@@ -27,8 +27,14 @@ let CONFIG = {
   TELEGRAM_BOT_TOKEN: "PUT_YOUR_BOT_TOKEN_HERE",
   // ID чата, куда слать лиды (свой numeric id у @userinfobot, либо id группы)
   TELEGRAM_CHAT_ID: "PUT_YOUR_CHAT_ID_HERE",
-  // Ваш купленный/подтверждённый в Voximplant номер (Caller ID)
-  CALLER_ID: "PUT_YOUR_VOXIMPLANT_NUMBER_HERE",
+  // Caller ID — с какого номера идёт звонок.
+  // В бесплатном ТЕСТОВОМ режиме (без аренды номера) ставьте "default".
+  // Когда арендуете номер для боевого обзвона — впишите этот номер сюда.
+  CALLER_ID: "default",
+
+  // ТЕСТОВЫЙ режим: звонить можно ТОЛЬКО на ваш подтверждённый номер.
+  // Используется, если номер не пришёл из списка обзвона (ручной запуск теста).
+  TEST_NUMBER: "+79185367424",
 
   // ── Что говорить абоненту ───────────────────────────────────────────────
   // Вариант 1 (основной): ваша запись с диктофона — ПРЯМАЯ ссылка на mp3/wav.
@@ -69,6 +75,12 @@ VoxEngine.addEventListener(AppEvents.Started, function () {
     // Не JSON: либо чистый номер, либо строка списка ("phone=...;name=...").
     const m = raw.match(/\+?\d[\d\s\-()]{9,}\d/);
     phoneNumber = m ? m[0].replace(/[^\d+]/g, "") : raw;
+  }
+
+  // Если номер не пришёл из списка обзвона (например, ручной запуск теста) —
+  // берём подтверждённый тестовый номер.
+  if (!phoneNumber) {
+    phoneNumber = (CONFIG.TEST_NUMBER || "").trim();
   }
 
   if (!phoneNumber) {
