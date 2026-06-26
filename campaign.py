@@ -44,6 +44,8 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 CALLER_ID = os.getenv("VOX_CALLER_ID", "")
 AUDIO_URL = os.getenv("AUDIO_URL", "")
+# Текст для озвучки (TTS). Если задан — робот проговорит его, mp3 не нужен.
+MESSAGE_TEXT = os.getenv("MESSAGE_TEXT", "")
 
 # Пауза между запусками звонков, сек (защита от слишком быстрого обзвона).
 DELAY_BETWEEN_CALLS = float(os.getenv("DELAY_BETWEEN_CALLS", "6"))
@@ -104,8 +106,14 @@ def build_custom_data(phone: str) -> str:
         overrides["TELEGRAM_CHAT_ID"] = TELEGRAM_CHAT_ID
     if CALLER_ID:
         overrides["CALLER_ID"] = CALLER_ID
-    if AUDIO_URL:
+    if MESSAGE_TEXT:
+        # TTS-режим: передаём текст и явно отключаем mp3.
+        overrides["MESSAGE_TEXT"] = MESSAGE_TEXT
+        overrides["AUDIO_URL"] = ""
+    elif AUDIO_URL:
+        # Режим mp3: своя запись по ссылке, TTS отключаем.
         overrides["AUDIO_URL"] = AUDIO_URL
+        overrides["MESSAGE_TEXT"] = ""
 
     if overrides:
         return json.dumps({"phone": phone, "config": overrides})

@@ -27,12 +27,28 @@ let CONFIG = {
   TELEGRAM_BOT_TOKEN: "PUT_YOUR_BOT_TOKEN_HERE",
   // ID чата, куда слать лиды (свой numeric id у @userinfobot, либо id группы)
   TELEGRAM_CHAT_ID: "PUT_YOUR_CHAT_ID_HERE",
-  // Ваш купленный в Voximplant номер (Caller ID), от которого идёт звонок
+  // Ваш купленный/подтверждённый в Voximplant номер (Caller ID)
   CALLER_ID: "PUT_YOUR_VOXIMPLANT_NUMBER_HERE",
-  // Прямая ссылка на mp3/wav с вашей записью (или используем медиа из Voximplant)
-  AUDIO_URL: "https://example.com/voice.mp3",
-  // Сколько секунд ждать нажатия после окончания записи, прежде чем класть трубку
-  WAIT_AFTER_AUDIO_SEC: 8,
+
+  // ── Что говорить абоненту ───────────────────────────────────────────────
+  // Вариант 1 (для теста): TTS — робот проговорит этот текст. Свой сервер и
+  // хостинг файла не нужны. Числа лучше писать словами ("один", "сорок"),
+  // чтобы TTS произносил их чисто.
+  // Замените вступление на свой реальный текст, концовку с "нажмите цифру один"
+  // оставьте — на ней завязан сбор лида.
+  MESSAGE_TEXT:
+    "Здравствуйте! Это пробный звонок голосового помощника. " +
+    "Если вам интересно, нажмите цифру один на клавиатуре. " +
+    "Я перезвоню буквально через сорок секунд, потому что это мой помощник " +
+    "звонит, если честно.",
+
+  // Вариант 2 (для боевого режима со своим голосом): ссылка на mp3/wav.
+  // Если MESSAGE_TEXT непустой — используется TTS и AUDIO_URL игнорируется.
+  // Чтобы включить свою запись, очистите MESSAGE_TEXT ("") и впишите ссылку сюда.
+  AUDIO_URL: "",
+
+  // Сколько секунд ждать нажатия после окончания фразы, прежде чем класть трубку
+  WAIT_AFTER_AUDIO_SEC: 12,
   // Цифра, которую должен нажать заинтересованный клиент
   INTEREST_KEY: "1",
 };
@@ -91,8 +107,18 @@ function onConnected(e) {
     }
   });
 
-  // Проигрываем вашу запись абоненту.
-  const player = VoxEngine.createURLPlayer(CONFIG.AUDIO_URL, false);
+  // Проигрываем сообщение абоненту: либо TTS (озвучка текста), либо ваш mp3.
+  let player;
+  if (CONFIG.MESSAGE_TEXT) {
+    // TTS. Если голос/язык не подхватится — выберите голос по актуальной доке:
+    // https://voximplant.com/docs/references/voxengine/voicelist
+    player = VoxEngine.createTTSPlayer(
+      CONFIG.MESSAGE_TEXT,
+      Language.RU_RUSSIAN_FEMALE
+    );
+  } else {
+    player = VoxEngine.createURLPlayer(CONFIG.AUDIO_URL, false);
+  }
   player.sendMediaTo(call);
 
   player.addEventListener(PlayerEvents.PlaybackFinished, function () {
