@@ -31,21 +31,13 @@ let CONFIG = {
   CALLER_ID: "PUT_YOUR_VOXIMPLANT_NUMBER_HERE",
 
   // ── Что говорить абоненту ───────────────────────────────────────────────
-  // Вариант 1 (для теста): TTS — робот проговорит этот текст. Свой сервер и
-  // хостинг файла не нужны. Числа лучше писать словами ("один", "сорок"),
-  // чтобы TTS произносил их чисто.
-  // Замените вступление на свой реальный текст, концовку с "нажмите цифру один"
-  // оставьте — на ней завязан сбор лида.
-  MESSAGE_TEXT:
-    "Здравствуйте! Это пробный звонок голосового помощника. " +
-    "Если вам интересно, нажмите цифру один на клавиатуре. " +
-    "Я перезвоню буквально через сорок секунд, потому что это мой помощник " +
-    "звонит, если честно.",
+  // Вариант 1 (основной): ваша запись с диктофона — ПРЯМАЯ ссылка на mp3/wav.
+  AUDIO_URL: "PUT_DIRECT_MP3_URL_HERE",
 
-  // Вариант 2 (для боевого режима со своим голосом): ссылка на mp3/wav.
-  // Если MESSAGE_TEXT непустой — используется TTS и AUDIO_URL игнорируется.
-  // Чтобы включить свою запись, очистите MESSAGE_TEXT ("") и впишите ссылку сюда.
-  AUDIO_URL: "",
+  // Вариант 2 (запасной): озвучка текста роботом (TTS), если нет записи.
+  // Если MESSAGE_TEXT НЕ пустой — играет TTS, а AUDIO_URL игнорируется.
+  // Чтобы играла именно ваша запись — оставьте MESSAGE_TEXT пустым ("").
+  MESSAGE_TEXT: "",
 
   // Сколько секунд ждать нажатия после окончания фразы, прежде чем класть трубку
   WAIT_AFTER_AUDIO_SEC: 12,
@@ -57,21 +49,26 @@ let phoneNumber = "";
 let leadSent = false;
 
 VoxEngine.addEventListener(AppEvents.Started, function () {
-  // customData приходит из Management API (StartScenarios -> script_custom_data).
-  // Поддерживаем два формата: просто номер строкой, либо JSON с номером и
-  // переопределением настроек (удобно, чтобы не хранить токены в коде сценария).
+  // Номер для звонка приходит из customData. Поддерживаем разные форматы:
+  //  - встроенный "Автоматический обзвон" / call list Voximplant (номер в данных);
+  //  - запуск через Management API (script_custom_data);
+  //  - просто номер строкой или JSON {"phone":"...", "config":{...}}.
   const raw = (VoxEngine.customData() || "").trim();
 
   if (raw.charAt(0) === "{") {
     try {
       const data = JSON.parse(raw);
-      phoneNumber = String(data.phone || "").trim();
+      phoneNumber = String(
+        data.phone || data.number || data.phone_number || ""
+      ).trim();
       CONFIG = Object.assign({}, CONFIG, data.config || {});
     } catch (err) {
       Logger.write("Не удалось разобрать customData как JSON: " + err);
     }
   } else {
-    phoneNumber = raw;
+    // Не JSON: либо чистый номер, либо строка списка ("phone=...;name=...").
+    const m = raw.match(/\+?\d[\d\s\-()]{9,}\d/);
+    phoneNumber = m ? m[0].replace(/[^\d+]/g, "") : raw;
   }
 
   if (!phoneNumber) {
