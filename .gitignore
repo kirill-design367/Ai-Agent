@@ -1,0 +1,10 @@
+# Секреты и личные данные
+.env
+data/clients.csv
+leads/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
