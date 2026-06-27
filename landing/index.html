@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Тихий Берег — премиальная база отдыха в Сочи</title>
+<meta name="description" content="Камерная база отдыха в предгорьях Сочи. Десять шале среди реликтового леса, в пяти минутах от моря. Тихий премиум, природа и безупречный сервис." />
+<meta property="og:title" content="Тихий Берег — тихий премиум на берегу Чёрного моря" />
+<meta property="og:description" content="Камерная база отдыха в предгорьях Сочи. Природа, приватность и сервис без слов." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   ТИХИЙ БЕРЕГ — Design System
+   Style: Quiet Premium · Nature · Editorial calm
+   Type:  Lora (serif display) + Raleway (sans body)
+   ============================================================ */
+:root{
+  /* surfaces — warm sand / paper */
+  --sand:        #F4EFE6;
+  --sand-deep:   #ECE4D6;
+  --cream:       #FBF8F1;
+  --paper:       #FFFDF8;
+
+  /* nature ink */
+  --forest:      #2C352C;   /* primary dark, near-black pine */
+  --forest-700:  #3A463A;
+  --pine:        #4A5A48;
+  --sage:        #8A9579;   /* secondary */
+  --sea:         #5A736C;   /* muted teal */
+  --stone:       #C7BCA8;   /* taupe */
+
+  /* luxury accent — brass / warm gold */
+  --brass:       #A98344;
+  --brass-soft:  #C0A06A;
+  --brass-tint:  #EFE6D4;
+
+  /* text */
+  --ink:         #25291F;
+  --ink-soft:    #555B49;
+  --ink-faint:   #8A8C7C;
+  --on-dark:     #EDE9DD;
+  --on-dark-soft:#B9BCA8;
+
+  --line:        rgba(44,53,44,.12);
+  --line-dark:   rgba(237,233,221,.16);
+
+  /* type scale */
+  --step--1: clamp(.82rem,.78rem + .2vw,.92rem);
+  --step-0:  clamp(1rem,.95rem + .25vw,1.12rem);
+  --step-1:  clamp(1.2rem,1.05rem + .6vw,1.45rem);
+  --step-2:  clamp(1.55rem,1.25rem + 1.4vw,2.1rem);
+  --step-3:  clamp(2.1rem,1.6rem + 2.4vw,3.2rem);
+  --step-4:  clamp(2.8rem,1.9rem + 4.4vw,5.4rem);
+
+  --maxw: 1240px;
+  --gutter: clamp(1.25rem,5vw,5rem);
+  --radius: 18px;
+  --radius-lg: 28px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --shadow-soft: 0 24px 60px -28px rgba(44,53,44,.32);
+  --shadow-lift: 0 38px 90px -36px rgba(44,53,44,.45);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;
+  font-family:"Raleway",system-ui,sans-serif;
+  font-weight:400;
+  color:var(--ink);
+  background:var(--sand);
+  line-height:1.65;
+  font-size:var(--step-0);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{font-family:"Lora",Georgia,serif;font-weight:500;line-height:1.12;letter-spacing:-.01em;margin:0}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter)}
+
+/* grain texture overlay */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.04;mix-blend-mode:multiply}
+
+/* eyebrow / kicker */
+.kicker{
+  font-size:var(--step--1);font-weight:600;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--brass);display:inline-flex;align-items:center;gap:.7rem;
+}
+.kicker::before{content:"";width:34px;height:1px;background:var(--brass-soft);display:inline-block}
+.kicker.center::after{content:"";width:34px;height:1px;background:var(--brass-soft);display:inline-block}
+.kicker.center{justify-content:center}
+
+/* buttons */
+.btn{
+  --bg:var(--forest);--fg:var(--paper);
+  display:inline-flex;align-items:center;gap:.6rem;justify-content:center;
+  min-height:52px;padding:0 1.9rem;border-radius:100px;
+  font-family:"Raleway",sans-serif;font-weight:500;font-size:var(--step--1);
+  letter-spacing:.13em;text-transform:uppercase;cursor:pointer;border:1px solid transparent;
+  background:var(--bg);color:var(--fg);position:relative;overflow:hidden;
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease),background .4s var(--ease),color .4s var(--ease);
+}
+.btn svg{width:17px;height:17px;transition:transform .4s var(--ease)}
+.btn:hover{transform:translateY(-3px);box-shadow:0 18px 34px -16px rgba(44,53,44,.55)}
+.btn:hover svg{transform:translateX(4px)}
+.btn:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.btn--gold{--bg:var(--brass);--fg:#fff}
+.btn--ghost{--bg:transparent;--fg:var(--forest);border-color:var(--line)}
+.btn--ghost:hover{background:var(--forest);color:var(--paper);border-color:var(--forest)}
+.btn--light{--bg:var(--cream);--fg:var(--forest)}
+.btn--outline-light{--bg:transparent;--fg:var(--on-dark);border-color:rgba(237,233,221,.4)}
+.btn--outline-light:hover{background:var(--on-dark);color:var(--forest);border-color:var(--on-dark)}
+
+/* reveal animation */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-d="1"]{transition-delay:.12s}
+.reveal[data-d="2"]{transition-delay:.24s}
+.reveal[data-d="3"]{transition-delay:.36s}
+.reveal[data-d="4"]{transition-delay:.48s}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* ===================== HEADER ===================== */
+.site-head{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem var(--gutter);
+  transition:background .5s var(--ease),padding .5s var(--ease),box-shadow .5s var(--ease),border-color .5s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.site-head.scrolled{
+  background:rgba(251,248,241,.82);backdrop-filter:blur(16px) saturate(1.4);
+  -webkit-backdrop-filter:blur(16px) saturate(1.4);
+  padding-block:.9rem;border-bottom-color:var(--line);
+  box-shadow:0 10px 40px -28px rgba(44,53,44,.5);
+}
+.brand{display:flex;align-items:center;gap:.7rem;color:var(--forest);transition:color .5s var(--ease)}
+.scrolled .brand{color:var(--forest)}
+.brand .mark{width:34px;height:34px;flex:none}
+.brand b{font-family:"Lora",serif;font-weight:600;font-size:1.18rem;letter-spacing:.02em}
+.brand span{font-size:.62rem;letter-spacing:.34em;text-transform:uppercase;opacity:.7;display:block;margin-top:-2px}
+.nav{display:flex;align-items:center;gap:2.2rem}
+.nav a.lk{
+  font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  font-weight:500;position:relative;transition:color .35s var(--ease)
+}
+.scrolled .nav a.lk{color:var(--ink-soft)}
+.nav a.lk::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--brass);transition:width .4s var(--ease)}
+.nav a.lk:hover{color:var(--brass)}
+.nav a.lk:hover::after{width:100%}
+.head-cta{display:inline-flex}
+.burger{display:none;width:46px;height:46px;border:1px solid var(--line);border-radius:50%;background:rgba(44,53,44,.04);cursor:pointer;align-items:center;justify-content:center}
+.scrolled .burger{border-color:var(--line)}
+.burger span{display:block;width:18px;height:1.5px;background:currentColor;position:relative;color:var(--forest)}
+.scrolled .burger span{color:var(--forest)}
+.burger span::before,.burger span::after{content:"";position:absolute;left:0;width:18px;height:1.5px;background:currentColor}
+.burger span::before{top:-5px}.burger span::after{top:5px}
+@media(max-width:920px){
+  .nav .lk{display:none}
+  .head-cta{display:none}
+  .burger{display:flex}
+}
+
+/* ===================== HERO ===================== */
+.hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden;background:linear-gradient(180deg,#cdd6c8 0%,#dfe2cf 38%,#eee6d4 100%)}
+.hero__sky{position:absolute;inset:0;background:
+  radial-gradient(120% 80% at 72% 8%, rgba(255,248,228,.9), rgba(255,248,228,0) 55%),
+  linear-gradient(180deg,#c7d2c6 0%,#d9dccb 40%,#ece3d2 78%,#f1e8d6 100%);}
+.hero__sun{position:absolute;top:9%;right:18%;width:min(34vw,360px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,250,233,.95),rgba(255,243,214,.45) 45%,rgba(255,243,214,0) 70%);filter:blur(2px)}
+.layer{position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:120%;will-change:transform}
+.hero__mist{position:absolute;left:0;right:0;height:46%;bottom:18%;
+  background:linear-gradient(180deg,rgba(244,239,230,0),rgba(244,239,230,.55) 60%,rgba(244,239,230,.85));pointer-events:none}
+.hero__content{position:relative;z-index:5;width:100%;padding-bottom:clamp(3rem,9vh,7rem);padding-top:8rem}
+.hero h1{color:var(--forest);font-size:var(--step-4);max-width:14ch;font-weight:500}
+.hero h1 em{font-style:italic;color:var(--brass)}
+.hero__lead{margin-top:1.6rem;max-width:46ch;color:var(--forest-700);font-size:var(--step-1);font-weight:300;line-height:1.55}
+.hero__cta{margin-top:2.4rem;display:flex;gap:1rem;flex-wrap:wrap}
+.hero__meta{margin-top:3.2rem;display:flex;gap:2.6rem;flex-wrap:wrap;padding-top:1.7rem;border-top:1px solid rgba(44,53,44,.16);max-width:620px}
+.hero__meta div{min-width:80px}
+.hero__meta b{font-family:"Lora",serif;font-size:1.7rem;color:var(--forest);font-weight:600;display:block}
+.hero__meta small{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+.scroll-hint{position:absolute;bottom:1.6rem;left:50%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--forest-700)}
+.scroll-hint small{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase}
+.scroll-hint .dot{width:1px;height:42px;background:linear-gradient(var(--forest-700),transparent);position:relative;overflow:hidden}
+.scroll-hint .dot::after{content:"";position:absolute;top:-12px;left:0;width:1px;height:12px;background:var(--forest);animation:fall 2.4s var(--ease) infinite}
+@keyframes fall{0%{top:-12px}60%,100%{top:42px}}
+@media (prefers-reduced-motion:reduce){.scroll-hint .dot::after{animation:none}}
+
+/* ===================== MARQUEE STRIP ===================== */
+.strip{background:var(--forest);color:var(--on-dark-soft);overflow:hidden;padding:1.1rem 0;border-block:1px solid rgba(255,255,255,.06)}
+.strip__track{display:flex;gap:3.4rem;white-space:nowrap;width:max-content;animation:slide 38s linear infinite}
+.strip span{font-family:"Lora",serif;font-style:italic;font-size:1.15rem;display:inline-flex;align-items:center;gap:3.4rem;letter-spacing:.01em}
+.strip span::after{content:"✦";color:var(--brass-soft);font-style:normal;font-size:.8rem}
+@keyframes slide{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.strip__track{animation:none}}
+
+/* ===================== SECTION SHELL ===================== */
+section{position:relative}
+.sec{padding-block:clamp(4.5rem,11vh,9rem)}
+.sec-head{max-width:760px}
+.sec-head.center{margin-inline:auto;text-align:center}
+.sec-head h2{font-size:var(--step-3);margin-top:1.1rem;color:var(--forest)}
+.sec-head p{margin-top:1.2rem;color:var(--ink-soft);font-size:var(--step-1);font-weight:300}
+
+/* ===================== USP / value ===================== */
+.usp{background:var(--cream);border-block:1px solid var(--line)}
+.usp__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:0}
+.usp__card{padding:clamp(1.6rem,3vw,2.6rem) clamp(1.4rem,2.5vw,2.4rem);border-right:1px solid var(--line)}
+.usp__card:last-child{border-right:none}
+.usp__ico{width:46px;height:46px;color:var(--brass);margin-bottom:1.3rem}
+.usp__ico svg{width:100%;height:100%;stroke-width:1.4}
+.usp__card h3{font-size:var(--step-1);color:var(--forest)}
+.usp__card p{margin-top:.7rem;color:var(--ink-soft);font-size:var(--step--1);line-height:1.6}
+@media(max-width:900px){.usp__grid{grid-template-columns:1fr 1fr}.usp__card:nth-child(2){border-right:none}.usp__card:nth-child(1),.usp__card:nth-child(2){border-bottom:1px solid var(--line)}}
+@media(max-width:520px){.usp__grid{grid-template-columns:1fr}.usp__card{border-right:none;border-bottom:1px solid var(--line)}.usp__card:last-child{border-bottom:none}}
+
+/* ===================== PHILOSOPHY (split) ===================== */
+.philo{background:var(--sand)}
+.philo__grid{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(2.5rem,6vw,6rem);align-items:center}
+.philo__art{border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-soft);aspect-ratio:4/5;position:relative}
+.philo__art svg{width:100%;height:100%}
+.philo__badge{position:absolute;left:1.4rem;bottom:1.4rem;background:rgba(251,248,241,.9);backdrop-filter:blur(8px);border-radius:14px;padding:.9rem 1.2rem;display:flex;align-items:center;gap:.8rem;box-shadow:var(--shadow-soft)}
+.philo__badge svg{width:30px;height:30px;color:var(--brass)}
+.philo__badge b{font-family:"Lora",serif;font-size:1.05rem;color:var(--forest);display:block;line-height:1.1}
+.philo__badge small{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.philo__text h2{font-size:var(--step-3);color:var(--forest);margin-top:1.1rem}
+.philo__text p{margin-top:1.3rem;color:var(--ink-soft);font-size:var(--step-0);line-height:1.75}
+.philo__sign{margin-top:2rem;font-family:"Lora",serif;font-style:italic;font-size:1.3rem;color:var(--pine)}
+.philo__sign small{display:block;font-family:"Raleway";font-style:normal;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-top:.4rem}
+@media(max-width:880px){.philo__grid{grid-template-columns:1fr}.philo__art{aspect-ratio:16/13;order:-1}}
+
+/* ===================== STAYS / rooms ===================== */
+.stays{background:var(--forest);color:var(--on-dark)}
+.stays .sec-head h2{color:var(--paper)}
+.stays .sec-head p{color:var(--on-dark-soft)}
+.stays .kicker{color:var(--brass-soft)}
+.stays .kicker::before,.stays .kicker.center::after{background:var(--brass-soft)}
+.stays__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;margin-top:3.4rem}
+.stay{background:#323d31;border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .5s var(--ease)}
+.stay:hover{transform:translateY(-8px);box-shadow:var(--shadow-lift);border-color:rgba(192,160,106,.4)}
+.stay__art{aspect-ratio:3/2.4;position:relative;overflow:hidden}
+.stay__art svg{width:100%;height:100%;transition:transform 1.1s var(--ease)}
+.stay:hover .stay__art svg{transform:scale(1.06)}
+.stay__tag{position:absolute;top:1rem;left:1rem;background:rgba(20,26,20,.55);backdrop-filter:blur(6px);color:var(--on-dark);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;padding:.45rem .9rem;border-radius:100px;border:1px solid rgba(255,255,255,.14)}
+.stay__body{padding:1.7rem 1.7rem 1.9rem;display:flex;flex-direction:column;flex:1}
+.stay__body h3{font-size:var(--step-2);color:var(--paper)}
+.stay__feat{margin:1rem 0 1.4rem;display:flex;flex-wrap:wrap;gap:.5rem}
+.stay__feat span{font-size:.72rem;letter-spacing:.04em;color:var(--on-dark-soft);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:.35rem .75rem;border-radius:8px}
+.stay__foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:1.3rem;border-top:1px solid rgba(255,255,255,.1)}
+.stay__price small{display:block;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--on-dark-soft)}
+.stay__price b{font-family:"Lora",serif;font-size:1.5rem;color:var(--paper);font-weight:600}
+.stay__price b sup{font-size:.7rem;color:var(--brass-soft);font-weight:400}
+.stay__link{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:var(--brass-soft);transition:background .4s var(--ease),color .4s var(--ease),transform .4s var(--ease)}
+.stay__link:hover{background:var(--brass);color:#fff;transform:rotate(-45deg)}
+.stay__link svg{width:18px;height:18px}
+@media(max-width:960px){.stays__grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.stays__grid{grid-template-columns:1fr}}
+
+/* ===================== AMENITIES ===================== */
+.amen{background:var(--cream)}
+.amen__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:3.2rem}
+.amen__card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:1.8rem 1.5rem;transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .45s var(--ease)}
+.amen__card:hover{transform:translateY(-6px);box-shadow:var(--shadow-soft);border-color:var(--brass-soft)}
+.amen__ico{width:42px;height:42px;color:var(--sea);margin-bottom:1.1rem}
+.amen__ico svg{width:100%;height:100%;stroke-width:1.4}
+.amen__card h4{font-size:1.12rem;color:var(--forest);font-weight:500}
+.amen__card p{margin-top:.5rem;font-size:.86rem;color:var(--ink-soft);line-height:1.55}
+@media(max-width:900px){.amen__grid{grid-template-columns:1fr 1fr}}
+@media(max-width:460px){.amen__grid{grid-template-columns:1fr}}
+
+/* ===================== GALLERY / mood ===================== */
+.gal{background:var(--sand)}
+.gal__grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:200px;gap:1rem;margin-top:3.2rem}
+.gal__item{border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:var(--shadow-soft)}
+.gal__item svg{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.gal__item:hover svg{transform:scale(1.08)}
+.gal__item figcaption{position:absolute;left:1rem;bottom:.9rem;color:var(--on-dark);font-family:"Lora",serif;font-style:italic;font-size:1.02rem;text-shadow:0 2px 12px rgba(0,0,0,.5);z-index:2}
+.gal__item::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(20,26,20,.45));pointer-events:none}
+.g-tall{grid-row:span 2}.g-wide{grid-column:span 2}
+@media(max-width:780px){.gal__grid{grid-template-columns:1fr 1fr;grid-auto-rows:160px}.g-wide{grid-column:span 2}}
+
+/* ===================== EXPERIENCE / seasons ===================== */
+.exp{background:var(--paper)}
+.exp__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;margin-top:3.4rem}
+.exp__card{position:relative;border-radius:var(--radius-lg);overflow:hidden;min-height:420px;display:flex;align-items:flex-end;color:var(--on-dark);box-shadow:var(--shadow-soft)}
+.exp__card svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.exp__card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(20,26,20,.78))}
+.exp__inner{position:relative;z-index:2;padding:2rem}
+.exp__inner span{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass-soft)}
+.exp__inner h3{font-size:var(--step-2);margin-top:.6rem;color:#fff}
+.exp__inner p{margin-top:.7rem;color:rgba(237,233,221,.85);font-size:.9rem;line-height:1.6}
+@media(max-width:880px){.exp__grid{grid-template-columns:1fr}}
+
+/* ===================== TESTIMONIALS ===================== */
+.revs{background:var(--sand-deep)}
+.revs__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:3.2rem}
+.rev{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);padding:2rem;display:flex;flex-direction:column}
+.rev__stars{display:flex;gap:.25rem;color:var(--brass)}
+.rev__stars svg{width:16px;height:16px}
+.rev p{margin-top:1.2rem;font-family:"Lora",serif;font-size:1.12rem;line-height:1.6;color:var(--forest-700);flex:1}
+.rev__who{margin-top:1.6rem;display:flex;align-items:center;gap:.9rem;padding-top:1.3rem;border-top:1px solid var(--line)}
+.rev__av{width:44px;height:44px;border-radius:50%;background:var(--brass-tint);display:flex;align-items:center;justify-content:center;font-family:"Lora",serif;color:var(--brass);font-size:1.05rem;flex:none}
+.rev__who b{display:block;font-size:.95rem;color:var(--forest)}
+.rev__who small{font-size:.76rem;color:var(--ink-faint)}
+@media(max-width:880px){.revs__grid{grid-template-columns:1fr}}
+
+/* ===================== BOOKING CTA ===================== */
+.book{position:relative;color:var(--on-dark);overflow:hidden;background:#222a22}
+.book__bg{position:absolute;inset:0}
+.book__bg svg{width:100%;height:100%;object-fit:cover}
+.book::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(34,42,34,.72),rgba(34,42,34,.9))}
+.book__in{position:relative;z-index:3;display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2.5rem,6vw,5rem);align-items:center}
+.book__in h2{font-size:var(--step-3);color:#fff;max-width:14ch}
+.book__in .lead{margin-top:1.3rem;color:var(--on-dark-soft);font-size:var(--step-1);font-weight:300;max-width:44ch}
+.book__list{margin-top:2rem;display:flex;flex-direction:column;gap:1rem}
+.book__list div{display:flex;align-items:center;gap:.9rem;color:var(--on-dark)}
+.book__list svg{width:22px;height:22px;color:var(--brass-soft);flex:none;stroke-width:1.5}
+.form{background:rgba(251,248,241,.97);border-radius:var(--radius-lg);padding:clamp(1.8rem,3.5vw,2.6rem);box-shadow:var(--shadow-lift)}
+.form h3{font-size:var(--step-2);color:var(--forest)}
+.form p.sub{margin-top:.5rem;color:var(--ink-soft);font-size:.88rem}
+.field{margin-top:1.3rem}
+.field label{display:block;font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.5rem;font-weight:600}
+.field input,.field select{
+  width:100%;min-height:50px;padding:0 1rem;border:1px solid var(--line);border-radius:12px;
+  background:var(--paper);font-family:"Raleway";font-size:1rem;color:var(--ink);transition:border-color .3s,box-shadow .3s;
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 4px rgba(169,131,68,.14)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form .btn{width:100%;margin-top:1.7rem}
+.form__note{margin-top:1rem;font-size:.74rem;color:var(--ink-faint);text-align:center;line-height:1.5}
+.form__ok{display:none;text-align:center;padding:1rem 0}
+.form__ok.show{display:block}
+.form__ok svg{width:54px;height:54px;color:var(--brass);margin:0 auto .9rem}
+.form__ok h3{color:var(--forest)}
+.form__ok p{margin-top:.6rem;color:var(--ink-soft);font-size:.92rem}
+@media(max-width:880px){.book__in{grid-template-columns:1fr}.field-row{grid-template-columns:1fr}}
+
+/* ===================== FOOTER ===================== */
+.foot{background:var(--forest);color:var(--on-dark-soft);padding-top:clamp(3.5rem,8vh,6rem)}
+.foot__top{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:2.5rem;padding-bottom:3rem;border-bottom:1px solid var(--line-dark)}
+.foot__brand .brand{color:var(--paper);margin-bottom:1.2rem}
+.foot__brand p{max-width:34ch;font-size:.9rem;line-height:1.7}
+.foot h5{font-family:"Raleway";font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--on-dark);margin:0 0 1.2rem;font-weight:600}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.7rem}
+.foot ul a{font-size:.9rem;transition:color .3s var(--ease)}
+.foot ul a:hover{color:var(--brass-soft)}
+.foot__contact a{display:block;font-size:.9rem;margin-bottom:.6rem;color:var(--on-dark)}
+.foot__contact a:hover{color:var(--brass-soft)}
+.foot__social{display:flex;gap:.7rem;margin-top:1.3rem}
+.foot__social a{width:42px;height:42px;border:1px solid var(--line-dark);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .35s var(--ease),color .35s var(--ease),border-color .35s}
+.foot__social a:hover{background:var(--brass);color:#fff;border-color:var(--brass)}
+.foot__social svg{width:18px;height:18px}
+.foot__bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;padding-block:1.8rem;font-size:.78rem}
+@media(max-width:880px){.foot__top{grid-template-columns:1fr 1fr}.foot__brand{grid-column:1/-1}}
+@media(max-width:520px){.foot__top{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- grain -->
+<svg class="grain" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-head" id="head">
+  <a href="#top" class="brand" aria-label="Тихий Берег — на главную">
+    <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="19" stroke="currentColor" stroke-width="1.2" opacity=".45"/>
+      <path d="M7 25c3-6 5-9 7-9s3 3 6 3 4-7 7-7 3 5 6 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M5 29h30" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="28" cy="13" r="3" fill="#A98344"/>
+    </svg>
+    <span class="brand-txt"><b>Тихий Берег</b><span>Sochi · Retreat</span></span>
+  </a>
+  <nav class="nav" aria-label="Главное меню">
+    <a class="lk" href="#philo">О месте</a>
+    <a class="lk" href="#stays">Размещение</a>
+    <a class="lk" href="#amen">Удобства</a>
+    <a class="lk" href="#exp">Впечатления</a>
+    <a class="lk" href="#book">Контакты</a>
+    <a class="btn btn--gold head-cta" href="#book">Забронировать</a>
+    <button class="burger" id="burger" aria-label="Меню"><span></span></button>
+  </nav>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<main id="top">
+<section class="hero" id="hero">
+  <div class="hero__sky"></div>
+  <div class="hero__sun" data-par="0.12"></div>
+
+  <!-- far mountains -->
+  <svg class="layer" data-par="0.18" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMax slice" style="height:78%" aria-hidden="true">
+    <defs>
+      <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#aebaa9"/><stop offset="1" stop-color="#c3cabb"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#far)" opacity=".7" d="M0 600V300l140-90 120 70 160-120 150 100 170-130 160 110 180-90 200 120v300Z"/>
+  </svg>
+  <!-- mid mountains -->
+  <svg class="layer" data-par="0.32" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMax slice" style="height:70%" aria-hidden="true">
+    <defs><linearGradient id="mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8d9b86"/><stop offset="1" stop-color="#a4ad96"/></linearGradient></defs>
+    <path fill="url(#mid)" opacity=".85" d="M0 600V380l180-130 150 95 200-150 190 130 210-120 200 140 160-70v235Z"/>
+  </svg>
+  <!-- sea band -->
+  <svg class="layer" data-par="0.05" viewBox="0 0 1440 200" preserveAspectRatio="none" style="height:24%;bottom:30%" aria-hidden="true">
+    <defs><linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7e9189"/><stop offset="1" stop-color="#9bab9d"/></linearGradient></defs>
+    <rect width="1440" height="200" fill="url(#seaG)" opacity=".5"/>
+    <g stroke="#fff" stroke-opacity=".25" stroke-width="1"><line x1="120" y1="60" x2="280" y2="60"/><line x1="520" y1="95" x2="700" y2="95"/><line x1="900" y1="70" x2="1080" y2="70"/><line x1="1180" y1="120" x2="1330" y2="120"/></g>
+  </svg>
+  <div class="hero__mist"></div>
+  <!-- foreground forest -->
+  <svg class="layer" data-par="0.5" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" style="height:46%" aria-hidden="true">
+    <defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#41513e"/><stop offset="1" stop-color="#33402f"/></linearGradient></defs>
+    <path fill="url(#fg)" d="M0 420V250c60-10 80 18 130 14 70-6 70-58 120-58s60 44 120 40 70-50 130-46 70 46 130 44 80-52 140-48 70 44 130 44 90-30 150-26 90 30 160 30v176Z"/>
+    <g fill="#2c3729">
+      <path d="M150 270l16 46h-32z"/><path d="M150 250l20 60h-40z" opacity=".7"/>
+      <path d="M430 256l18 52h-36z"/><path d="M760 262l16 48h-32z"/><path d="M1080 258l18 54h-36z"/><path d="M1300 264l16 46h-32z"/>
+    </g>
+  </svg>
+
+  <div class="hero__content wrap">
+    <p class="kicker reveal in">Камерная база отдыха · Красная Поляна — Сочи</p>
+    <h1 class="reveal in" data-d="1">Тишина,<br>у которой есть <em>адрес</em></h1>
+    <p class="hero__lead reveal in" data-d="2">Десять авторских шале в реликтовом лесу, пять минут до моря и горизонт, который принадлежит только вам. Здесь премиум звучит шёпотом.</p>
+    <div class="hero__cta reveal in" data-d="3">
+      <a class="btn btn--gold" href="#book">Забронировать уединение
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn--ghost" href="#stays">Смотреть размещение</a>
+    </div>
+    <div class="hero__meta reveal in" data-d="4">
+      <div><b>10</b><small>шале на 4 га</small></div>
+      <div><b>5 мин</b><small>до моря</small></div>
+      <div><b>320 м</b><small>над уровнем суеты</small></div>
+      <div><b>24/7</b><small>личный консьерж</small></div>
+    </div>
+  </div>
+  <a class="scroll-hint" href="#philo" aria-label="Листать вниз"><small>Листайте</small><span class="dot"></span></a>
+</section>
+</main>
+
+<!-- ===================== STRIP ===================== -->
+<div class="strip" aria-hidden="true">
+  <div class="strip__track">
+    <span>Реликтовый лес</span><span>Чёрное море</span><span>Авторская кухня</span><span>Спа на дровах</span><span>Приватность</span><span>Тишина как услуга</span>
+    <span>Реликтовый лес</span><span>Чёрное море</span><span>Авторская кухня</span><span>Спа на дровах</span><span>Приватность</span><span>Тишина как услуга</span>
+  </div>
+</div>
+
+<!-- ===================== USP ===================== -->
+<section class="usp sec" id="usp" style="padding-block:0">
+  <div class="wrap" style="padding:0">
+    <div class="usp__grid">
+      <div class="usp__card reveal">
+        <div class="usp__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 18c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 3 2" stroke-linecap="round"/><path d="M3 13c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 3 2" stroke-linecap="round" opacity=".5"/><path d="M12 3v4M9 5l3-2 3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>5 минут до моря</h3>
+        <p>Собственная лесная тропа выводит к уединённой галечной бухте без посторонних глаз.</p>
+      </div>
+      <div class="usp__card reveal" data-d="1">
+        <div class="usp__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 20l6-11 4 6 3-5 5 10z" stroke-linejoin="round"/><circle cx="17" cy="6" r="2"/></svg></div>
+        <h3>В предгорьях</h3>
+        <p>Шале укрыты в реликтовом лесу на высоте 320 м — прохладный воздух и панорама хребта.</p>
+      </div>
+      <div class="usp__card reveal" data-d="2">
+        <div class="usp__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Тишина как услуга</h3>
+        <p>Не более десяти гостевых домов на четыре гектара. Приватность мы гарантируем договором.</p>
+      </div>
+      <div class="usp__card reveal" data-d="3">
+        <div class="usp__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l2.4 6.9H22l-5.8 4.3 2.2 7L12 16.9 5.6 20.2l2.2-7L2 8.9h7.6z" stroke-linejoin="round"/></svg></div>
+        <h3>Сервис без слов</h3>
+        <p>Личный консьерж, заранее продуманные мелочи и трансфер премиум-класса от трапа самолёта.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PHILOSOPHY ===================== -->
+<section class="philo sec" id="philo">
+  <div class="wrap">
+    <div class="philo__grid">
+      <div class="philo__art reveal">
+        <svg viewBox="0 0 480 600" preserveAspectRatio="xMidYMid slice" aria-label="Шале среди утреннего леса в Сочи">
+          <defs>
+            <linearGradient id="pSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7ddc8"/><stop offset=".5" stop-color="#d6ceba"/><stop offset="1" stop-color="#b9bfa6"/></linearGradient>
+            <linearGradient id="pHill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa589"/><stop offset="1" stop-color="#76845f"/></linearGradient>
+            <linearGradient id="pFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3f4f3a"/><stop offset="1" stop-color="#2c3727"/></linearGradient>
+            <radialGradient id="pSun" cx="72%" cy="22%" r="40%"><stop offset="0" stop-color="#fff4d8" stop-opacity=".95"/><stop offset="1" stop-color="#fff4d8" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="480" height="600" fill="url(#pSky)"/>
+          <rect width="480" height="600" fill="url(#pSun)"/>
+          <path fill="url(#pHill)" opacity=".7" d="M0 330l120-60 110 50 130-80 120 70v540H0Z"/>
+          <path fill="url(#pHill)" d="M0 400l90-50 140 60 110-50 140 70v470H0Z"/>
+          <!-- chalet -->
+          <g transform="translate(150 330)">
+            <rect x="0" y="40" width="180" height="120" rx="6" fill="#e9e1d0"/>
+            <rect x="0" y="40" width="180" height="120" rx="6" fill="none" stroke="#cdbf9f" stroke-width="1.5"/>
+            <path d="M-14 44L90 -8 194 44Z" fill="#5e4a35"/>
+            <rect x="24" y="78" width="38" height="48" rx="3" fill="#cdb98e"/>
+            <rect x="118" y="78" width="38" height="48" rx="3" fill="#f6e8b8"/>
+            <rect x="118" y="78" width="38" height="48" rx="3" fill="none" stroke="#cdbf9f"/>
+            <rect x="74" y="104" width="32" height="56" rx="3" fill="#7a5f43"/>
+            <line x1="24" y1="102" x2="62" y2="102" stroke="#cdbf9f"/><line x1="118" y1="102" x2="156" y2="102" stroke="#cdbf9f"/>
+          </g>
+          <!-- foreground pines -->
+          <path fill="url(#pFront)" d="M0 470c50-6 70 24 120 20s60-44 120-40 70 42 130 38 60-30 110-26v138H0Z"/>
+          <g fill="#26301f">
+            <path d="M70 430l22 70H48z"/><path d="M70 400l28 90H42z" opacity=".8"/>
+            <path d="M380 440l20 64h-40z"/><path d="M412 410l26 84h-52z" opacity=".75"/>
+          </g>
+          <g stroke="#fff" stroke-opacity=".14" stroke-width="20" stroke-linecap="round"><line x1="80" y1="120" x2="60" y2="240"/><line x1="320" y1="100" x2="300" y2="220" stroke-opacity=".1"/></g>
+        </svg>
+        <div class="philo__badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-5.2-7-11a7 7 0 1114 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <div><b>Эсто-Садок</b><small>Красная Поляна, Сочи</small></div>
+        </div>
+      </div>
+      <div class="philo__text">
+        <p class="kicker reveal">Философия места</p>
+        <h2 class="reveal" data-d="1">Премиум, который не нужно доказывать</h2>
+        <p class="reveal" data-d="2">«Тихий Берег» вырос из простой мысли: настоящая роскошь — это пространство, время и тишина. Мы не строили отель. Мы бережно вписали десять шале в склон реликтового леса так, чтобы каждое жило своей приватной жизнью — со своей террасой, своим видом и своим рассветом.</p>
+        <p class="reveal" data-d="2">Здесь нет шумных анимаций и толп у бассейна. Есть запах хвои после дождя, тёплый камень под ногами, авторская кухня на локальных продуктах и сервис, который угадывает желание раньше вас.</p>
+        <div class="philo__sign reveal" data-d="3">«Мы продаём не номера. Мы возвращаем тишину.»
+          <small>Анна Левина — основатель</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STAYS ===================== -->
+<section class="stays sec" id="stays">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <p class="kicker center">Размещение</p>
+      <h2>Три формата уединения</h2>
+      <p>Каждое шале — отдельный дом с приватной территорией, тёплыми полами и панорамным остеклением в пол. Завтрак на террасе включён.</p>
+    </div>
+    <div class="stays__grid">
+
+      <!-- card 1 -->
+      <article class="stay reveal">
+        <div class="stay__art">
+          <svg viewBox="0 0 500 400" preserveAspectRatio="xMidYMid slice" aria-label="Лесное шале">
+            <defs><linearGradient id="s1s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cdd3bd"/><stop offset="1" stop-color="#aeb898"/></linearGradient></defs>
+            <rect width="500" height="400" fill="url(#s1s)"/>
+            <path fill="#8a9774" d="M0 250l120-40 130 50 130-60 120 40v160H0Z"/>
+            <g transform="translate(160 220)"><rect x="0" y="30" width="180" height="110" rx="5" fill="#efe8d6"/><path d="M-12 34L90 -10 192 34Z" fill="#5e4a35"/><rect x="20" y="64" width="44" height="56" fill="#f6e7b4"/><rect x="116" y="64" width="44" height="56" fill="#bda77f"/><rect x="78" y="86" width="30" height="54" fill="#7a5f43"/></g>
+            <path fill="#3c4a36" d="M0 330c60-8 80 22 130 18s70-40 130-36 70 38 130 34 60-24 110-20v74H0Z"/>
+            <g fill="#28311f"><path d="M60 300l24 60H36z"/><path d="M420 308l22 54h-44z"/></g>
+          </svg>
+          <span class="stay__tag">Для двоих</span>
+        </div>
+        <div class="stay__body">
+          <h3>Лесное шале</h3>
+          <div class="stay__feat"><span>45 м²</span><span>Терраса с очагом</span><span>Хвойный вид</span><span>2 гостя</span></div>
+          <div class="stay__foot">
+            <div class="stay__price"><small>от</small><b>18 900<sup> ₽/ночь</sup></b></div>
+            <a href="#book" class="stay__link" aria-label="Забронировать Лесное шале"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- card 2 -->
+      <article class="stay reveal" data-d="1">
+        <div class="stay__art">
+          <svg viewBox="0 0 500 400" preserveAspectRatio="xMidYMid slice" aria-label="Вилла у воды">
+            <defs><linearGradient id="s2s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe1ce"/><stop offset="1" stop-color="#b6c2b4"/></linearGradient></defs>
+            <rect width="500" height="400" fill="url(#s2s)"/>
+            <rect y="230" width="500" height="80" fill="#86a097" opacity=".6"/>
+            <g stroke="#fff" stroke-opacity=".3"><line x1="60" y1="260" x2="180" y2="260"/><line x1="300" y1="285" x2="420" y2="285"/></g>
+            <g transform="translate(140 170)"><rect x="0" y="40" width="220" height="100" fill="#efe8d6"/><rect x="0" y="20" width="220" height="22" fill="#d8cdb3"/><rect x="18" y="62" width="50" height="60" fill="#f6e7b4"/><rect x="86" y="62" width="50" height="60" fill="#cdb98e"/><rect x="154" y="62" width="50" height="60" fill="#f6e7b4"/></g>
+            <rect x="120" y="300" width="260" height="10" rx="5" fill="#caa46d" opacity=".7"/>
+            <path fill="#3c4a36" d="M0 340c50-6 70 18 120 16v44H0Z"/>
+          </svg>
+          <span class="stay__tag">Бестселлер</span>
+        </div>
+        <div class="stay__body">
+          <h3>Вилла у воды</h3>
+          <div class="stay__feat"><span>78 м²</span><span>Бассейн-инфинити</span><span>Вид на море</span><span>4 гостя</span></div>
+          <div class="stay__foot">
+            <div class="stay__price"><small>от</small><b>32 000<sup> ₽/ночь</sup></b></div>
+            <a href="#book" class="stay__link" aria-label="Забронировать Виллу у воды"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- card 3 -->
+      <article class="stay reveal" data-d="2">
+        <div class="stay__art">
+          <svg viewBox="0 0 500 400" preserveAspectRatio="xMidYMid slice" aria-label="Панорамный люкс Кавказ">
+            <defs><linearGradient id="s3s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9dcc4"/><stop offset="1" stop-color="#c4c3a6"/></linearGradient></defs>
+            <rect width="500" height="400" fill="url(#s3s)"/>
+            <path fill="#9aa07e" opacity=".7" d="M0 200l120-70 110 60 140-90 130 80v220H0Z"/>
+            <path fill="#737e5c" d="M0 250l130-60 120 60 130-70 120 60v160H0Z"/>
+            <g transform="translate(150 200)"><rect x="0" y="40" width="200" height="120" fill="#efe8d6"/><path d="M-10 44L100 -6 210 44Z" fill="#574433"/><rect x="20" y="70" width="160" height="60" fill="#f3e4ad" opacity=".9"/><g stroke="#cdbf9f"><line x1="60" y1="70" x2="60" y2="130"/><line x1="100" y1="70" x2="100" y2="130"/><line x1="140" y1="70" x2="140" y2="130"/></g></g>
+            <circle cx="380" cy="80" r="26" fill="#fff3cf" opacity=".8"/>
+          </svg>
+          <span class="stay__tag">Signature</span>
+        </div>
+        <div class="stay__body">
+          <h3>Панорамный люкс «Кавказ»</h3>
+          <div class="stay__feat"><span>120 м²</span><span>Спа-комната</span><span>Хребет 270°</span><span>6 гостей</span></div>
+          <div class="stay__foot">
+            <div class="stay__price"><small>от</small><b>47 500<sup> ₽/ночь</sup></b></div>
+            <a href="#book" class="stay__link" aria-label="Забронировать люкс Кавказ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== AMENITIES ===================== -->
+<section class="amen sec" id="amen">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker">Инфраструктура</p>
+      <h2>Всё, ради чего стоит остаться</h2>
+      <p>Восемь продуманных пространств для тела и тишины — без очередей и расписаний.</p>
+    </div>
+    <div class="amen__grid">
+      <div class="amen__card reveal">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3c2 2.5 2 5 0 7s-2 4.5 0 7" stroke-linecap="round"/><path d="M8 5c1.4 1.7 1.4 3.4 0 5M16 5c1.4 1.7 1.4 3.4 0 5" stroke-linecap="round" opacity=".6"/><path d="M4 21h16" stroke-linecap="round"/></svg></div>
+        <h4>Спа & хаммам</h4><p>Турецкий хаммам, соляная комната и массаж на травах Кавказа.</p>
+      </div>
+      <div class="amen__card reveal" data-d="1">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 16c2 0 2-1.5 4-1.5S9 16 11 16s2-1.5 4-1.5S17 16 19 16s2-1.5 2-1.5" stroke-linecap="round"/><path d="M3 20c2 0 2-1.5 4-1.5S9 20 11 20s2-1.5 4-1.5S17 20 19 20s2-1.5 2-1.5" stroke-linecap="round" opacity=".5"/><path d="M7 11V5a2 2 0 014 0M11 8h6" stroke-linecap="round"/></svg></div>
+        <h4>Бассейн-инфинити</h4><p>Подогреваемая вода 29° с видом на хребет — открыт круглый год.</p>
+      </div>
+      <div class="amen__card reveal" data-d="2">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3v7a3 3 0 006 0V3M9 3v18M18 3c-1.5 1-2 3-2 6s.5 4 2 5v7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Авторский ресторан</h4><p>Сезонное меню от шефа на локальных фермерских продуктах и морепродуктах.</p>
+      </div>
+      <div class="amen__card reveal" data-d="3">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 10h12v3a5 5 0 01-5 5H10a5 5 0 01-5-5z" stroke-linejoin="round"/><path d="M17 11h2a2 2 0 010 4h-2M8 4c0 1-1 1.5-1 2.5M11 3.5c0 1-1 1.5-1 2.5" stroke-linecap="round"/></svg></div>
+        <h4>Чайная терраса</h4><p>Церемонии с горными травами на закате над верхушками сосен.</p>
+      </div>
+      <div class="amen__card reveal">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V6a4 4 0 018 0v3M9 14c0 1.5 1.5 2 1.5 3.5M14 13.5c0 1.5-1.5 2-1.5 3.5" stroke-linecap="round"/></svg></div>
+        <h4>Баня на дровах</h4><p>Русская баня с купелью и выходом к ледяному горному ручью.</p>
+      </div>
+      <div class="amen__card reveal" data-d="1">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="6" r="2"/><path d="M12 8v6m0 0l-3 6m3-6l3 6M7 11l5-1 5 1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Йога на рассвете</h4><p>Практики на деревянном деке с инструктором — лицом к восходящему солнцу.</p>
+      </div>
+      <div class="amen__card reveal" data-d="2">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 3v8a4 4 0 008 0V3M6 3h12M12 15v6M9 21h6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>Винный погреб</h4><p>Коллекция кубанских и грузинских вин с дегустациями при свечах.</p>
+      </div>
+      <div class="amen__card reveal" data-d="3">
+        <div class="amen__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20l6-12 4 7 2-3 4 8z" stroke-linejoin="round"/><circle cx="7" cy="6" r="2"/></svg></div>
+        <h4>Трекинг с гидом</h4><p>Маршруты к водопадам и смотровым точкам Кавказского заповедника.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GALLERY ===================== -->
+<section class="gal sec" id="gal">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <p class="kicker center">Атмосфера</p>
+      <h2>Один день в «Тихом Береге»</h2>
+    </div>
+    <div class="gal__grid">
+      <figure class="gal__item g-tall reveal">
+        <svg viewBox="0 0 400 420" preserveAspectRatio="xMidYMid slice" aria-label="Рассвет в горах">
+          <defs><linearGradient id="ga1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0dcb8"/><stop offset=".5" stop-color="#d8c6a4"/><stop offset="1" stop-color="#9aa483"/></linearGradient></defs>
+          <rect width="400" height="420" fill="url(#ga1)"/><circle cx="280" cy="120" r="50" fill="#fff1cc" opacity=".85"/>
+          <path fill="#8c9778" opacity=".7" d="M0 250l120-50 110 50 170-70v240H0Z"/><path fill="#5d6a4b" d="M0 300l130-40 120 50 150-50v160H0Z"/>
+        </svg>
+        <figcaption>Рассвет над хребтом</figcaption>
+      </figure>
+      <figure class="gal__item reveal" data-d="1">
+        <svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid slice" aria-label="Завтрак на террасе">
+          <rect width="300" height="220" fill="#e7ded0"/><rect y="150" width="300" height="70" fill="#cbb794"/><circle cx="150" cy="120" r="34" fill="#f3e8cf" stroke="#cdbf9f"/><path d="M120 150h60M135 150v-12M165 150v-12" stroke="#a98344" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <figcaption>Завтрак на террасе</figcaption>
+      </figure>
+      <figure class="gal__item reveal" data-d="2">
+        <svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid slice" aria-label="Бассейн-инфинити">
+          <rect width="300" height="220" fill="#cdd6cf"/><rect y="90" width="300" height="130" fill="#7e9990"/><g stroke="#fff" stroke-opacity=".4"><line x1="40" y1="130" x2="120" y2="130"/><line x1="170" y1="160" x2="250" y2="160"/></g><rect y="70" width="300" height="22" fill="#b9c2b0"/>
+        </svg>
+        <figcaption>Инфинити над лесом</figcaption>
+      </figure>
+      <figure class="gal__item g-wide reveal" data-d="1">
+        <svg viewBox="0 0 620 220" preserveAspectRatio="xMidYMid slice" aria-label="Вечер у очага">
+          <defs><linearGradient id="ga4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d4a39"/><stop offset="1" stop-color="#28301f"/></linearGradient></defs>
+          <rect width="620" height="220" fill="url(#ga4)"/><circle cx="310" cy="150" r="40" fill="#e8a24c" opacity=".5"/><circle cx="310" cy="155" r="20" fill="#f7c46b"/>
+          <g fill="#1d2417"><path d="M90 60l20 70H70z"/><path d="M520 50l24 80h-48z"/></g>
+        </svg>
+        <figcaption>Вечер у открытого очага</figcaption>
+      </figure>
+      <figure class="gal__item reveal" data-d="2">
+        <svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid slice" aria-label="Тропа к морю">
+          <rect width="300" height="220" fill="#c9d2bd"/><path fill="#7f8d64" d="M0 120l150-40 150 40v100H0Z"/><path fill="#d8cdb0" d="M120 220l30-110 30 110z"/><g fill="#46543a"><path d="M50 90l16 50H34z"/><path d="M250 80l18 56h-36z"/></g>
+        </svg>
+        <figcaption>Тропа к бухте</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EXPERIENCE / SEASONS ===================== -->
+<section class="exp sec" id="exp">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <p class="kicker center">Впечатления</p>
+      <h2>Сочи в любое время года</h2>
+      <p>Мы собрали впечатления, ради которых возвращаются — каждый сезон раскрывает место заново.</p>
+    </div>
+    <div class="exp__grid">
+      <article class="exp__card reveal">
+        <svg class="bg" viewBox="0 0 460 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="e1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfd9c2"/><stop offset="1" stop-color="#7e9080"/></linearGradient></defs>
+          <rect width="460" height="460" fill="url(#e1)"/><circle cx="120" cy="100" r="40" fill="#fff2d0" opacity=".7"/><path fill="#5f7160" d="M0 300l140-60 150 50 170-60v230H0Z"/>
+        </svg>
+        <div class="exp__inner"><span>Весна — Лето</span><h3>Море и горные реки</h3><p>Купание в уединённой бухте, рафтинг по Мзымте и пикники на альпийских лугах.</p></div>
+      </article>
+      <article class="exp__card reveal" data-d="1">
+        <svg class="bg" viewBox="0 0 460 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="e2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7caa0"/><stop offset="1" stop-color="#a4794a"/></linearGradient></defs>
+          <rect width="460" height="460" fill="url(#e2)"/><path fill="#9a6f43" d="M0 280l150-70 160 60 150-60v250H0Z"/><g fill="#7c5733"><path d="M90 230l24 70H66z"/><path d="M330 210l28 90h-56z"/></g>
+        </svg>
+        <div class="exp__inner"><span>Осень</span><h3>Золото бархатного сезона</h3><p>Тёплое море, винные дегустации и неспешные прогулки по золотому буковому лесу.</p></div>
+      </article>
+      <article class="exp__card reveal" data-d="2">
+        <svg class="bg" viewBox="0 0 460 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="e3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe6ee"/><stop offset="1" stop-color="#9fb0bd"/></linearGradient></defs>
+          <rect width="460" height="460" fill="url(#e3)"/><path fill="#c4d0d8" d="M0 260l150-80 160 70 150-70v290H0Z"/><path fill="#fff" opacity=".7" d="M0 300l150-50 160 60 150-50v200H0Z"/>
+        </svg>
+        <div class="exp__inner"><span>Зима</span><h3>Снег Красной Поляны</h3><p>Горные лыжи в 20 минутах, баня на дровах и глинтвейн под пледом у панорамного окна.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section class="revs sec" id="revs">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <p class="kicker center">Гости говорят</p>
+      <h2>Возвращаются за тишиной</h2>
+    </div>
+    <div class="revs__grid">
+      <figure class="rev reveal">
+        <div class="rev__stars">★★★★★</div>
+        <p>«Впервые за годы я услышал тишину. Шале спрятано так, что соседей будто не существует. Завтрак на террасе с видом на горы — это то, ради чего возвращаешься.»</p>
+        <figcaption class="rev__who"><span class="rev__av">Д</span><div><b>Дмитрий и Елена</b><small>Москва · апрель</small></div></figcaption>
+      </figure>
+      <figure class="rev reveal" data-d="1">
+        <div class="rev__stars">★★★★★</div>
+        <p>«Сервис уровня, которого не ждёшь в горах. Консьерж организовал приватный ужин на смотровой площадке — без единого вопроса с нашей стороны. Безупречно.»</p>
+        <figcaption class="rev__who"><span class="rev__av">А</span><div><b>Алина Г.</b><small>Санкт-Петербург · октябрь</small></div></figcaption>
+      </figure>
+      <figure class="rev reveal" data-d="2">
+        <div class="rev__stars">★★★★★</div>
+        <p>«Тот самый "тихий люкс". Никакой показной роскоши — только натуральные материалы, идеальная чистота и природа за стеклом. Уехали отдохнувшими по-настоящему.»</p>
+        <figcaption class="rev__who"><span class="rev__av">М</span><div><b>Марк Соколов</b><small>Краснодар · январь</small></div></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BOOKING ===================== -->
+<section class="book sec" id="book">
+  <div class="book__bg" aria-hidden="true">
+    <svg viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice">
+      <defs><linearGradient id="bb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4736"/><stop offset="1" stop-color="#222a22"/></linearGradient></defs>
+      <rect width="1440" height="700" fill="url(#bb)"/>
+      <path fill="#2c3727" d="M0 460c120-20 160 30 280 24s160-70 280-62 160 64 280 56 140-44 240-36 200 20 360 14v280H0Z"/>
+      <g fill="#1d2417"><path d="M180 380l30 100h-60z"/><path d="M620 360l34 120h-68z"/><path d="M1080 390l30 100h-60z"/></g>
+    </svg>
+  </div>
+  <div class="wrap book__in">
+    <div class="reveal">
+      <p class="kicker">Бронирование</p>
+      <h2>Оставьте суету у подножия</h2>
+      <p class="lead">Заполните заявку — личный консьерж свяжется в течение часа, подберёт шале и продумает каждую деталь приезда.</p>
+      <div class="book__list">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Бесплатная отмена за 7 дней до заезда</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Трансфер премиум-класса от аэропорта Сочи</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Завтрак на террасе и приветственный сет включены</div>
+      </div>
+    </div>
+
+    <form class="form reveal" data-d="1" id="bookForm" novalidate>
+      <div id="formBody">
+        <h3>Запросить уединение</h3>
+        <p class="sub">Никаких предоплат на этом шаге — только согласование деталей.</p>
+        <div class="field">
+          <label for="name">Имя</label>
+          <input id="name" name="name" type="text" autocomplete="name" placeholder="Как к вам обращаться" required />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="phone">Телефон</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+7 ___ ___ __ __" required />
+          </div>
+          <div class="field">
+            <label for="guests">Гостей</label>
+            <select id="guests" name="guests">
+              <option>2 гостя</option><option>3 гостя</option><option>4 гостя</option><option>5+ гостей</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="checkin">Заезд</label>
+            <input id="checkin" name="checkin" type="date" required />
+          </div>
+          <div class="field">
+            <label for="stay">Размещение</label>
+            <select id="stay" name="stay">
+              <option>Лесное шале</option><option>Вилла у воды</option><option>Люкс «Кавказ»</option><option>Помогите выбрать</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn--gold" type="submit">Отправить заявку
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <p class="form__note">Отправляя форму, вы соглашаетесь с политикой конфиденциальности. Мы не передаём данные третьим лицам.</p>
+      </div>
+      <div class="form__ok" id="formOk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>Заявка принята</h3>
+        <p>Спасибо! Консьерж «Тихого Берега» свяжется с вами в течение часа.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <a href="#top" class="brand" aria-label="Тихий Берег">
+          <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" stroke="currentColor" stroke-width="1.2" opacity=".45"/>
+            <path d="M7 25c3-6 5-9 7-9s3 3 6 3 4-7 7-7 3 5 6 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M5 29h30" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="28" cy="13" r="3" fill="#C0A06A"/></svg>
+          <span class="brand-txt"><b>Тихий Берег</b><span>Sochi · Retreat</span></span>
+        </a>
+        <p>Камерная база отдыха премиум-класса в предгорьях Сочи. Тишина, природа и сервис, который угадывает желания.</p>
+        <div class="foot__social">
+          <a href="#" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3l-3.1 14.8c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.5 13.2l-4.8-1.5c-1-.3-1.1-1 .2-1.5l18.7-7.2c.9-.3 1.6.2 1.3 1.3z"/></svg></a>
+          <a href="#" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.5 15.2L2 22l4.9-1.3A10 10 0 1012 2zm0 2a8 8 0 11-4.1 14.9l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0112 4zm-2.7 4c-.2 0-.5 0-.7.3-.2.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.7 2.8 4.3 3.8 2.1.8 2.6.7 3 .6.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1l-.7-.4c-.4-.2-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.6-.2-1.4-.5-2.3-1.4-.6-.5-1-1.2-1.2-1.5-.1-.2 0-.4.1-.5l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.7-1.8c-.2-.5-.4-.4-.5-.4z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h5>Навигация</h5>
+        <ul>
+          <li><a href="#philo">О месте</a></li>
+          <li><a href="#stays">Размещение</a></li>
+          <li><a href="#amen">Удобства</a></li>
+          <li><a href="#exp">Впечатления</a></li>
+          <li><a href="#revs">Отзывы</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Гостям</h5>
+        <ul>
+          <li><a href="#book">Бронирование</a></li>
+          <li><a href="#">Подарочные сертификаты</a></li>
+          <li><a href="#">Свадьбы и события</a></li>
+          <li><a href="#">Корпоративный ретрит</a></li>
+          <li><a href="#">Политика отмены</a></li>
+        </ul>
+      </div>
+      <div class="foot__contact">
+        <h5>Контакты</h5>
+        <a href="tel:+78005005050">+7 800 500-50-50</a>
+        <a href="mailto:stay@tihiy-bereg.ru">stay@tihiy-bereg.ru</a>
+        <a href="#">Сочи, Эсто-Садок,<br>ул. Горная, 4</a>
+        <a href="#">Ежедневно · 24/7</a>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>© 2026 Тихий Берег. Все права защищены.</span>
+      <span>Сделано с тишиной и вниманием к деталям.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // header scroll state
+  var head = document.getElementById("head");
+  function onScroll(){ head.classList.toggle("scrolled", window.scrollY > 40); }
+  onScroll(); window.addEventListener("scroll", onScroll, {passive:true});
+
+  // reveal on view
+  var reveals = document.querySelectorAll(".reveal:not(.in)");
+  if("IntersectionObserver" in window && !rm){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, {threshold:.14, rootMargin:"0px 0px -8% 0px"});
+    reveals.forEach(function(el){ io.observe(el); });
+  } else {
+    reveals.forEach(function(el){ el.classList.add("in"); });
+  }
+
+  // hero parallax
+  var pars = Array.prototype.slice.call(document.querySelectorAll("[data-par]"));
+  if(!rm && pars.length){
+    var ticking = false;
+    window.addEventListener("scroll", function(){
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(function(){
+        var y = window.scrollY;
+        if(y < window.innerHeight){
+          pars.forEach(function(el){
+            var s = parseFloat(el.getAttribute("data-par"));
+            var base = el.classList.contains("layer") ? "translateX(-50%) " : "";
+            el.style.transform = base + "translateY(" + (y*s) + "px)";
+          });
+        }
+        ticking = false;
+      });
+    }, {passive:true});
+  }
+
+  // smooth anchor + close-state
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener("click", function(e){
+      var id = a.getAttribute("href");
+      if(id.length>1){ var t=document.querySelector(id); if(t){ e.preventDefault(); t.scrollIntoView({behavior: rm?"auto":"smooth", block:"start"}); } }
+    });
+  });
+
+  // mobile burger -> jump to booking (simple, accessible fallback)
+  var burger = document.getElementById("burger");
+  if(burger){ burger.addEventListener("click", function(){ document.getElementById("philo").scrollIntoView({behavior: rm?"auto":"smooth"}); }); }
+
+  // form
+  var form = document.getElementById("bookForm");
+  if(form){
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      if(!form.checkValidity()){
+        var first = form.querySelector(":invalid"); if(first) first.focus(); return;
+      }
+      document.getElementById("formBody").style.display = "none";
+      document.getElementById("formOk").classList.add("show");
+    });
+  }
+
+  // min date = today
+  var ci = document.getElementById("checkin");
+  if(ci){ ci.min = new Date().toISOString().split("T")[0]; }
+})();
+</script>
+</body>
+</html>
