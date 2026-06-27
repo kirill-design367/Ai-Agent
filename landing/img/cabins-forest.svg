@@ -1,0 +1,284 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a3040"/>
+      <stop offset="50%" stop-color="#1a2030"/>
+      <stop offset="100%" stop-color="#111820"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2822"/>
+      <stop offset="100%" stop-color="#1a1810"/>
+    </linearGradient>
+    <radialGradient id="interior-glow" cx="50%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#dda850" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#cc8830" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#995500" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="interior-glow2" cx="50%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#cc9940" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#885500" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="path-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#dda850" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#aa6600" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lamp-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffdd88" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#cc8822" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#884400" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="gblur">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="gblur-sm">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="gblur-lg">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <clipPath id="clip"><rect width="900" height="600"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <!-- Sky gradient - twilight blue -->
+    <rect width="900" height="600" fill="url(#sky)"/>
+
+    <!-- Stars -->
+    <g fill="#ffffff" opacity="0.6">
+      <circle cx="100" cy="40" r="1"/><circle cx="220" cy="25" r="0.8"/><circle cx="350" cy="55" r="1.2"/><circle cx="480" cy="20" r="0.9"/>
+      <circle cx="600" cy="45" r="1"/><circle cx="720" cy="30" r="0.7"/><circle cx="820" cy="60" r="1.1"/>
+      <circle cx="160" cy="70" r="0.8"/><circle cx="290" cy="35" r="0.9"/><circle cx="420" cy="65" r="1"/>
+      <circle cx="560" cy="28" r="0.8"/><circle cx="680" cy="55" r="1.2"/><circle cx="780" cy="42" r="0.7"/>
+    </g>
+
+    <!-- Far pine trees (darkest layer) -->
+    <g fill="#0e1318" opacity="0.9">
+      <path d="M0 200 L20 100 L40 200 Z"/><path d="M30 200 L55 80 L80 200 Z"/>
+      <path d="M65 200 L85 110 L105 200 Z"/><path d="M95 200 L115 90 L135 200 Z"/>
+      <path d="M125 200 L148 75 L170 200 Z"/><path d="M155 200 L178 95 L200 200 Z"/>
+      <path d="M185 200 L208 70 L230 200 Z"/><path d="M220 200 L240 85 L262 200 Z"/>
+      <path d="M250 200 L272 100 L295 200 Z"/><path d="M285 200 L305 78 L328 200 Z"/>
+      <path d="M315 200 L338 90 L360 200 Z"/><path d="M350 200 L370 72 L392 200 Z"/>
+      <path d="M385 200 L408 85 L430 200 Z"/><path d="M418 200 L440 95 L462 200 Z"/>
+      <path d="M452 200 L472 70 L494 200 Z"/><path d="M485 200 L508 88 L530 200 Z"/>
+      <path d="M520 200 L540 75 L562 200 Z"/><path d="M552 200 L575 92 L598 200 Z"/>
+      <path d="M587 200 L608 70 L630 200 Z"/><path d="M620 200 L642 85 L665 200 Z"/>
+      <path d="M655 200 L675 78 L698 200 Z"/><path d="M688 200 L710 95 L732 200 Z"/>
+      <path d="M722 200 L742 70 L765 200 Z"/><path d="M755 200 L778 82 L800 200 Z"/>
+      <path d="M790 200 L810 90 L832 200 Z"/><path d="M825 200 L845 72 L868 200 Z"/>
+      <path d="M858 200 L878 88 L900 200 Z"/>
+    </g>
+
+    <!-- Mid pine trees (medium dark) -->
+    <g fill="#121820" opacity="0.95">
+      <path d="M-10 300 L25 160 L60 300 Z"/><path d="M40 300 L78 140 L116 300 Z"/>
+      <path d="M100 300 L132 155 L164 300 Z"/><path d="M148 300 L182 132 L218 300 Z"/>
+      <path d="M200 300 L238 148 L276 300 Z"/><path d="M262 300 L295 130 L328 300 Z"/>
+      <path d="M320 300 L355 142 L390 300 Z"/><path d="M382 300 L415 128 L450 300 Z"/>
+      <path d="M442 300 L478 145 L514 300 Z"/><path d="M508 300 L540 132 L572 300 Z"/>
+      <path d="M568 300 L602 140 L636 300 Z"/><path d="M630 300 L662 125 L695 300 Z"/>
+      <path d="M692 300 L726 138 L760 300 Z"/><path d="M752 300 L786 130 L820 300 Z"/>
+      <path d="M815 300 L848 145 L882 300 Z"/>
+    </g>
+
+    <!-- Front pine trees (darkest, closest) -->
+    <g fill="#0d1015">
+      <path d="M-20 500 L30 280 L80 500 Z"/><path d="M50 500 L105 258 L160 500 Z"/>
+      <path d="M800 500 L850 272 L900 500 Z"/>
+      <path d="M0 500 L-5 350 L-10 500" fill="#0d1015"/>
+    </g>
+
+    <!-- MAIN CABIN (foreground right) -->
+    <g transform="translate(480, 180)">
+      <!-- glow from interior -->
+      <ellipse cx="100" cy="280" rx="160" ry="80" fill="url(#interior-glow)" filter="url(#gblur-lg)" opacity="0.8"/>
+
+      <!-- Cabin body -->
+      <!-- Walls - dark wood/composite -->
+      <rect x="0" y="180" width="200" height="200" fill="#1a1510"/>
+      <!-- vertical wood plank lines -->
+      <g stroke="#222018" stroke-width="2" opacity="0.6">
+        <line x1="20" y1="180" x2="20" y2="380"/><line x1="40" y1="180" x2="40" y2="380"/>
+        <line x1="60" y1="180" x2="60" y2="380"/><line x1="80" y1="180" x2="80" y2="380"/>
+        <line x1="100" y1="180" x2="100" y2="380"/><line x1="120" y1="180" x2="120" y2="380"/>
+        <line x1="140" y1="180" x2="140" y2="380"/><line x1="160" y1="180" x2="160" y2="380"/>
+        <line x1="180" y1="180" x2="180" y2="380"/>
+      </g>
+
+      <!-- ROOF - dark angular/peaked -->
+      <path d="M-20 180 L100 20 L220 180 Z" fill="#111410"/>
+      <!-- roof texture - dark shingles -->
+      <g fill="#0d100d" stroke="#161812" stroke-width="0.5">
+        <path d="M30 180 L100 32 L130 70 Z" opacity="0.6"/>
+        <path d="M80 180 L100 45 L160 150 Z" opacity="0.4"/>
+        <!-- metal roof sheen -->
+        <path d="M20 165 L100 22 L115 60 L35 175 Z" fill="#181c18" opacity="0.5"/>
+      </g>
+
+      <!-- Large panoramic window (glowing warmly) -->
+      <rect x="20" y="200" width="90" height="160" rx="4" fill="#dda850" opacity="0.85"/>
+      <rect x="20" y="200" width="90" height="160" rx="4" fill="none" stroke="#111" stroke-width="3"/>
+      <!-- window cross bars -->
+      <line x1="65" y1="200" x2="65" y2="360" stroke="#1a1a1a" stroke-width="3"/>
+      <line x1="20" y1="280" x2="110" y2="280" stroke="#1a1a1a" stroke-width="2"/>
+      <!-- interior warm scene glimpse -->
+      <rect x="23" y="203" width="39" height="75" fill="#cc8830" opacity="0.7"/>
+      <rect x="68" y="203" width="39" height="75" fill="#dd9940" opacity="0.6"/>
+      <rect x="23" y="283" width="84" height="74" fill="#bb7720" opacity="0.5"/>
+      <!-- interior objects suggested -->
+      <ellipse cx="45" cy="320" rx="15" ry="8" fill="#aa6610" opacity="0.6"/>
+      <rect x="40" y="295" width="5" height="28" fill="#aa6610" opacity="0.5"/>
+
+      <!-- Second smaller window -->
+      <rect x="130" y="220" width="60" height="100" rx="3" fill="#cc8830" opacity="0.7"/>
+      <rect x="130" y="220" width="60" height="100" rx="3" fill="none" stroke="#111" stroke-width="2"/>
+      <line x1="160" y1="220" x2="160" y2="320" stroke="#1a1a1a" stroke-width="2"/>
+
+      <!-- Deck/terrace -->
+      <rect x="-30" y="370" width="260" height="28" fill="#1e1c16"/>
+      <!-- deck boards -->
+      <g stroke="#161410" stroke-width="1.5">
+        <line x1="-30" y1="376" x2="230" y2="376"/>
+        <line x1="-30" y1="382" x2="230" y2="382"/>
+        <line x1="-30" y1="388" x2="230" y2="388"/>
+        <line x1="-30" y1="393" x2="230" y2="393"/>
+      </g>
+
+      <!-- Outdoor chairs on deck (white/cream) -->
+      <!-- Chair 1 -->
+      <g transform="translate(-10, 340)">
+        <rect x="0" y="0" width="38" height="32" rx="4" fill="#e8e4dc" opacity="0.9"/>
+        <rect x="-2" y="-8" width="42" height="12" rx="5" fill="#ede9e1"/>
+        <rect x="5" y="30" width="8" height="18" rx="2" fill="#d4cfc5"/>
+        <rect x="25" y="30" width="8" height="18" rx="2" fill="#d4cfc5"/>
+      </g>
+      <!-- Chair 2 -->
+      <g transform="translate(55, 340)">
+        <rect x="0" y="0" width="38" height="32" rx="4" fill="#e8e4dc" opacity="0.85"/>
+        <rect x="-2" y="-8" width="42" height="12" rx="5" fill="#ede9e1"/>
+        <rect x="5" y="30" width="8" height="18" rx="2" fill="#d4cfc5"/>
+        <rect x="25" y="30" width="8" height="18" rx="2" fill="#d4cfc5"/>
+      </g>
+      <!-- Small table -->
+      <g transform="translate(100, 348)">
+        <ellipse cx="0" cy="0" rx="20" ry="18" fill="#2a2418"/>
+        <rect x="-2" y="0" width="4" height="22" fill="#241e12"/>
+      </g>
+
+      <!-- Deck light (small) -->
+      <g transform="translate(0, 368)">
+        <ellipse cx="0" cy="0" rx="30" ry="20" fill="#ffcc44" filter="url(#gblur)" opacity="0.4"/>
+        <circle cx="0" cy="-2" r="4" fill="#ffee88"/>
+      </g>
+      <g transform="translate(200, 368)">
+        <ellipse cx="0" cy="0" rx="30" ry="20" fill="#ffcc44" filter="url(#gblur)" opacity="0.4"/>
+        <circle cx="0" cy="-2" r="4" fill="#ffee88"/>
+      </g>
+
+      <!-- Wall sconce light -->
+      <g transform="translate(10, 195)">
+        <ellipse cx="0" cy="0" rx="22" ry="16" fill="#ffcc66" filter="url(#gblur-sm)" opacity="0.8"/>
+        <rect x="-5" y="-12" width="10" height="14" rx="2" fill="#1a1a1a"/>
+        <circle cx="0" cy="-5" r="3" fill="#ffee88"/>
+      </g>
+    </g>
+
+    <!-- SECOND CABIN (middle) -->
+    <g transform="translate(280, 240)" opacity="0.85">
+      <ellipse cx="90" cy="250" rx="120" ry="60" fill="url(#interior-glow2)" filter="url(#gblur-lg)" opacity="0.6"/>
+      <rect x="10" y="165" width="160" height="170" fill="#161210"/>
+      <g stroke="#1e1c18" stroke-width="1.5" opacity="0.5">
+        <line x1="28" y1="165" x2="28" y2="335"/><line x1="48" y1="165" x2="48" y2="335"/>
+        <line x1="68" y1="165" x2="68" y2="335"/><line x1="88" y1="165" x2="88" y2="335"/>
+        <line x1="108" y1="165" x2="108" y2="335"/><line x1="128" y1="165" x2="128" y2="335"/>
+        <line x1="148" y1="165" x2="148" y2="335"/>
+      </g>
+      <path d="M-5 166 L90 22 L185 166 Z" fill="#0f0e0c"/>
+      <rect x="20" y="185" width="80" height="130" rx="3" fill="#cc8830" opacity="0.75"/>
+      <rect x="20" y="185" width="80" height="130" rx="3" fill="none" stroke="#0d0d0d" stroke-width="2"/>
+      <line x1="60" y1="185" x2="60" y2="315" stroke="#111" stroke-width="2"/>
+      <line x1="20" y1="250" x2="100" y2="250" stroke="#111" stroke-width="1.5"/>
+      <rect x="110" y="200" width="50" height="90" rx="2" fill="#bb7722" opacity="0.65"/>
+      <rect x="-10" y="325" width="200" height="22" fill="#1a1814"/>
+      <!-- chairs on this deck -->
+      <g transform="translate(5, 300)" opacity="0.8">
+        <rect x="0" y="0" width="32" height="26" rx="3" fill="#ddd9d1"/>
+        <rect x="-1" y="-7" width="34" height="9" rx="4" fill="#e8e4dc"/>
+        <rect x="4" y="24" width="6" height="14" rx="1" fill="#c8c4bc"/>
+        <rect x="22" y="24" width="6" height="14" rx="1" fill="#c8c4bc"/>
+      </g>
+      <g transform="translate(15, 195)">
+        <ellipse cx="0" cy="0" rx="18" ry="13" fill="#ffcc66" filter="url(#gblur-sm)" opacity="0.7"/>
+        <rect x="-4" y="-10" width="8" height="11" rx="1" fill="#1a1a1a"/>
+        <circle cx="0" cy="-4" r="2.5" fill="#ffee88"/>
+      </g>
+    </g>
+
+    <!-- THIRD CABIN (far back) -->
+    <g transform="translate(120, 290)" opacity="0.65">
+      <ellipse cx="75" cy="220" rx="90" ry="44" fill="url(#interior-glow2)" filter="url(#gblur-lg)" opacity="0.5"/>
+      <rect x="15" y="150" width="120" height="140" fill="#111010"/>
+      <path d="M0 151 L75 30 L150 151 Z" fill="#0d0c0a"/>
+      <rect x="20" y="166" width="60" height="110" rx="2" fill="#bb7722" opacity="0.65"/>
+      <rect x="20" y="166" width="60" height="110" rx="2" fill="none" stroke="#0d0d0d" stroke-width="1.5"/>
+      <rect x="-5" y="282" width="160" height="18" fill="#161412"/>
+      <g transform="translate(10, 158)">
+        <ellipse cx="0" cy="0" rx="15" ry="10" fill="#ffcc66" filter="url(#gblur-sm)" opacity="0.6"/>
+        <rect x="-3" y="-8" width="6" height="9" rx="1" fill="#1a1a1a"/>
+        <circle cx="0" cy="-3" r="2" fill="#ffee88"/>
+      </g>
+    </g>
+
+    <!-- Stepping stone path between cabins -->
+    <!-- Path glow -->
+    <path d="M100 540 Q200 480 340 420 Q430 380 520 350 Q600 320 680 300" stroke="#ffcc44" stroke-width="3" fill="none" filter="url(#gblur)" opacity="0.15"/>
+
+    <!-- Stone steps -->
+    <g fill="#2a2820" stroke="#3a3630" stroke-width="1">
+      <ellipse cx="150" cy="540" rx="30" ry="14" fill="#282620"/>
+      <ellipse cx="200" cy="518" rx="26" ry="12" fill="#2a2820"/>
+      <ellipse cx="248" cy="498" rx="24" ry="11" fill="#282620"/>
+      <ellipse cx="294" cy="478" rx="22" ry="10" fill="#2a2820"/>
+      <ellipse cx="338" cy="460" rx="20" ry="9" fill="#282620"/>
+      <ellipse cx="380" cy="444" rx="18" ry="8.5" fill="#2a2820"/>
+      <ellipse cx="420" cy="430" rx="17" ry="8" fill="#282620"/>
+      <ellipse cx="458" cy="418" rx="16" ry="7.5" fill="#2a2820"/>
+    </g>
+
+    <!-- Stone step glow highlights -->
+    <g filter="url(#gblur)" opacity="0.3">
+      <ellipse cx="150" cy="538" rx="32" ry="10" fill="#ffcc44"/>
+      <ellipse cx="200" cy="516" rx="28" ry="8" fill="#ffcc44"/>
+      <ellipse cx="248" cy="496" rx="25" ry="7" fill="#ffcc44"/>
+      <ellipse cx="294" cy="476" rx="22" ry="6" fill="#ffcc44"/>
+      <ellipse cx="338" cy="458" rx="20" ry="6" fill="#ffcc44"/>
+    </g>
+
+    <!-- Gravel/ground texture -->
+    <rect x="0" y="460" width="900" height="140" fill="#1a1814" opacity="0.7"/>
+    <g fill="#252220" opacity="0.6">
+      <circle cx="120" cy="480" r="3"/><circle cx="155" cy="495" r="2"/><circle cx="190" cy="470" r="4"/>
+      <circle cx="230" cy="490" r="3"/><circle cx="265" cy="475" r="2"/><circle cx="300" cy="495" r="3"/>
+      <circle cx="340" cy="480" r="4"/><circle cx="378" cy="465" r="2"/><circle cx="415" cy="488" r="3"/>
+      <circle cx="452" cy="472" r="4"/><circle cx="490" cy="485" r="2"/><circle cx="528" cy="470" r="3"/>
+    </g>
+
+    <!-- Small rocks alongside path -->
+    <g fill="#222020">
+      <ellipse cx="130" cy="520" rx="12" ry="7"/><ellipse cx="180" cy="505" rx="10" ry="6"/>
+      <ellipse cx="220" cy="488" rx="8" ry="5"/><ellipse cx="262" cy="470" rx="9" ry="5.5"/>
+    </g>
+
+    <!-- Atmospheric ground fog -->
+    <rect x="0" y="440" width="900" height="60" fill="#1a2030" filter="url(#gblur)" opacity="0.25"/>
+
+    <!-- Vignette -->
+    <defs>
+      <radialGradient id="vig2" cx="50%" cy="50%" r="70%">
+        <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
+      </radialGradient>
+    </defs>
+    <rect width="900" height="600" fill="url(#vig2)"/>
+  </g>
+</svg>
