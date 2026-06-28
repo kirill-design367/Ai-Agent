@@ -1,74 +1,56 @@
 import React, { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import GoldenMark from '../GoldenMark'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const phrases = [
-  { line1: 'Заплатили', line2: '150 000 ₽.', gold: false },
-  { line1: 'Получили', line2: 'шаблон.', gold: false },
-  { line1: 'Ждали', line2: '3 месяца.', gold: false },
-  { line1: 'Так не должно', line2: 'быть.', gold: true },
+const pains = [
+  {
+    num: '01',
+    headline: 'Месяц стал тремя',
+    body: 'Студия говорит «2–4 недели». Потом согласования, правки, выходные. В итоге — 3 месяца. Бизнес стоит.',
+  },
+  {
+    num: '02',
+    headline: 'Шаблон за 100 тысяч',
+    body: 'Вы платите за «уникальный дизайн». Получаете WordPress-тему за $49 с переставленными блоками.',
+  },
+  {
+    num: '03',
+    headline: 'Никто не берёт трубку',
+    body: 'Менеджер ушёл в отпуск. Дизайнер занят другим. Правки — «в следующем спринте». Вы просто ждёте.',
+  },
+  {
+    num: '04',
+    headline: 'Сайт умер через год',
+    body: 'Студия закрылась или подняла ценник на поддержку в 3 раза. Сайт висит и теряет клиентов каждый день.',
+  },
 ]
 
 export default function Pain() {
   const sectionRef = useRef<HTMLElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const section = sectionRef.current
-      if (!section) return
-      const vh = window.innerHeight
+      gsap.fromTo('.pain-hook',
+        { y: 60, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '.pain-hook', start: 'top 80%' } }
+      )
 
-      // Background darkens progressively
-      gsap.to(overlayRef.current, {
-        opacity: 0.65,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: `top+=${phrases.length * vh} top`,
-          scrub: 1,
-        },
+      pains.forEach((_, i) => {
+        gsap.fromTo(`.pain-row-${i}`,
+          { x: -30, opacity: 0 },
+          {
+            x: 0, opacity: 1, duration: 0.75, ease: 'power3.out', delay: i * 0.07,
+            scrollTrigger: { trigger: `.pain-row-${i}`, start: 'top 86%', once: true },
+          }
+        )
       })
 
-      // Each phrase fades in, then fades out
-      phrases.forEach((_, i) => {
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: `top+=${i * vh} top`,
-            end: `top+=${(i + 1) * vh} top`,
-            scrub: 0.7,
-          },
-        })
-          .fromTo(
-            `.pain-phrase-${i}`,
-            { opacity: 0, y: 80, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'power2.out' }
-          )
-          .to(
-            `.pain-phrase-${i}`,
-            { opacity: 0, y: -60, scale: 1.02, duration: 0.3, ease: 'power2.in' },
-            '+=0.3'
-          )
-      })
-
-      // Resolution fades in after all phrases
-      gsap.fromTo(
-        '.pain-resolution',
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          scrollTrigger: {
-            trigger: section,
-            start: `top+=${phrases.length * vh} top`,
-            end: `top+=${phrases.length * vh + 200} top`,
-            scrub: 1,
-          },
-        }
+      gsap.fromTo('.pain-resolution',
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: '.pain-resolution', start: 'top 87%' } }
       )
     }, sectionRef)
 
@@ -76,60 +58,77 @@ export default function Pain() {
   }, [])
 
   return (
-    <section
-      ref={sectionRef}
-      style={{ height: `${100 + phrases.length * 100 + 120}vh`, background: 'var(--bg-primary)' }}
-    >
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
-        {/* Progressive dark overlay */}
-        <div
-          ref={overlayRef}
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: '#020305', opacity: 0 }}
-        />
+    <section ref={sectionRef} className="section-padding relative overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+      <GoldenMark variant="rects" size={620} className="absolute top-1/2 right-0 -translate-y-1/3 translate-x-1/4" />
+      <GoldenMark variant="circles-bl" size={380} className="absolute bottom-0 left-0" />
 
-        {/* Eyebrow */}
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-          <span className="w-6 h-px opacity-35" style={{ background: 'var(--gold)' }} />
+      <div className="max-w-7xl mx-auto px-6">
+
+        <div className="flex items-center gap-3 mb-16">
+          <span className="w-6 h-px bg-gold opacity-60" />
           <span className="font-inter text-text-muted text-xs tracking-[0.25em] uppercase">Знакомая ситуация?</span>
-          <span className="w-6 h-px opacity-35" style={{ background: 'var(--gold)' }} />
         </div>
 
-        {/* Phrases — each absolutely positioned, stacked */}
-        {phrases.map((p, i) => (
+        <div className="pain-hook opacity-0 mb-20">
+          <h2
+            className="font-syne font-bold text-text-primary"
+            style={{ fontSize: 'clamp(34px, 5vw, 68px)', lineHeight: 1.1, maxWidth: '700px' }}
+          >
+            Большинство клиентов<br />
+            <span
+              className="font-cormorant italic font-normal"
+              style={{ color: 'var(--gold)', fontSize: '1.1em' }}
+            >
+              уже это пережили.
+            </span>
+          </h2>
+        </div>
+
+        <div className="mb-2 h-px" style={{ background: 'linear-gradient(to right, rgba(201,168,124,0.35), transparent)' }} />
+
+        {pains.map((p, i) => (
           <div
             key={i}
-            className={`pain-phrase-${i} absolute inset-0 flex items-center justify-center text-center px-6`}
-            style={{ opacity: 0 }}
+            className={`pain-row-${i} opacity-0`}
+            style={{
+              borderBottom: i < pains.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+              paddingTop: '36px',
+              paddingBottom: '36px',
+            }}
           >
-            <h2
-              className="font-syne font-bold"
-              style={{
-                fontSize: 'clamp(62px, 11vw, 156px)',
-                lineHeight: 0.97,
-                color: p.gold ? 'var(--gold)' : 'var(--text-primary)',
-              }}
-            >
-              {p.line1}
-              <br />
-              {p.line2}
-            </h2>
+            <div className="grid grid-cols-[48px_1fr] lg:grid-cols-[88px_minmax(0,300px)_1fr] gap-4 lg:gap-12 items-start">
+              <span
+                className="font-syne font-bold leading-none select-none flex-shrink-0"
+                style={{ fontSize: 'clamp(30px, 3.5vw, 52px)', color: 'var(--text-primary)', opacity: 0.1 }}
+              >
+                {p.num}
+              </span>
+              <h3
+                className="font-syne font-bold text-text-primary"
+                style={{ fontSize: 'clamp(20px, 2.2vw, 32px)', lineHeight: 1.2 }}
+              >
+                {p.headline}
+              </h3>
+              <p
+                className="font-inter text-text-muted leading-relaxed col-start-2 lg:col-start-auto"
+                style={{ fontSize: '15px', maxWidth: '440px' }}
+              >
+                {p.body}
+              </p>
+            </div>
           </div>
         ))}
 
-        {/* Resolution — appears after all phrases */}
-        <div
-          className="pain-resolution absolute bottom-14 left-0 right-0 text-center z-10"
-          style={{ opacity: 0 }}
-        >
+        <div className="pain-resolution opacity-0 mt-20">
           <p
             className="font-cormorant italic"
-            style={{ fontSize: 'clamp(22px, 2.6vw, 36px)', color: 'var(--text-muted)' }}
+            style={{ fontSize: 'clamp(22px, 2.8vw, 36px)', color: 'var(--text-muted)' }}
           >
             Я работаю иначе —{' '}
             <span style={{ color: 'var(--gold)' }}>напрямую с вами.</span>
           </p>
         </div>
+
       </div>
     </section>
   )

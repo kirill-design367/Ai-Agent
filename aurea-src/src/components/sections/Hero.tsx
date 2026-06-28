@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
+import GoldenMark from '../GoldenMark'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -93,6 +94,9 @@ export default function Hero() {
 
       {/* Noise */}
       <div className="noise-section z-[1]" />
+      {/* Golden ratio geometry */}
+      <GoldenMark variant="spiral-tl" size={700} className="absolute z-[2] -top-20 -left-20" />
+      <GoldenMark variant="circles-tr" size={500} className="absolute z-[2] top-0 right-0" />
 
       {/* Layout */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12">

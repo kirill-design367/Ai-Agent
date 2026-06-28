@@ -122,11 +122,11 @@ html.lenis, html.lenis body {
 
 /* Section spacing */
 .section-padding {
-  padding: 150px 0;
+  padding: 120px 0;
 }
 
 @media (max-width: 768px) {
-  .section-padding { padding: 100px 0; }
+  .section-padding { padding: 80px 0; }
 }
 
 /* Reveal clip animations */
