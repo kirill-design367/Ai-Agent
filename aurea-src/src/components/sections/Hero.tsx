@@ -8,7 +8,6 @@ gsap.registerPlugin(ScrollTrigger)
 const BASE = import.meta.env.BASE_URL
 
 // Portfolio slides shown inside MacBook screen
-// Place your portfolio screenshots in aurea-src/public/images/portfolio/
 const slides = [
   {
     img: `${BASE}images/portfolio/p1.jpg`,
@@ -17,14 +16,6 @@ const slides = [
   {
     img: `${BASE}images/portfolio/p2.jpg`,
     fallback: 'linear-gradient(135deg, #f0ebe0 0%, #d9cbb0 50%, #b8a080 100%)',
-  },
-  {
-    img: `${BASE}images/portfolio/p3.jpg`,
-    fallback: 'linear-gradient(135deg, #1a0a14 0%, #3d1030 50%, #5c1848 100%)',
-  },
-  {
-    img: `${BASE}images/portfolio/p4.jpg`,
-    fallback: 'linear-gradient(135deg, #0a1a0a 0%, #1a3020 50%, #1e3d25 100%)',
   },
 ]
 
@@ -188,18 +179,18 @@ export default function Hero() {
           <div ref={macRef} className="relative opacity-0 lg:-mr-8 xl:-mr-16">
             <div className="relative w-full">
 
-              {/* MacBook frame */}
+              {/* MacBook frame — z-index 1 (behind carousel) */}
               <img
                 src={`${BASE}images/macbook.jpg`}
                 alt="MacBook Pro"
-                className="relative z-10 w-full select-none pointer-events-none"
-                style={{ filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.75))' }}
+                className="relative w-full select-none pointer-events-none"
+                style={{ zIndex: 1, filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.75))' }}
               />
 
-              {/* Screen carousel — sits behind the frame via z-index */}
+              {/* Screen carousel — z-index 10 (on top of MacBook, only in screen area) */}
               <div
                 className="absolute overflow-hidden"
-                style={{ zIndex: 5, top: SCREEN.top, left: SCREEN.left, width: SCREEN.width, height: SCREEN.height }}
+                style={{ zIndex: 10, top: SCREEN.top, left: SCREEN.left, width: SCREEN.width, height: SCREEN.height }}
               >
                 {slides.map((s, i) => (
                   <div
@@ -225,10 +216,10 @@ export default function Hero() {
                 />
               </div>
 
-              {/* Slide dot indicators */}
+              {/* Slide dot indicators — z-index 20 (above carousel) */}
               <div
                 className="absolute flex items-center justify-center gap-1.5"
-                style={{ zIndex: 15, bottom: '22%', left: '50%', transform: 'translateX(-50%)' }}
+                style={{ zIndex: 20, bottom: '22%', left: '50%', transform: 'translateX(-50%)' }}
               >
                 {slides.map((_, i) => (
                   <button
