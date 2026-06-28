@@ -259,6 +259,21 @@ html.lenis body {
   color: var(--accent);
 }
 
+/* — Сравнение (split-world). Asymmetric pair: "Со мной" dominant, "Студия"
+   muted. Collapses to a single column on mobile (each cell self-labels). */
+.cmp-pair {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: clamp(1rem, 4vw, 3rem);
+  align-items: start;
+}
+@media (max-width: 680px) {
+  .cmp-pair {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     transition: none;

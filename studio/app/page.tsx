@@ -8,6 +8,7 @@ import Pain from "@/components/sections/Pain";
 import Process from "@/components/sections/Process";
 import Value from "@/components/sections/Value";
 import Pricing from "@/components/sections/Pricing";
+import Comparison from "@/components/sections/Comparison";
 
 /*
   Page shell = the studio "engine" assembled. Sections drop in below Hero as we
@@ -28,6 +29,7 @@ export default function Home() {
         <Process />
         <Value />
         <Pricing />
+        <Comparison />
 
         {/* Placeholder for the next scenes — replaced as we build them. */}
         <section
