@@ -274,6 +274,161 @@ html.lenis body {
   }
 }
 
+/* — Aurora glow drift (cinematic ambient background for dark scenes, V.93) */
+.aurora {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.5;
+}
+.aurora span {
+  position: absolute;
+  width: 42vw;
+  height: 42vw;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+.aurora span:nth-child(1) {
+  background: rgba(120, 140, 200, 0.28);
+  top: 4%;
+  left: 8%;
+  animation: drift1 22s ease-in-out infinite;
+}
+.aurora span:nth-child(2) {
+  background: rgba(200, 150, 120, 0.22);
+  bottom: 6%;
+  right: 10%;
+  animation: drift2 28s ease-in-out infinite;
+}
+.aurora span:nth-child(3) {
+  background: rgba(150, 130, 190, 0.2);
+  top: 40%;
+  left: 45%;
+  animation: drift1 34s ease-in-out infinite reverse;
+}
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8vw, 6vh) scale(1.2); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  50% { transform: translate(-7vw, -5vh) scale(0.9); }
+}
+
+/* — FAQ editorial accordion (gentle expand, III.10) */
+.faq-item {
+  border-top: 1px solid var(--border-soft);
+}
+.faq-q {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: clamp(1.4rem, 4vh, 2.2rem) 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2rem;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.faq-mark {
+  flex: none;
+  color: var(--accent);
+  transition: transform var(--dur-micro) var(--ease-expo);
+}
+.faq-item[data-open="true"] .faq-mark {
+  transform: rotate(45deg);
+}
+.faq-a {
+  overflow: hidden;
+  height: 0;
+  transition: height 0.5s var(--ease-expo);
+}
+.faq-a-inner {
+  padding-bottom: clamp(1.4rem, 4vh, 2.2rem);
+  max-width: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+}
+
+/* — Preloader curtain (V.117 / V.38) */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #0a0a0b;
+  display: grid;
+  place-items: center;
+  color: #f4f2ee;
+}
+.preloader[data-done="true"] {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1s var(--ease-expo);
+  pointer-events: none;
+}
+.preloader-word {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 7vw, 4rem);
+  letter-spacing: 0.02em;
+  opacity: 0;
+  animation: pl-in 0.8s var(--ease-expo) 0.1s forwards;
+}
+@keyframes pl-in {
+  from { opacity: 0; transform: translateY(0.4em); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* — Form fields (Bible IV.17): focus glow, >=16px (anti iOS-zoom), human */
+.field {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 18px;
+  font-size: 16px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  color: var(--text-on-dark);
+  background: rgba(244, 242, 238, 0.04);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo);
+  resize: vertical;
+}
+.field::placeholder {
+  color: var(--text-tertiary);
+}
+.field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+/* — Floating messenger button (РФ, L.156) — allowed, no pressure */
+.msg-fab {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 9000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.3rem;
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  color: var(--bg-base);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--dur-micro) var(--ease-expo);
+}
+.msg-fab:hover {
+  transform: translateY(-3px);
+}
+
 /* — Portfolio case hover zoom (tactility, III.7.10) */
 .case-media:hover .case-img {
   transform: scale(1.04);

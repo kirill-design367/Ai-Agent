@@ -3,6 +3,8 @@ import CustomCursor from "@/components/kit/CustomCursor";
 import MagneticTargets from "@/components/kit/MagneticTargets";
 import GrainOverlay from "@/components/kit/GrainOverlay";
 import ScrollProgress from "@/components/kit/ScrollProgress";
+import Preloader from "@/components/kit/Preloader";
+import MessengerFab from "@/components/kit/MessengerFab";
 import Hero from "@/components/sections/Hero";
 import Pain from "@/components/sections/Pain";
 import Process from "@/components/sections/Process";
@@ -10,6 +12,9 @@ import Value from "@/components/sections/Value";
 import Pricing from "@/components/sections/Pricing";
 import Comparison from "@/components/sections/Comparison";
 import Portfolio from "@/components/sections/Portfolio";
+import Reviews from "@/components/sections/Reviews";
+import Faq from "@/components/sections/Faq";
+import Contact from "@/components/sections/Contact";
 
 /*
   Page shell = the studio "engine" assembled. Sections drop in below Hero as we
@@ -19,10 +24,12 @@ import Portfolio from "@/components/sections/Portfolio";
 export default function Home() {
   return (
     <SmoothScroll>
+      <Preloader />
       <ScrollProgress />
       <CustomCursor />
       <MagneticTargets />
       <GrainOverlay />
+      <MessengerFab />
 
       <main>
         <Hero />
@@ -32,8 +39,9 @@ export default function Home() {
         <Pricing />
         <Portfolio />
         <Comparison />
-
-        {/* Next: Отзывы → FAQ → Финал */}
+        <Reviews />
+        <Faq />
+        <Contact />
       </main>
     </SmoothScroll>
   );
