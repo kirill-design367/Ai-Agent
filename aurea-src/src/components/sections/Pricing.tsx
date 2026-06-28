@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import MagneticButton from '../ui/MagneticButton'
 import { ArrowRight } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -46,22 +45,21 @@ export default function Pricing() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.pricing-label', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: '.pricing-label', start: 'top 85%' } })
-      gsap.fromTo('.pricing-title', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: '.pricing-title', start: 'top 82%' } })
-
-      // Cards cascade
-      gsap.fromTo('.pricing-card',
-        { opacity: 0, y: 50, scale: 0.96 },
-        {
-          opacity: 1, y: 0, scale: 1,
-          duration: 0.8, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: { trigger: '.pricing-grid', start: 'top 75%' }
-        }
+      gsap.fromTo('.pricing-eyebrow',
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: '.pricing-eyebrow', start: 'top 85%' } }
+      )
+      gsap.fromTo('.pricing-head',
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: '.pricing-head', start: 'top 82%' } }
       )
 
-      // Recommended glow pulse
-      gsap.to('.recommended-glow',
-        { opacity: 0.8, duration: 2, yoyo: true, repeat: -1, ease: 'power2.inOut' }
+      gsap.fromTo('.pricing-row',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out',
+          scrollTrigger: { trigger: '.pricing-rows', start: 'top 78%' },
+        }
       )
     }, sectionRef)
 
@@ -69,83 +67,109 @@ export default function Pricing() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="pricing" className="section-padding relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
-      <div className="orb absolute w-[700px] h-[700px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+    <section
+      ref={sectionRef}
+      id="pricing"
+      className="relative overflow-hidden"
+      style={{ background: 'var(--bg-primary)', paddingTop: 'clamp(80px, 10vw, 160px)', paddingBottom: 'clamp(80px, 10vw, 160px)' }}
+    >
+      <div
+        className="absolute pointer-events-none"
+        style={{ width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 70%)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}
+      />
 
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-14">
-          <div className="pricing-label flex items-center gap-3 mb-6">
-            <span className="w-6 h-px bg-gold opacity-60" />
-            <span className="font-inter text-text-muted text-xs tracking-[0.25em] uppercase">Стоимость</span>
-          </div>
-          <h2 className="pricing-title font-syne font-bold text-text-primary" style={{ fontSize: 'clamp(36px, 5vw, 64px)' }}>
-            Прозрачные цены.<br />
-            <span className="text-gradient-gold font-cormorant italic font-normal">Без скрытых платежей</span>
-          </h2>
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="pricing-eyebrow flex items-center gap-3 mb-8">
+          <span className="w-6 h-px opacity-60" style={{ background: 'var(--gold)' }} />
+          <span className="font-inter text-text-muted text-xs tracking-[0.25em] uppercase">Стоимость</span>
         </div>
 
-        <div className="pricing-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <h2
+          className="pricing-head font-syne font-bold text-text-primary mb-20 lg:mb-28"
+          style={{ fontSize: 'clamp(40px, 6vw, 82px)', lineHeight: 1.05 }}
+        >
+          Прозрачные цены.<br />
+          <span className="font-cormorant italic font-normal text-gradient-gold">Без скрытых платежей</span>
+        </h2>
+
+        {/* Pricing as editorial rows */}
+        <div className="pricing-rows">
           {plans.map((plan, i) => (
             <div
               key={i}
-              className={`pricing-card relative rounded-2xl p-6 flex flex-col transition-all duration-300 group hover:-translate-y-1.5 opacity-0 ${plan.recommended ? 'glow-gold' : ''}`}
-              style={{
-                background: plan.recommended ? 'var(--surface-hover)' : 'var(--surface)',
-                border: plan.recommended ? '1px solid rgba(201,168,124,0.3)' : '1px solid var(--border)',
-              }}
+              className="pricing-row opacity-0 group"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' }}
             >
-              {plan.recommended && (
-                <>
-                  <div className="recommended-glow absolute inset-0 rounded-2xl pointer-events-none opacity-0" style={{ background: 'radial-gradient(ellipse at center, rgba(201,168,124,0.08) 0%, transparent 70%)' }} />
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="font-inter text-xs font-semibold px-3 py-1 rounded-full text-bg-primary bg-gold">
-                      Популярный
+              <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr_auto] gap-6 lg:gap-12 items-start">
+
+                {/* Plan name + time */}
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="font-inter text-xs tracking-[0.25em] uppercase" style={{ color: 'var(--text-muted)' }}>
+                      {plan.name}
                     </span>
+                    {plan.recommended && (
+                      <span className="font-inter text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(201,168,124,0.15)', color: 'var(--gold)', border: '1px solid rgba(201,168,124,0.25)' }}>
+                        Популярный
+                      </span>
+                    )}
                   </div>
-                </>
-              )}
-
-              <div className="mb-5 pt-2">
-                <div className="font-inter text-xs text-text-muted tracking-widest uppercase mb-2">{plan.name}</div>
-                <div className="font-syne font-bold text-text-primary text-2xl mb-1">{plan.price} ₽</div>
-                <div className="font-inter text-xs text-gold">{plan.time}</div>
-              </div>
-
-              <p className="font-inter text-text-muted text-xs leading-relaxed mb-5">{plan.desc}</p>
-
-              <div className="space-y-2 mb-6 flex-1">
-                {plan.features.map((f, j) => (
-                  <div key={j} className="flex items-center gap-2">
-                    <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: plan.recommended ? 'var(--gold)' : 'var(--text-muted)' }} />
-                    <span className="font-inter text-text-muted text-xs">{f}</span>
+                  <div
+                    className="font-syne font-bold"
+                    style={{ fontSize: 'clamp(34px, 4vw, 56px)', lineHeight: 1.0, color: plan.recommended ? 'var(--gold)' : 'var(--text-primary)' }}
+                  >
+                    {plan.price} ₽
                   </div>
-                ))}
-              </div>
+                  <div className="font-inter text-sm mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                    {plan.time}
+                  </div>
+                </div>
 
-              <button
-                className={`w-full py-3 rounded-xl text-sm font-inter font-medium transition-all duration-300 ${
-                  plan.recommended
-                    ? 'bg-gold text-bg-primary hover:bg-[#d9b88c]'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                }`}
-                style={{ border: plan.recommended ? 'none' : '1px solid var(--border)' }}
-                onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Выбрать
-              </button>
+                {/* Features */}
+                <div>
+                  <p className="font-inter text-sm leading-relaxed mb-5" style={{ color: 'var(--text-muted)', maxWidth: '340px' }}>
+                    {plan.desc}
+                  </p>
+                  <div className="flex flex-wrap gap-x-6 gap-y-2">
+                    {plan.features.map((f, j) => (
+                      <span key={j} className="font-inter text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        — {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="flex items-start lg:pt-1">
+                  <button
+                    className="group/btn inline-flex items-center gap-2 font-inter text-sm transition-all duration-300"
+                    style={{
+                      color: plan.recommended ? 'var(--gold)' : 'var(--text-muted)',
+                      paddingBottom: '2px',
+                      borderBottom: plan.recommended ? '1px solid rgba(201,168,124,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                    }}
+                    onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    Выбрать
+                    <ArrowRight size={14} className="transition-transform duration-200 group-hover/btn:translate-x-1" />
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
-        </div>
 
-        <p className="text-center font-inter text-text-muted text-sm mt-8">
-          Финальная стоимость зависит от объёма задачи —{' '}
-          <button
-            className="text-gold hover:text-[#d9b88c] underline underline-offset-2 transition-colors duration-200"
-            onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            обсудим за 15 минут
-          </button>
-        </p>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '24px' }}>
+            <p className="font-inter text-text-muted text-sm">
+              Финальная стоимость зависит от объёма задачи —{' '}
+              <button
+                className="text-gold hover:text-[#d9b88c] underline underline-offset-2 transition-colors duration-200"
+                onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                обсудим за 15 минут
+              </button>
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )

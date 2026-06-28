@@ -1,93 +1,74 @@
 import React, { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin'
-import { MessageSquare, Lightbulb, Code2, Rocket } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const steps = [
   {
-    icon: MessageSquare,
     num: '01',
     title: 'Вы рассказываете',
-    desc: 'Пишите в свободной форме о бизнесе, задачах и пожеланиях. 15 минут разговора — и я понимаю всё что нужно.',
+    desc: 'Пишите в свободной форме о бизнесе, задачах и пожеланиях. 15 минут разговора — и я понимаю всё, что нужно.',
     time: '15 минут',
   },
   {
-    icon: Lightbulb,
     num: '02',
     title: 'Я предлагаю концепцию',
-    desc: 'Структура сайта, стиль и черновые тексты — готовы в течение 24 часов. Вы видите направление до старта.',
+    desc: 'Структура сайта, стиль и черновые тексты — готовы в течение 24 часов. Вы видите направление до старта работ.',
     time: '24 часа',
   },
   {
-    icon: Code2,
     num: '03',
     title: 'Разработка',
     desc: 'Создаю сайт на чистом коде. Вы можете следить за процессом и вносить правки напрямую — без посредников.',
     time: '1–4 дня',
   },
   {
-    icon: Rocket,
     num: '04',
     title: 'Сдача и запуск',
-    desc: 'Размещение на хостинге, подключение домена, инструкция. Готов к работе — гарантия навсегда.',
+    desc: 'Размещение на хостинге, подключение домена, видеоинструкция. Готов к работе — гарантия навсегда.',
     time: 'День 5',
   },
 ]
 
 export default function Process() {
   const sectionRef = useRef<HTMLElement>(null)
-  const lineRef = useRef<SVGPathElement>(null)
+  const lineRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.process-label',
+      gsap.fromTo('.process-eyebrow',
         { opacity: 0, x: -20 },
-        { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out',
-          scrollTrigger: { trigger: '.process-label', start: 'top 85%' } }
+        { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: '.process-eyebrow', start: 'top 85%' } }
       )
-      gsap.fromTo('.process-title',
+      gsap.fromTo('.process-head',
         { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: '.process-title', start: 'top 85%' } }
+        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: '.process-head', start: 'top 85%' } }
       )
 
-      // Animate line drawing
+      // Line draws downward on scroll
       if (lineRef.current) {
-        const len = lineRef.current.getTotalLength()
-        gsap.set(lineRef.current, { strokeDasharray: len, strokeDashoffset: len })
-        gsap.to(lineRef.current, {
-          strokeDashoffset: 0,
-          duration: 2,
-          ease: 'power2.inOut',
-          scrollTrigger: {
-            trigger: '.process-timeline',
-            start: 'top 70%',
-            end: 'bottom 30%',
-            scrub: 1,
-          },
-        })
+        gsap.fromTo(lineRef.current,
+          { scaleY: 0, transformOrigin: 'top center' },
+          {
+            scaleY: 1, ease: 'none',
+            scrollTrigger: {
+              trigger: '.process-timeline',
+              start: 'top 75%',
+              end: 'bottom 50%',
+              scrub: 1,
+            },
+          }
+        )
       }
 
-      // Steps animate in sequence
+      // Steps stagger in
       steps.forEach((_, i) => {
-        gsap.fromTo(`.process-step-${i}`,
-          { opacity: 0, x: i % 2 === 0 ? -40 : 40, scale: 0.95 },
+        gsap.fromTo(`.proc-step-${i}`,
+          { opacity: 0, x: -40 },
           {
-            opacity: 1, x: 0, scale: 1,
-            duration: 0.8, ease: 'power3.out',
-            scrollTrigger: {
-              trigger: `.process-step-${i}`,
-              start: 'top 80%',
-              onEnter: () => {
-                gsap.fromTo(`.step-icon-${i}`,
-                  { scale: 0, rotate: -20 },
-                  { scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2)', delay: 0.2 }
-                )
-              }
-            }
+            opacity: 1, x: 0, duration: 0.8, ease: 'power3.out', delay: i * 0.08,
+            scrollTrigger: { trigger: `.proc-step-${i}`, start: 'top 84%', once: true },
           }
         )
       })
@@ -97,81 +78,93 @@ export default function Process() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="process" className="section-padding relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
-      <div className="orb absolute w-[600px] h-[600px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 70%)', bottom: '-10%', left: '-5%' }} />
+    <section
+      ref={sectionRef}
+      id="process"
+      className="section-padding relative overflow-hidden"
+      style={{ background: 'var(--bg-primary)' }}
+    >
+      <div
+        className="absolute pointer-events-none"
+        style={{ width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 70%)', bottom: '-5%', left: '-5%' }}
+      />
 
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-16">
-          <div className="process-label flex items-center gap-3 mb-6">
-            <span className="w-6 h-px bg-gold opacity-60" />
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="mb-20 lg:mb-28">
+          <div className="process-eyebrow flex items-center gap-3 mb-8">
+            <span className="w-6 h-px opacity-60" style={{ background: 'var(--gold)' }} />
             <span className="font-inter text-text-muted text-xs tracking-[0.25em] uppercase">Как это работает</span>
           </div>
-          <h2 className="process-title font-syne font-bold text-text-primary" style={{ fontSize: 'clamp(36px, 5vw, 64px)' }}>
+          <h2
+            className="process-head font-syne font-bold text-text-primary"
+            style={{ fontSize: 'clamp(40px, 6vw, 82px)', lineHeight: 1.05 }}
+          >
             Просто. Быстро.<br />
-            <span className="text-gradient-gold font-cormorant italic font-normal">Без лишних движений</span>
+            <span className="font-cormorant italic font-normal text-gradient-gold">Без лишних движений</span>
           </h2>
         </div>
 
         {/* Timeline */}
-        <div className="process-timeline relative">
-          {/* SVG connecting line (desktop) */}
-          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 pointer-events-none" style={{ transform: 'translateX(-50%)' }}>
-            <svg width="2" height="100%" style={{ position: 'absolute', left: 0 }}>
-              <path
-                ref={lineRef}
-                d="M 1 0 L 1 10000"
-                stroke="rgba(201,168,124,0.3)"
-                strokeWidth="1"
-                fill="none"
+        <div className="process-timeline relative pl-10 lg:pl-20">
+          {/* Vertical line */}
+          <div
+            ref={lineRef}
+            className="absolute top-0 bottom-0"
+            style={{ left: '0', width: '1px', background: 'linear-gradient(to bottom, rgba(201,168,124,0.5), rgba(201,168,124,0.15), transparent)' }}
+          />
+
+          {steps.map((step, i) => (
+            <div
+              key={i}
+              className={`proc-step-${i} relative opacity-0`}
+              style={{ paddingBottom: i < steps.length - 1 ? 'clamp(56px, 8vw, 100px)' : '0' }}
+            >
+              {/* Dot */}
+              <div
+                className="absolute -left-10 lg:-left-20 w-2.5 h-2.5 rounded-full"
+                style={{
+                  top: '10px',
+                  left: '-5px',
+                  background: 'var(--bg-primary)',
+                  border: '1px solid rgba(201,168,124,0.6)',
+                  boxShadow: '0 0 12px rgba(201,168,124,0.25)',
+                }}
               />
-            </svg>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            {steps.map((step, i) => {
-              const Icon = step.icon
-              const isRight = i % 2 !== 0
-
-              return (
-                <div
-                  key={i}
-                  className={`process-step-${i} ${isRight ? 'lg:col-start-2' : ''} opacity-0`}
+              {/* Step meta */}
+              <div className="flex items-center gap-4 mb-4">
+                <span
+                  className="font-inter text-xs tracking-[0.3em] uppercase"
+                  style={{ color: 'rgba(201,168,124,0.5)' }}
                 >
-                  <div
-                    className="relative p-7 rounded-2xl hover:border-[rgba(201,168,124,0.2)] transition-all duration-500 group"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-                  >
-                    {/* Step number */}
-                    <div className="absolute -top-4 left-7">
-                      <span className="font-syne font-bold text-xs tracking-[0.2em] text-text-muted px-3 py-1 rounded-full" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-                        {step.num}
-                      </span>
-                    </div>
+                  {step.num}
+                </span>
+                <span className="w-8 h-px" style={{ background: 'rgba(201,168,124,0.2)' }} />
+                <span
+                  className="font-inter text-xs tracking-[0.2em] uppercase"
+                  style={{ color: 'var(--gold)' }}
+                >
+                  {step.time}
+                </span>
+              </div>
 
-                    {/* Icon */}
-                    <div className={`step-icon-${i} flex items-center justify-center w-12 h-12 rounded-xl mb-5`} style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)' }}>
-                      <Icon size={22} className="text-gold" strokeWidth={1.5} />
-                    </div>
+              {/* Title */}
+              <h3
+                className="font-syne font-bold text-text-primary mb-4"
+                style={{ fontSize: 'clamp(26px, 3.2vw, 44px)', lineHeight: 1.1 }}
+              >
+                {step.title}
+              </h3>
 
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="font-syne font-bold text-text-primary text-lg mb-2 group-hover:text-white transition-colors duration-300">{step.title}</h3>
-                        <p className="font-inter text-text-muted text-sm leading-relaxed">{step.desc}</p>
-                      </div>
-                    </div>
-
-                    {/* Time badge */}
-                    <div className="mt-5 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
-                      <span className="font-inter text-xs text-gold tracking-widest uppercase">{step.time}</span>
-                    </div>
-
-                    {/* Hover glow */}
-                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(201,168,124,0.03) 0%, transparent 70%)' }} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+              {/* Description */}
+              <p
+                className="font-inter text-text-muted leading-relaxed"
+                style={{ fontSize: '16px', maxWidth: '480px' }}
+              >
+                {step.desc}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
