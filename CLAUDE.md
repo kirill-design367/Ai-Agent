@@ -1,0 +1,82 @@
+# CLAUDE.md — контекст проекта AUREA Studio
+
+> Памятка для Claude Code. Читается автоматически при старте сессии.
+
+## Что это
+
+Премиальный кинематографический сайт веб-студии одного мастера (делает сайты
+за 1–5 дней на чистом коде). Главный проект репо. Приложение — в `studio/`.
+
+## Текущее состояние (НЕ начинать с нуля)
+
+Сайт уже собран целиком — **10 сцен**: Hero → Боль → Процесс → Что получаете →
+Цены → Портфолио → Сравнение → Отзывы → FAQ → Финал, + прелоадер + плавающая
+кнопка мессенджера. Задеплоен на GitHub Pages (корень):
+**https://kirill-design367.github.io/Ai-Agent/**
+
+Запуск:
+```bash
+cd studio && npm install && npm run dev   # http://localhost:3000
+NEXT_PUBLIC_BASE_PATH=/Ai-Agent npm run build   # прод-экспорт для Pages → out/
+```
+
+## Стек
+
+Next.js 15 · React 19 · React-Three-Fiber · GSAP (ScrollTrigger/SplitText) ·
+Lenis · Tailwind · TypeScript. Студийный кит переиспользуемых компонентов — в
+`studio/components/kit/` (SmoothScroll, CustomCursor, MagneticTargets, Reveal,
+SplitReveal, GrainOverlay, ScrollProgress, Preloader, MessengerFab).
+
+## Дизайн-направление
+
+- Палитра: **люкс-чёрный** (монохром). Акцент = ink/white, меняется одной
+  переменной `--accent` в `studio/app/globals.css`. Тёмные сцены — класс
+  `.theme-dark` (авто-инверсия).
+- Дизайн-токены (цвет, шкала, тени, easing) — в `studio/app/globals.css`.
+- Шрифты с кириллицей: Playfair Display (display) × Manrope (body).
+- Мобильный приоритет 50/50 — всё адаптивно, «вау» на телефоне и десктопе.
+
+## ГЛАВНАЯ ЗАДАЧА СЛЕДУЮЩЕЙ СЕССИИ: кинематографический проход
+
+Клиент сказал, что текстовые сцены вышли **слишком сдержанно** — нужно
+**динамичнее, как в референсах**. Подними сцены до Awwwards-уровня, активно
+используя установленные скилы:
+- **gsap-scrolltrigger** — переходы между сценами, scrub, пиннинг, scroll-театр.
+- **threejs-*** (10 модулей) — обогатить Hero/Портфолио 3D, шейдеры, свет, постобработка.
+- **motion-design**, **animation-principles**, **color-motion** — режиссура движения.
+- **premium-ui**, **frontend-design**, **ui-ux-pro-max** — премиальная подача, микровзаимодействия.
+
+Конкретно: переходы между сценами (curtain/морф, не стык), живые фоны/свет в
+текстовых сценах, Портфолио → scroll-театр с параллаксом и мокапами устройств,
+богаче Hero, кинетика заголовков.
+
+## Эталоны (всегда сверяться)
+
+Сайты-референсы клиента (Awwwards-уровень): **goodie.work** (OGL/Three/GLSL,
+кастомный фреймворк, page-transitions), **3d-portfolio** (Next+R3F+Lenis,
+премиум-кит), **mojito** (GSAP SplitText + video-scrub + pin), **isladjan
+parallax** (SVG-слои + scrub-морф), **ARISTIDE** (тёмный фотопортфолио).
+Их код изучался — это целевая планка.
+
+## Памятка вкуса
+
+`docs/aurea-bible/` — AUREA Design Bible (философия, моушн, драматургия, UI,
+122 техники, правила). Это **ориентир вкуса**, не догма: приоритет — пожелания
+клиента и уровень референсов. Конкретные техники брать из установленных скилов.
+
+## Ассеты (готовы, в studio/public/)
+
+- `hero/macbook-to-iphone.mp4` — морф по скроллу (Hero). `hero/macbook-close.mp4`
+  — запасное видео закрытия (пока не используется).
+- `hero/macbook-still.jpg`, `hero/iphone-still.jpg` — постеры.
+- `work/case-1..6` — 6 реальных кейсов (Volume, Aristide, Анна Рыковская,
+  Garden Eight, Dream.doll, Web3).
+- Отзывы — пока плейсхолдеры (реальных нет), слоты готовы под замену.
+
+## Деплой
+
+GitHub Pages из ветки `gh-pages` (корень). Workflow `.github/workflows/
+deploy-pages.yml` запускается **вручную с дефолтной ветки**
+(`claude/ai-voice-calling-bot-czoaot`) — окружение Pages пускает только её.
+Сборку (`NEXT_PUBLIC_BASE_PATH=/Ai-Agent`) кладут в корень `gh-pages`, затем
+триггерят workflow.
