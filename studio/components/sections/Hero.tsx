@@ -1,12 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import SplitReveal from "@/components/kit/SplitReveal";
-
-// R3F/WebGL is client-only — never SSR the canvas.
-const HeroCanvas = dynamic(() => import("@/components/three/HeroCanvas"), {
-  ssr: false,
-});
+import HeroVideo from "@/components/three/HeroVideo";
 
 /*
   HERO — wow-first (user's directive), cinematic 3D device + bold MIXED
@@ -35,7 +30,7 @@ export default function Hero() {
           overflow: "hidden",
         }}
       >
-        <HeroCanvas />
+        <HeroVideo />
 
         <div
           style={{

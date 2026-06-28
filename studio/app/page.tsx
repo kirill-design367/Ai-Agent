@@ -9,6 +9,7 @@ import Process from "@/components/sections/Process";
 import Value from "@/components/sections/Value";
 import Pricing from "@/components/sections/Pricing";
 import Comparison from "@/components/sections/Comparison";
+import Portfolio from "@/components/sections/Portfolio";
 
 /*
   Page shell = the studio "engine" assembled. Sections drop in below Hero as we
@@ -29,24 +30,10 @@ export default function Home() {
         <Process />
         <Value />
         <Pricing />
+        <Portfolio />
         <Comparison />
 
-        {/* Placeholder for the next scenes — replaced as we build them. */}
-        <section
-          id="work"
-          style={{
-            minHeight: "100vh",
-            display: "grid",
-            placeItems: "center",
-            padding: "var(--space-5xl) var(--space-xl)",
-          }}
-        >
-          <p style={{ color: "var(--text-secondary)", textAlign: "center" }}>
-            Следующие сцены (Боль → Процесс → Портфолио → … → Финал)
-            <br />
-            собираются здесь по мере готовности анимаций.
-          </p>
-        </section>
+        {/* Next: Отзывы → FAQ → Финал */}
       </main>
     </SmoothScroll>
   );
