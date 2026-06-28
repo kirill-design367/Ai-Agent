@@ -18,6 +18,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
+      className="theme-dark"
       style={{
         position: "relative",
         height: "200vh", // scroll room for the device open/spin rig

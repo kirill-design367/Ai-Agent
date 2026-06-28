@@ -7,13 +7,13 @@
 */
 :root {
   /* — Neutral base (light theme — primary). Warm, never sterile #fff (IV.8.1) */
-  --bg-base: #faf8f4;
+  --bg-base: #f4f3f0;
   --bg-elevated: #ffffff;
-  --bg-sunken: #f1eee8;
-  --bg-dark: #0f0f11;
-  --bg-dark-2: #17171a;
-  --border-soft: #e7e3db;
-  --border-strong: #d4cfc4;
+  --bg-sunken: #eceae5;
+  --bg-dark: #0a0a0b;
+  --bg-dark-2: #141417;
+  --border-soft: #e4e1da;
+  --border-strong: #cfcabf;
 
   /* — Text (never pure #000 on #fff — IV.2.6) */
   --text-primary: #16161a;
@@ -21,10 +21,12 @@
   --text-tertiary: #9a9aa3;
   --text-on-dark: #f4f2ee;
 
-  /* — Accent: ONE, used sparingly (60-30-10). Default = warm premium bronze.
-       Switch this single value to retheme the whole site (IV.8.3). */
-  --accent: #b8763e;
-  --accent-soft: rgba(184, 118, 62, 0.15);
+  /* — Accent: luxe-neutral (IV.8.3) — the accent IS deep ink / monochrome
+       contrast. --accent = fill, --accent-ink = text/icon ON that fill.
+       In .theme-dark these flip (white becomes the contrast). */
+  --accent: #121214;
+  --accent-ink: #f7f6f3;
+  --accent-soft: rgba(18, 18, 20, 0.12);
 
   /* — Semantic (muted, never #FF0000 — IV.8.5) */
   --success: #4a7c59;
@@ -80,6 +82,27 @@
   --dur-micro: 0.2s;
   --dur-reveal: 0.8s;
   --dur-cinema: 1.2s;
+}
+
+/*
+  Dark scenes (Hero, Боль, Портфолио-кульминация). Alternating light↔dark is
+  the drama engine (Bible III/VI.135). On dark, white becomes the accent so
+  black-fill CTAs invert to white-fill automatically — no per-element overrides.
+*/
+.theme-dark {
+  --bg-base: #0a0a0b;
+  --bg-elevated: #141417;
+  --bg-sunken: #050506;
+  --text-primary: #f4f2ee;
+  --text-secondary: rgba(244, 242, 238, 0.62);
+  --text-tertiary: rgba(244, 242, 238, 0.4);
+  --border-soft: rgba(244, 242, 238, 0.12);
+  --border-strong: rgba(244, 242, 238, 0.22);
+  --accent: #f4f2ee;
+  --accent-ink: #0a0a0b;
+  --accent-soft: rgba(244, 242, 238, 0.16);
+  color: var(--text-primary);
+  background: var(--bg-base);
 }
 
 /* Expose tokens to Tailwind v4 utilities */
@@ -149,20 +172,22 @@ html.lenis body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   opacity: 0;
-  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
-  mix-blend-mode: multiply;
+  background: transparent;
+  border: 1.5px solid #ffffff;
+  /* difference blend = monochrome ring readable on both light and black */
+  mix-blend-mode: difference;
   transition: width 0.25s var(--ease-expo), height 0.25s var(--ease-expo),
     opacity 0.3s ease;
 }
 .cursor-halo[data-hover="true"] {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
 }
 
 /* — Magnetic targets (kit/MagneticTargets.tsx) read these CSS vars. */
@@ -214,7 +239,7 @@ html.lenis body {
 }
 .btn--primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   box-shadow: var(--shadow-md);
 }
 .btn--primary:hover {

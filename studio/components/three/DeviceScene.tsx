@@ -45,13 +45,13 @@ export default function DeviceScene({ scroll }: { scroll: { current: number } })
           <boxGeometry args={[3, 2, 0.1]} />
           <meshStandardMaterial color="#0f0f11" metalness={0.7} roughness={0.35} />
         </mesh>
-        {/* screen face */}
+        {/* screen face — neutral luxe glow (swap for live site texture later) */}
         <mesh position={[0, 1, 0.06]}>
           <planeGeometry args={[2.8, 1.8]} />
           <meshStandardMaterial
-            color="#b8763e"
-            emissive="#b8763e"
-            emissiveIntensity={0.35}
+            color="#e9e8e6"
+            emissive="#e9e8e6"
+            emissiveIntensity={0.22}
             metalness={0.1}
             roughness={0.6}
           />
