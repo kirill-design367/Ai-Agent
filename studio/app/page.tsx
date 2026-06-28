@@ -6,6 +6,7 @@ import ScrollProgress from "@/components/kit/ScrollProgress";
 import Hero from "@/components/sections/Hero";
 import Pain from "@/components/sections/Pain";
 import Process from "@/components/sections/Process";
+import Value from "@/components/sections/Value";
 
 /*
   Page shell = the studio "engine" assembled. Sections drop in below Hero as we
@@ -24,6 +25,7 @@ export default function Home() {
         <Hero />
         <Pain />
         <Process />
+        <Value />
 
         {/* Placeholder for the next scenes — replaced as we build them. */}
         <section
