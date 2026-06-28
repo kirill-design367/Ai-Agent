@@ -4,6 +4,7 @@ import MagneticTargets from "@/components/kit/MagneticTargets";
 import GrainOverlay from "@/components/kit/GrainOverlay";
 import ScrollProgress from "@/components/kit/ScrollProgress";
 import Hero from "@/components/sections/Hero";
+import Pain from "@/components/sections/Pain";
 
 /*
   Page shell = the studio "engine" assembled. Sections drop in below Hero as we
@@ -20,6 +21,7 @@ export default function Home() {
 
       <main>
         <Hero />
+        <Pain />
 
         {/* Placeholder for the next scenes — replaced as we build them. */}
         <section
