@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Ai-Agent/aurea/',
+  base: '/Ai-Agent/',
   build: {
     outDir: '../aurea',
     emptyOutDir: true,
