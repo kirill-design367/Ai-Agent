@@ -1,6 +1,7 @@
 "use client";
 
 import Reveal from "@/components/kit/Reveal";
+import { asset } from "@/lib/asset";
 
 /*
   ПОРТФОЛИО — кульминация (Bible III.7). Full-bleed cinematic cases, NOT a card
@@ -92,7 +93,7 @@ export default function Portfolio() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={c.img}
+                  src={asset(c.img)}
                   alt={c.title}
                   loading="lazy"
                   className="case-img"

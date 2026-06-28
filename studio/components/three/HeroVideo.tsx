@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, registerGsap } from "@/lib/gsap";
+import { asset } from "@/lib/asset";
 
 /*
   Hero video scroll-scrub (Bible technique #74, mojito pattern). The MacBook→
@@ -42,8 +43,8 @@ export default function HeroVideo() {
   return (
     <video
       ref={videoRef}
-      src="/hero/macbook-to-iphone.mp4"
-      poster="/hero/macbook-still.jpg"
+      src={asset("/hero/macbook-to-iphone.mp4")}
+      poster={asset("/hero/macbook-still.jpg")}
       muted
       playsInline
       preload="auto"
