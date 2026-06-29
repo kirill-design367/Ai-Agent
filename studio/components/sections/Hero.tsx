@@ -98,18 +98,16 @@ export default function Hero() {
       <div className="hero-main">
         <h1 className="hero-headline">
           <span className="line">
-            <span className="inner">Сайт за</span>
+            <span className="inner">Первое впечатление</span>
           </span>
           <span className="line">
-            <span className="inner">
-              1–5&nbsp;<em>дней</em>
-            </span>
+            <span className="inner">невозможно повторить</span>
           </span>
         </h1>
 
         <p className="hero-sub" data-hero-fade>
-          Уникальный дизайн на чистом коде. Без шаблонов, без посредников,
-          с&nbsp;пожизненной гарантией. <strong>От 30&nbsp;000&nbsp;₽.</strong>
+          Поэтому мы создаём сайты, которые вызывают доверие, выглядят дорого
+          и&nbsp;помогают бизнесу расти.
         </p>
 
         <div className="hero-cta-row" data-hero-fade>

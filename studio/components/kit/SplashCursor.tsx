@@ -1147,13 +1147,12 @@ export default function SplashCursor({
     }
 
     function generateColor(): ColorRGB {
-      // Luxe-mono palette: warm gold / champagne, not rainbow. Hue stays in the
-      // gold band with low saturation so the fluid reads as light, not colour.
-      const hue = 0.1 + Math.random() * 0.04; // ~36–50° (gold)
-      const c = HSVtoRGB(hue, 0.35 + Math.random() * 0.25, 1.0);
-      c.r *= 0.18;
-      c.g *= 0.15;
-      c.b *= 0.12;
+      // Monochrome: soft white / silver smoke, no colour (luxe black & white).
+      const c = HSVtoRGB(0, 0, 1.0); // pure white
+      const k = 0.13 + Math.random() * 0.05;
+      c.r *= k;
+      c.g *= k;
+      c.b *= k;
       return c;
     }
 

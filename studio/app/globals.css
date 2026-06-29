@@ -330,7 +330,7 @@ html.lenis body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--text-on-dark);
 }
 .hero-ping span:first-child {
   animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
@@ -349,13 +349,15 @@ html.lenis body {
   pointer-events: none;
 }
 .hero-headline {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  font-size: clamp(3rem, 11vw, 11rem);
-  line-height: 0.92;
-  letter-spacing: -0.02em;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 6.4vw, 5.8rem);
+  line-height: 0.98;
+  letter-spacing: -0.018em;
+  text-transform: uppercase;
   color: var(--text-on-dark);
   margin: 0;
+  max-width: 18ch;
 }
 .hero-headline .line {
   display: block;
@@ -365,8 +367,8 @@ html.lenis body {
   display: block;
 }
 .hero-headline em {
-  font-style: italic;
-  color: var(--gold);
+  font-style: normal;
+  color: rgba(244, 242, 238, 0.45);
 }
 .hero-sub {
   max-width: 38ch;
@@ -423,7 +425,7 @@ html.lenis body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--text-on-dark);
 }
 
 /*
