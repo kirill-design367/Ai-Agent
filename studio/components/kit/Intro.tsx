@@ -26,6 +26,9 @@ export default function Intro() {
 
       const finish = () => {
         setLift(true);
+        // tell the Hero (and anything waiting) to begin as the curtain lifts
+        document.documentElement.classList.add("intro-done");
+        window.dispatchEvent(new Event("aurea:revealed"));
         window.setTimeout(() => setGone(true), 1100);
       };
 
