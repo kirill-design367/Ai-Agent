@@ -31,17 +31,21 @@ export default function Works() {
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
       cards.forEach((card, i) => {
         if (i === cards.length - 1) return;
-        gsap.to(card, {
-          scale: 0.92,
-          filter: "brightness(0.55)",
-          ease: "none",
+        const shade = card.querySelector(".work-shade");
+        // transform + opacity only (no filter) → no flicker, fully smooth
+        const tl = gsap.timeline({
           scrollTrigger: {
             trigger: cards[i + 1],
             start: "top bottom",
             end: "top top",
-            scrub: true,
+            scrub: 0.6,
           },
         });
+        tl.to(card, { scale: 0.94, ease: "none" }, 0).to(
+          shade,
+          { opacity: 0.55, ease: "none" },
+          0
+        );
       });
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
@@ -88,6 +92,7 @@ export default function Works() {
             </span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={asset(c.img)} alt={c.title} loading="lazy" />
+            <div className="work-shade" aria-hidden />
             <div className="work-cap">
               <h3>{c.title}</h3>
               <span className="meta">{c.meta}</span>

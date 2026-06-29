@@ -3,57 +3,63 @@
 import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, registerGsap } from "@/lib/gsap";
+import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 
-// WebGL fluid cursor (signature) — client-only, desktop-only (CSS-gated).
 const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
   ssr: false,
 });
 
 /*
-  HERO — the thesis (frontend-design): dark, a gold fluid cursor as the one
-  signature, a kinetic display headline that states the promise, a spinning
-  "обсудить" badge. Entrance is held until the intro curtain lifts (listens for
-  the `aurea:revealed` event), so the reveal is actually seen.
+  HERO — отвечает на вопрос клиента: «Вы делаете то, что мне нужно?»
+  Буквы заголовка чуть разбросаны (хаос); когда уходит интро, они мягко встают
+  на места — «из хаоса рождается система». Фишки вместо бейджа доступности.
 */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+  const headline = useRef<HTMLHeadingElement>(null);
 
   useGSAP(
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const inners = gsap.utils.toArray<HTMLElement>(".hero-headline .inner");
       const fades = gsap.utils.toArray<HTMLElement>("[data-hero-fade]");
+      // words+chars so words never break mid-line (chars animate, words stay whole)
+      const split = new SplitText(headline.current!, { type: "words,chars" });
 
       if (reduce) {
-        gsap.set([inners, fades], { clearProps: "all" });
+        gsap.set([split.chars, fades], { clearProps: "all" });
         return;
       }
 
-      gsap.set(inners, { yPercent: 115 });
+      // chaos: each letter nudged a few px, slightly rotated, dimmed
+      gsap.set(split.chars, {
+        x: () => gsap.utils.random(-9, 9),
+        y: () => gsap.utils.random(-11, 11),
+        rotation: () => gsap.utils.random(-7, 7),
+        opacity: 0.55,
+      });
       gsap.set(fades, { opacity: 0, y: 24 });
 
       const play = () => {
         const tl = gsap.timeline();
-        tl.to(inners, {
-          yPercent: 0,
-          duration: 1.1,
+        // order: letters settle into place
+        tl.to(split.chars, {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          opacity: 1,
+          duration: 1.3,
           ease: "expo.out",
-          stagger: 0.12,
-        })
-          .to(
-            fades,
-            { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.1 },
-            "-=0.7"
-          );
+          stagger: { each: 0.018, from: "random" },
+        }).to(
+          fades,
+          { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.1 },
+          "-=0.8"
+        );
       };
 
-      if (document.documentElement.classList.contains("intro-done")) {
-        play();
-      } else {
-        window.addEventListener("aurea:revealed", play, { once: true });
-      }
+      if (document.documentElement.classList.contains("intro-done")) play();
+      else window.addEventListener("aurea:revealed", play, { once: true });
     },
     { scope: root }
   );
@@ -68,46 +74,16 @@ export default function Hero() {
         <span className="hero-mark" data-hero-fade>
           AUREA
         </span>
-        <span className="hero-avail" data-hero-fade>
-          <span className="hero-ping">
-            <span />
-            <span />
-          </span>
-          Свободен для нового проекта
-        </span>
       </div>
 
-      <a href="#contact" className="hero-spin" aria-label="Обсудить проект" data-cursor="hover">
-        <svg viewBox="0 0 120 120" className="ring">
-          <defs>
-            <path id="spinPath" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
-          </defs>
-          <text
-            fill="rgba(244,242,238,0.85)"
-            fontSize="9"
-            fontWeight="600"
-            letterSpacing="3.4"
-            fontFamily="var(--font-body), sans-serif"
-          >
-            <textPath href="#spinPath">ОБСУДИТЬ ПРОЕКТ · ОБСУДИТЬ ПРОЕКТ ·&nbsp;</textPath>
-          </text>
-        </svg>
-        <span className="dot" />
-      </a>
-
       <div className="hero-main">
-        <h1 className="hero-headline">
-          <span className="line">
-            <span className="inner">Первое впечатление</span>
-          </span>
-          <span className="line">
-            <span className="inner">невозможно повторить</span>
-          </span>
+        <h1 className="hero-headline" ref={headline}>
+          Первое впечатление невозможно повторить
         </h1>
 
         <p className="hero-sub" data-hero-fade>
-          Поэтому мы создаём сайты, которые вызывают доверие, выглядят дорого
-          и&nbsp;помогают бизнесу расти.
+          Поэтому мы создаём сайты, которые помогают бизнесу выделяться, вызывать
+          доверие и&nbsp;получать больше заявок.
         </p>
 
         <div className="hero-cta-row" data-hero-fade>
@@ -119,9 +95,11 @@ export default function Hero() {
           </a>
         </div>
 
-        <p className="hero-meta" data-hero-fade>
-          7 лет · 100+ проектов · от 1 дня · пожизненная гарантия
-        </p>
+        <ul className="hero-feats" data-hero-fade>
+          <li>Полностью под ключ</li>
+          <li>Индивидуальный дизайн</li>
+          <li>Пожизненная гарантия</li>
+        </ul>
       </div>
     </section>
   );

@@ -295,14 +295,23 @@ html.lenis body {
 }
 .work-card {
   position: sticky;
-  top: 10vh;
-  height: min(78vh, 760px);
+  top: 14vh;
+  height: min(64vh, 620px);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-xl);
   border: 1px solid rgba(244, 242, 238, 0.08);
   transform-origin: center top;
   will-change: transform;
+  backface-visibility: hidden;
+}
+.work-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #0a0a0b;
+  opacity: 0;
+  pointer-events: none;
 }
 .work-card img {
   position: absolute;
@@ -476,6 +485,25 @@ html.lenis body {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-tertiary);
+}
+.hero-feats {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.5rem, 1.4vw, 0.9rem);
+  margin: clamp(1.6rem, 4.5vh, 2.6rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hero-feats li {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.82);
+  border: 1px solid rgba(244, 242, 238, 0.22);
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.05rem;
 }
 /* spinning circular CTA badge */
 .hero-spin {
