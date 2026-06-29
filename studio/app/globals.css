@@ -370,15 +370,55 @@ html.lenis body {
   mix-blend-mode: difference;
 }
 
-/* — NEW HERO (reference-level: fluid cursor + kinetic type + spinning CTA) */
+/* — WORKS адаптив: узкие вертикальные карточки под телефон (а не широкий десктоп-скрин).
+   Ландшафтные скрины кропаются в портрет и привязаны к верху страницы кейса. */
+@media (max-width: 760px) {
+  .works {
+    padding: clamp(3rem, 8vh, 5rem) 1.1rem clamp(6rem, 16vh, 10rem);
+  }
+  .works-stack {
+    gap: 1.4rem;
+  }
+  .work-card {
+    height: auto;
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    top: 8vh;
+    border-radius: var(--radius-md);
+  }
+  .work-card img {
+    object-position: top center;
+  }
+  .work-cap {
+    left: 1.1rem;
+    right: 1.1rem;
+    bottom: 1.1rem;
+  }
+}
+
+/* — HERO — editorial «хаос по золотому сечению»: геометрия + кинетический шрифт.
+   12-колоночная сетка: марка/kicker сверху, заголовок ломаными строками слева,
+   подзаголовок справа-внизу, действие+фишки на нижней hairline-строке. Под фоном
+   живёт fluid-курсор (на телефоне реагирует на касание). Полностью адаптивно. */
 .hero {
   position: relative;
-  height: 100svh;
-  min-height: 640px;
+  min-height: 100svh;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 5vw, 4.5rem);
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  column-gap: clamp(0.8rem, 2vw, 1.8rem);
+  row-gap: clamp(1.4rem, 4vh, 3rem);
+  padding: clamp(1.4rem, 3.5vw, 2.8rem) clamp(1.4rem, 5vw, 4.5rem)
+    clamp(3.4rem, 7vh, 5rem);
+  isolation: isolate;
+}
+/* grid-дети не должны раздувать треки до min-content (иначе nowrap-заголовок
+   ломает ширину контейнера на телефоне) */
+.hero > * {
+  min-width: 0;
 }
 .hero-fluid {
   position: absolute;
@@ -386,159 +426,225 @@ html.lenis body {
   z-index: 0;
   opacity: 0.9;
 }
-@media (hover: none), (max-width: 900px) {
-  .hero-fluid {
-    display: none;
-  }
+
+/* геометрия бренда — контурный треугольник-A с точкой (эхо логотипа) */
+.hero-geo {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: clamp(-5rem, 1vw, 3rem);
+  width: clamp(240px, 36vw, 540px);
+  height: auto;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
+.hero-geo polygon,
+.hero-geo line {
+  fill: none;
+  stroke: rgba(244, 242, 238, 0.13);
+  stroke-width: 1;
+}
+.hero-geo circle {
+  fill: rgba(244, 242, 238, 0.42);
+  stroke: none;
+}
+
+/* верхняя hairline-строка: марка + индекс вопроса */
 .hero-top {
+  grid-column: 1 / -1;
+  grid-row: 1;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1.2rem;
+  border-top: 1px solid rgba(244, 242, 238, 0.16);
+  padding-top: 0.85rem;
   pointer-events: none;
 }
 .hero-mark {
   font-family: var(--font-geometric), system-ui, sans-serif;
   font-weight: 600;
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
-  letter-spacing: 0.04em;
+  font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+  letter-spacing: 0.06em;
   color: var(--text-on-dark);
 }
-.hero-avail {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.hero-mark sup {
+  font-size: 0.5em;
+  vertical-align: super;
+  opacity: 0.55;
+}
+.hero-kicker {
+  max-width: 24ch;
+  text-align: right;
   font-size: var(--text-xs);
-  letter-spacing: 0.22em;
+  letter-spacing: 0.13em;
+  line-height: 1.55;
   text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.7);
+  color: rgba(244, 242, 238, 0.6);
 }
-.hero-ping {
-  position: relative;
-  width: 7px;
-  height: 7px;
+.hero-kicker i {
+  font-style: normal;
+  color: var(--text-on-dark);
+  margin-right: 0.4em;
 }
-.hero-ping span {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--text-on-dark);
-}
-.hero-ping span:first-child {
-  animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-@keyframes ping {
-  75%,
-  100% {
-    transform: scale(2.6);
-    opacity: 0;
-  }
-}
-.hero-main {
+
+/* заголовок — ломаные строки по золотому сечению (кинетика хаос→система) */
+.hero-headline {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: end;
+  margin: 0;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 7vw, 6.6rem);
+  line-height: 1;
+  letter-spacing: -0.022em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
   position: relative;
   z-index: 2;
-  margin-top: auto;
-  pointer-events: none;
 }
-.hero-headline {
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-weight: 800;
-  font-size: clamp(2.2rem, 6.4vw, 5.8rem);
-  line-height: 0.98;
-  letter-spacing: -0.018em;
-  text-transform: uppercase;
-  color: var(--text-on-dark);
-  margin: 0;
-  max-width: 18ch;
-}
-.hero-headline .line {
+.hero-headline .hl-line {
   display: block;
-  overflow: hidden;
+  white-space: nowrap;
 }
-.hero-headline .inner {
-  display: block;
+.hero-headline .hl-b {
+  margin-left: 8vw;
 }
-.hero-headline em {
-  font-style: normal;
-  color: rgba(244, 242, 238, 0.45);
+.hero-headline .hl-c {
+  margin-left: 2.5vw;
+  color: rgba(244, 242, 238, 0.42);
 }
+.hero-headline .hl-d {
+  margin-left: 14vw;
+}
+
+/* подзаголовок — отдельная зона справа-внизу */
 .hero-sub {
-  max-width: 38ch;
-  margin-top: clamp(1.2rem, 3vh, 2rem);
+  grid-column: 7 / 13;
+  grid-row: 2;
+  align-self: start;
+  justify-self: end;
+  max-width: 34ch;
+  margin: 0 0 clamp(0.5rem, 2vh, 1.5rem);
+  font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--text-lg);
+  line-height: 1.5;
+  text-align: right;
   color: rgba(244, 242, 238, 0.72);
+  position: relative;
+  z-index: 2;
+}
+
+/* нижняя hairline-строка: действие + нумерованные фишки */
+.hero-foot {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  border-top: 1px solid rgba(244, 242, 238, 0.16);
+  padding-top: clamp(1rem, 2.5vh, 1.6rem);
+  /* правый отступ под плавающую кнопку «Написать», чтобы фишки её не задевали */
+  padding-right: clamp(0rem, 11vw, 9.5rem);
 }
 .hero-cta-row {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-md);
-  margin-top: clamp(1.5rem, 4vh, 2.5rem);
   pointer-events: auto;
 }
-.hero-meta {
-  position: relative;
-  z-index: 2;
-  margin-top: clamp(1.5rem, 4vh, 2.5rem);
-  font-size: var(--text-xs);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
 .hero-feats {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.5rem, 1.4vw, 0.9rem);
-  margin: clamp(1.6rem, 4.5vh, 2.6rem) 0 0;
+  gap: clamp(1.1rem, 3vw, 2.6rem);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 .hero-feats li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
   font-size: var(--text-xs);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: rgba(244, 242, 238, 0.82);
-  border: 1px solid rgba(244, 242, 238, 0.22);
-  border-radius: var(--radius-pill);
-  padding: 0.55rem 1.05rem;
 }
-/* spinning circular CTA badge */
-.hero-spin {
-  position: absolute;
-  right: clamp(1.5rem, 5vw, 4.5rem);
-  bottom: clamp(8rem, 24vh, 14rem);
-  z-index: 3;
-  width: 116px;
-  height: 116px;
-  display: none;
+.hero-feats li i {
+  font-style: normal;
+  font-size: 0.72em;
+  color: rgba(244, 242, 238, 0.4);
+  font-variant-numeric: tabular-nums;
 }
-@media (min-width: 900px) {
-  .hero-spin {
-    display: grid;
-    place-items: center;
+
+/* — HERO адаптив: вертикальный поток на телефоне, мягкие сдвиги вместо больших */
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    row-gap: clamp(1.6rem, 5vh, 2.6rem);
+    padding-bottom: 5.5rem;
   }
-}
-.hero-spin svg.ring {
-  position: absolute;
-  inset: 0;
-  animation: ctaspin 14s linear infinite;
-}
-.hero-spin:hover svg.ring {
-  animation-duration: 5s;
-}
-@keyframes ctaspin {
-  to {
-    transform: rotate(360deg);
+  .hero-geo {
+    top: 38%;
+    right: -18%;
+    width: 78vw;
   }
-}
-.hero-spin .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-on-dark);
+  .hero-top {
+    grid-column: 1;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .hero-kicker {
+    text-align: left;
+    max-width: 30ch;
+  }
+  .hero-headline {
+    grid-column: 1;
+    align-self: end;
+    font-size: clamp(1.7rem, 8.6vw, 2.6rem);
+    line-height: 1.02;
+  }
+  .hero-headline .hl-b {
+    margin-left: 1.4rem;
+  }
+  .hero-headline .hl-c {
+    margin-left: 0.5rem;
+  }
+  .hero-headline .hl-d {
+    margin-left: 2.4rem;
+  }
+  .hero-sub {
+    grid-column: 1;
+    justify-self: start;
+    align-self: start;
+    text-align: left;
+    max-width: 42ch;
+    margin-bottom: 0;
+    font-size: var(--text-base);
+  }
+  .hero-foot {
+    grid-column: 1;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.3rem;
+    padding-right: 0;
+  }
+  .hero-cta-row .btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+  .hero-feats {
+    gap: 0.9rem 1.6rem;
+  }
 }
 
 /*

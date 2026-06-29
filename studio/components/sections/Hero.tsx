@@ -11,8 +11,12 @@ const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
 
 /*
   HERO — отвечает на вопрос клиента: «Вы делаете то, что мне нужно?»
-  Буквы заголовка чуть разбросаны (хаос); когда уходит интро, они мягко встают
-  на места — «из хаоса рождается система». Фишки вместо бейджа доступности.
+
+  Композиция «хаос по золотому сечению»: заголовок не стоит ровным столбцом —
+  строки разбиты и сдвинуты по разным зонам экрана (0.382 / 0.618), вокруг —
+  геометрия бренда (контурный треугольник-A с точкой, hairline-сетка, kicker-
+  метки). Буквы заголовка чуть разбросаны (хаос); когда уходит интро, они мягко
+  встают на места — «из хаоса рождается система».
 */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
@@ -33,10 +37,10 @@ export default function Hero() {
 
       // chaos: each letter nudged a few px, slightly rotated, dimmed
       gsap.set(split.chars, {
-        x: () => gsap.utils.random(-9, 9),
-        y: () => gsap.utils.random(-11, 11),
-        rotation: () => gsap.utils.random(-7, 7),
-        opacity: 0.55,
+        x: () => gsap.utils.random(-14, 14),
+        y: () => gsap.utils.random(-16, 16),
+        rotation: () => gsap.utils.random(-9, 9),
+        opacity: 0.4,
       });
       gsap.set(fades, { opacity: 0, y: 24 });
 
@@ -48,13 +52,13 @@ export default function Hero() {
           y: 0,
           rotation: 0,
           opacity: 1,
-          duration: 1.3,
+          duration: 1.4,
           ease: "expo.out",
-          stagger: { each: 0.018, from: "random" },
+          stagger: { each: 0.016, from: "random" },
         }).to(
           fades,
-          { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.1 },
-          "-=0.8"
+          { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
+          "-=0.95"
         );
       };
 
@@ -70,22 +74,39 @@ export default function Hero() {
         <SplashCursor />
       </div>
 
-      <div className="hero-top">
+      {/* геометрия бренда: контурный треугольник-A с точкой */}
+      <svg className="hero-geo" viewBox="0 0 400 360" aria-hidden data-hero-fade>
+        <polygon points="200,24 376,336 24,336" />
+        <circle cx="200" cy="246" r="6" />
+        <line x1="200" y1="24" x2="200" y2="336" />
+      </svg>
+
+      {/* верхняя строка-сетка: марка + индекс вопроса */}
+      <header className="hero-top">
         <span className="hero-mark" data-hero-fade>
-          AUREA
+          AUREA<sup>®</sup>
         </span>
-      </div>
+        <span className="hero-kicker" data-hero-fade>
+          <i>(01)</i> Вы&nbsp;делаете то, что&nbsp;мне нужно?
+        </span>
+      </header>
 
-      <div className="hero-main">
-        <h1 className="hero-headline" ref={headline}>
-          Первое впечатление невозможно повторить
-        </h1>
+      {/* заголовок — ломаные строки по золотому сечению */}
+      <h1 className="hero-headline" ref={headline}>
+        <span className="hl-line hl-a">Первое</span>
+        <span className="hl-line hl-b">впечатление</span>
+        <span className="hl-line hl-c">невозможно</span>
+        <span className="hl-line hl-d">повторить</span>
+      </h1>
 
-        <p className="hero-sub" data-hero-fade>
-          Поэтому мы создаём сайты, которые помогают бизнесу выделяться, вызывать
-          доверие и&nbsp;получать больше заявок.
-        </p>
+      {/* подзаголовок — отдельная зона справа-внизу */}
+      <p className="hero-sub" data-hero-fade>
+        Поэтому мы&nbsp;создаём сайты, которые помогают бизнесу выделяться,
+        вызывать доверие и&nbsp;получать больше&nbsp;заявок.
+      </p>
 
+      {/* нижняя зона: действие + фишки на hairline-сетке */}
+      <div className="hero-foot">
         <div className="hero-cta-row" data-hero-fade>
           <a href="#contact" className="btn btn--primary" data-magnetic>
             Обсудить проект
@@ -96,9 +117,15 @@ export default function Hero() {
         </div>
 
         <ul className="hero-feats" data-hero-fade>
-          <li>Полностью под ключ</li>
-          <li>Индивидуальный дизайн</li>
-          <li>Пожизненная гарантия</li>
+          <li>
+            <i>01</i> Полностью под&nbsp;ключ
+          </li>
+          <li>
+            <i>02</i> Индивидуальный дизайн
+          </li>
+          <li>
+            <i>03</i> Пожизненная гарантия
+          </li>
         </ul>
       </div>
     </section>

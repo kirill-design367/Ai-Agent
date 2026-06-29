@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Manrope, Montserrat } from "next/font/google";
+import { Playfair_Display, Manrope, Montserrat, Unbounded } from "next/font/google";
 import "./globals.css";
 
 /*
@@ -31,6 +31,18 @@ const geometric = Montserrat({
   display: "swap",
 });
 
+/*
+  Headline face — Unbounded (Gogol's geometric display, ships full cyrillic).
+  Circular, characterful, distinctly "designed" — replaces the flat grotesk
+  the client found boring. Used only for the hero headline at large sizes.
+*/
+const headline = Unbounded({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-headline",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Сайт за 1–5 дней — красивый, быстрый, продающий",
   description:
@@ -45,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${display.variable} ${body.variable} ${geometric.variable}`}
+      className={`${display.variable} ${body.variable} ${geometric.variable} ${headline.variable}`}
     >
       <body>{children}</body>
     </html>
