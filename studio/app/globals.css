@@ -276,140 +276,163 @@ html.lenis body {
   }
 }
 
-/* — WORKS: бесконечная лента-баннер (две встречные строки кейсов в движении) */
-.worksm {
+/* — WORKS: бегущая лента-баннер (заголовок) + sticky stacking cinema */
+.works {
   position: relative;
   background: var(--bg-dark);
-  padding: clamp(2.4rem, 6vh, 4rem) 0 clamp(3rem, 8vh, 5.5rem);
+  padding: clamp(2.4rem, 6vh, 4rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
+}
+.works-banner {
+  position: relative;
   overflow: hidden;
+  margin: 0 0 clamp(2.5rem, 7vh, 5rem);
+  padding: clamp(1rem, 2.5vh, 1.8rem) 0;
+  border-top: 1px solid rgba(244, 242, 238, 0.14);
+  border-bottom: 1px solid rgba(244, 242, 238, 0.14);
 }
-.worksm-head {
+.works-ticker {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  max-width: 1500px;
-  margin: 0 auto clamp(1.6rem, 4vh, 2.6rem);
-  padding: 0 clamp(1.4rem, 5vw, 4.5rem);
-}
-.worksm-kicker {
-  font-size: var(--text-xs);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-.worksm-kicker--r {
-  color: rgba(244, 242, 238, 0.78);
-}
-.mq {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(0.8rem, 1.6vw, 1.4rem);
-}
-.mq-row {
-  display: flex;
-  gap: clamp(0.8rem, 1.6vw, 1.4rem);
   width: max-content;
-  will-change: transform;
+  animation: worksticker 26s linear infinite;
 }
-.mq-row--left {
-  animation: mqleft 48s linear infinite;
+.works-ticker span {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 5.4vw, 4.4rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
+  white-space: nowrap;
 }
-.mq-row--right {
-  animation: mqright 48s linear infinite;
+.works-ticker span i {
+  font-style: normal;
+  color: rgba(244, 242, 238, 0.38);
+  font-size: 0.6em;
 }
-.mq:hover .mq-row {
+.works:hover .works-ticker {
   animation-play-state: paused;
 }
-@keyframes mqleft {
+@keyframes worksticker {
   to { transform: translateX(-50%); }
 }
-@keyframes mqright {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
+.works-stack {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 6vh, 5rem);
 }
-.mq-card {
-  position: relative;
-  flex: 0 0 auto;
-  width: clamp(260px, 30vw, 440px);
-  aspect-ratio: 16 / 10;
-  border-radius: var(--radius-md);
+.work-card {
+  position: sticky;
+  top: 14vh;
+  height: min(64vh, 620px);
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-xl);
   border: 1px solid rgba(244, 242, 238, 0.08);
-  box-shadow: var(--shadow-lg);
-  background: var(--bg-dark-2);
+  transform-origin: center top;
+  will-change: transform;
+  backface-visibility: hidden;
 }
-.mq-card img {
+.work-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #0a0a0b;
+  opacity: 0;
+  pointer-events: none;
+}
+.work-card img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
-  transition: transform 0.9s var(--ease-expo);
+  transition: transform 1s var(--ease-expo);
 }
-.mq-card:hover img {
-  transform: scale(1.05);
+.work-card:hover img {
+  transform: scale(1.04);
 }
-.mq-card::after {
+.work-card::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(8, 8, 9, 0.85) 100%);
-  opacity: 0;
-  transition: opacity 0.5s var(--ease-expo);
+  background: linear-gradient(180deg, transparent 45%, rgba(8, 8, 9, 0.82) 100%);
+  pointer-events: none;
 }
-.mq-card:hover::after {
-  opacity: 1;
-}
-.mq-cap {
+.work-cap {
   position: absolute;
-  left: 1rem;
-  right: 1rem;
-  bottom: 0.9rem;
+  left: clamp(1.5rem, 4vw, 3rem);
+  right: clamp(1.5rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 4vw, 2.5rem);
   z-index: 2;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.6rem;
+  gap: 0.6rem 1.5rem;
   color: var(--text-on-dark);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
 }
-.mq-card:hover .mq-cap {
-  opacity: 1;
-  transform: translateY(0);
-}
-.mq-cap h3 {
+.work-cap h3 {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 500;
-  font-size: var(--text-lg);
+  font-size: clamp(1.6rem, 4vw, 3rem);
   letter-spacing: -0.01em;
 }
-.mq-cap .meta {
-  font-size: var(--text-xs);
-  letter-spacing: 0.08em;
+.work-cap .meta {
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(244, 242, 238, 0.7);
-  white-space: nowrap;
+}
+.work-num {
+  position: absolute;
+  top: clamp(1.2rem, 3vw, 2rem);
+  left: clamp(1.5rem, 4vw, 3rem);
+  z-index: 2;
+  font-family: var(--font-geometric), sans-serif;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: rgba(244, 242, 238, 0.85);
+  mix-blend-mode: difference;
 }
 @media (max-width: 760px) {
-  .mq-card {
-    width: 70vw;
-    aspect-ratio: 4 / 3;
+  .works {
+    padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(6rem, 16vh, 10rem);
   }
-  .mq-cap {
-    opacity: 1;
-    transform: none;
+  .works-ticker span {
+    font-size: clamp(1.5rem, 9vw, 2.6rem);
   }
-  .mq-card::after {
-    opacity: 0.9;
+  .works-stack {
+    gap: 1.4rem;
+  }
+  .work-card {
+    height: auto;
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    top: 8vh;
+    border-radius: var(--radius-md);
+  }
+  .work-card img {
+    object-position: top center;
+  }
+  .work-cap {
+    left: 1.1rem;
+    right: 1.1rem;
+    bottom: 1.1rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mq-row--left,
-  .mq-row--right {
+  .works-ticker {
     animation: none;
   }
 }
