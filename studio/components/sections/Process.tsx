@@ -5,12 +5,12 @@ import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
-  ПРОЦЕСС — отвечает на возражение «Это долго и мучительно для меня?».
+  ПРОЦЕСС — отвечает на «Это долго и мучительно для меня?».
 
-  Вверху — «Как мы работаем» в окружении хаотичных вопросов (страхи клиента),
-  которые невесомо плавают и гаснут, когда появляется система. Ниже — 4 шага
-  гигантскими глаголами (текст становится дизайном, референс TrucknRoll).
-  Слева — единая линия с «кометой»: точка едет вниз, линия за ней остаётся.
+  Вход — портал: тёмная завеса с надписью «Мы строим работу иначе» приближается
+  к зрителю (parallax-зум) и растворяется — СЛЕДУЮЩИЙ блок проявляется будто
+  изнутри этой надписи (а не просто начинается после). Дальше — «Как мы
+  работаем» в рою вопросов-страхов и 4 шага с линией-кометой.
 */
 const STEPS = [
   {
@@ -31,7 +31,6 @@ const STEPS = [
   },
 ];
 
-// страхи-вопросы (хаотичный пиксельный рой над заголовком)
 const QUESTIONS = [
   { t: "Сложно?", x: 8, y: 12, s: 1.5, o: 0.5 },
   { t: "Долго?", x: 74, y: 8, s: 2.1, o: 0.6 },
@@ -52,9 +51,28 @@ export default function Process() {
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return;
+      if (reduce) {
+        gsap.set(".proc-veil", { autoAlpha: 0 });
+        return;
+      }
 
-      // заголовок появляется, вопросы невесомо плавают и проявляются
+      // ПОРТАЛ-ВХОД: надпись приближается и растворяется, блок проявляется изнутри
+      const enter = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".proc-enter",
+          start: "top top",
+          end: "+=130%",
+          scrub: 0.8,
+          pin: true,
+          anticipatePin: 1,
+        },
+      });
+      enter
+        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 7, opacity: 0, ease: "power2.in" }, 0)
+        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in" }, 0.35)
+        .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out" }, 0.1);
+
+      // заголовок + вопросы (невесомый рой)
       const title = root.current!.querySelector(".proc-bigtitle");
       if (title)
         gsap.fromTo(
@@ -65,23 +83,10 @@ export default function Process() {
             opacity: 1,
             duration: 1,
             ease: "expo.out",
-            scrollTrigger: { trigger: ".proc-intro", start: "top 70%" },
+            scrollTrigger: { trigger: ".proc-enter", start: "top 30%" },
           }
         );
-
       gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
-        gsap.fromTo(
-          q,
-          { opacity: 0, scale: 0.6 },
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 1.1,
-            ease: "expo.out",
-            scrollTrigger: { trigger: ".proc-intro", start: "top 75%" },
-          }
-        );
-        // невесомость
         gsap.to(q, {
           y: gsap.utils.random(-18, 18),
           x: gsap.utils.random(-12, 12),
@@ -93,18 +98,12 @@ export default function Process() {
         });
       });
 
-      // линия + комета: точка едет вниз вместе с заливкой линии
+      // линия + комета
       const fill = root.current!.querySelector(".proc-fill");
       const comet = root.current!.querySelector(".proc-comet");
-      const lineST = {
-        trigger: ".proc-steps",
-        start: "top 65%",
-        end: "bottom 75%",
-        scrub: 0.6,
-      };
+      const lineST = { trigger: ".proc-steps", start: "top 65%", end: "bottom 75%", scrub: 0.6 };
       if (fill) gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: lineST });
-      if (comet)
-        gsap.fromTo(comet, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: lineST });
+      if (comet) gsap.fromTo(comet, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: lineST });
 
       // глаголы «въезжают и выпрямляются»
       gsap.utils.toArray<HTMLElement>(".proc-step").forEach((step) => {
@@ -142,25 +141,30 @@ export default function Process() {
 
   return (
     <section id="process" className="process" ref={root}>
-      <div className="proc-intro">
-        <div className="proc-questions" aria-hidden>
-          {QUESTIONS.map((q, i) => (
-            <span
-              className="proc-q"
-              key={i}
-              style={{
-                left: `${q.x}%`,
-                top: `${q.y}%`,
-                fontSize: `${q.s}rem`,
-                opacity: q.o,
-              }}
-            >
-              {q.t}
-            </span>
-          ))}
+      {/* портал-вход: следующий блок проявляется изнутри надписи */}
+      <div className="proc-enter">
+        <div className="proc-intro">
+          <div className="proc-questions" aria-hidden>
+            {QUESTIONS.map((q, i) => (
+              <span
+                className="proc-q"
+                key={i}
+                style={{ left: `${q.x}%`, top: `${q.y}%`, fontSize: `${q.s}rem`, opacity: q.o }}
+              >
+                {q.t}
+              </span>
+            ))}
+          </div>
+          <span className="proc-kicker">(03)</span>
+          <h2 className="proc-bigtitle">Как&nbsp;мы работаем</h2>
         </div>
-        <span className="proc-kicker">(03)</span>
-        <h2 className="proc-bigtitle">Как&nbsp;мы работаем</h2>
+
+        <div className="proc-veil" aria-hidden>
+          <h2 className="proc-turn">
+            <span>Мы строим</span>
+            <span>работу иначе</span>
+          </h2>
+        </div>
       </div>
 
       <div className="proc-steps">

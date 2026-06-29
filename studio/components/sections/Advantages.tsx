@@ -49,20 +49,25 @@ export default function Advantages() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // слова вопроса встают в столбик
-      gsap.fromTo(
-        ".adv-qw",
-        { y: 40, opacity: 0, filter: "blur(8px)" },
-        {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "expo.out",
-          stagger: 0.12,
-          scrollTrigger: { trigger: ".adv-stage", start: "top 65%" },
-        }
-      );
+      // слова вопроса СВАЛИВАЮТСЯ по скроллу — слово за словом
+      gsap.utils.toArray<HTMLElement>(".adv-qw").forEach((w, i) => {
+        gsap.fromTo(
+          w,
+          { y: -130, opacity: 0, rotateX: -55 },
+          {
+            y: 0,
+            opacity: 1,
+            rotateX: 0,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".adv-stage",
+              start: `top ${64 - i * 7}%`,
+              end: `top ${36 - i * 7}%`,
+              scrub: 0.7,
+            },
+          }
+        );
+      });
 
       // «?» стекает водой → наливает блок ответов
       const drip = root.current!.querySelector(".adv-drip");

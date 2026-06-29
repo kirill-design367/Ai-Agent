@@ -8,7 +8,7 @@
 export default function MessengerFab() {
   return (
     <a
-      href="https://t.me/"
+      href="https://t.me/Sk_Mac1"
       target="_blank"
       rel="noopener"
       className="msg-fab"

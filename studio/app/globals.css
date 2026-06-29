@@ -778,46 +778,6 @@ html.lenis body {
   50% { transform: translate(-7vw, -5vh) scale(0.9); }
 }
 
-/* — FAQ editorial accordion (gentle expand, III.10) */
-.faq-item {
-  border-top: 1px solid var(--border-soft);
-}
-.faq-q {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: clamp(1.4rem, 4vh, 2.2rem) 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 2rem;
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
-  font-weight: 500;
-  color: var(--text-primary);
-}
-.faq-mark {
-  flex: none;
-  color: var(--accent);
-  transition: transform var(--dur-micro) var(--ease-expo);
-}
-.faq-item[data-open="true"] .faq-mark {
-  transform: rotate(45deg);
-}
-.faq-a {
-  overflow: hidden;
-  height: 0;
-  transition: height 0.5s var(--ease-expo);
-}
-.faq-a-inner {
-  padding-bottom: clamp(1.4rem, 4vh, 2.2rem);
-  max-width: 60ch;
-  color: var(--text-secondary);
-  font-size: var(--text-lg);
-}
-
 /* — Preloader curtain (V.117 / V.38) */
 .preloader {
   position: fixed;
@@ -1070,24 +1030,54 @@ html.lenis body {
   position: relative;
   z-index: 3;
   overflow-x: clip;
-  margin-top: -7vh;
   background: var(--bg-base);
   color: var(--text-primary);
-  border-radius: clamp(28px, 5vw, 60px) clamp(28px, 5vw, 60px) 0 0;
-  box-shadow: 0 -50px 90px rgba(0, 0, 0, 0.55);
-  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem)
-    clamp(6rem, 14vh, 12rem);
+  padding: 0 clamp(1.4rem, 6vw, 7rem) clamp(6rem, 14vh, 12rem);
+}
+/* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок */
+.proc-enter {
+  position: relative;
+  height: 100svh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+}
+.proc-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: #070708;
+  will-change: opacity;
+}
+.proc-turn {
+  margin: 0;
+  padding: 0 1rem;
+  text-align: center;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 8vw, 7rem);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
+  will-change: transform, opacity;
+}
+.proc-turn span {
+  display: block;
 }
 .proc-intro {
-  position: relative;
-  max-width: 1300px;
-  min-height: clamp(34vh, 46vh, 60vh);
-  margin: 0 auto;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0 clamp(1.4rem, 6vw, 7rem);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  will-change: transform;
 }
 .proc-questions {
   position: absolute;
@@ -1429,5 +1419,585 @@ html.lenis body {
   .adv-item[data-i="4"],
   .adv-item[data-i="5"] {
     grid-column: 1;
+  }
+}
+
+/* перспектива для «сваливания» слов вопроса в Преимуществах */
+.adv-quest {
+  perspective: 1000px;
+}
+.adv-qw {
+  transform-origin: top center;
+}
+
+/* ============================================================================
+   БЛОК 7 — ЦЕНЫ: светлый, тёмные карточки с бегущим огоньком (StarBorder)
+   ============================================================================ */
+.prices {
+  position: relative;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+}
+.prices-head {
+  max-width: 1300px;
+  margin: 0 auto clamp(2.5rem, 7vh, 4.5rem);
+}
+.prices-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.prices-title {
+  margin: clamp(0.7rem, 2vh, 1.2rem) 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: var(--text-4xl);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+.price-grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  align-items: stretch;
+}
+.price-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  isolation: isolate;
+}
+.star-move {
+  position: absolute;
+  z-index: 0;
+  width: 200%;
+  height: 60%;
+  border-radius: 50%;
+  filter: blur(6px);
+  opacity: 0.9;
+}
+.star-move--b {
+  bottom: -22%;
+  right: -100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 12%);
+  animation: starb 6s linear infinite alternate;
+}
+.star-move--t {
+  top: -22%;
+  left: -100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 12%);
+  animation: start 6s linear infinite alternate;
+}
+.price-card--rec .star-move {
+  filter: blur(5px);
+  opacity: 1;
+}
+@keyframes starb {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+@keyframes start {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+.price-inner {
+  position: relative;
+  z-index: 1;
+  margin: 2px;
+  height: calc(100% - 4px);
+  border-radius: calc(var(--radius-lg) - 2px);
+  background: #0d0d10;
+  color: var(--text-on-dark);
+  padding: clamp(1.6rem, 3vw, 2.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.price-card--rec .price-inner {
+  background: #111116;
+  box-shadow: inset 0 0 0 1px rgba(244, 242, 238, 0.16);
+}
+.price-badge {
+  align-self: flex-start;
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bg-dark);
+  background: var(--text-on-dark);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.8rem;
+  margin-bottom: 0.4rem;
+}
+.price-name {
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.62);
+}
+.price-value {
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  letter-spacing: -0.02em;
+}
+.price-time {
+  font-size: var(--text-sm);
+  color: rgba(244, 242, 238, 0.5);
+}
+.price-desc {
+  margin: 0.4rem 0 0.6rem;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: rgba(244, 242, 238, 0.72);
+}
+.price-feats {
+  list-style: none;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.price-feats li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: var(--text-sm);
+  color: rgba(244, 242, 238, 0.8);
+}
+.price-feats li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: rgba(244, 242, 238, 0.4);
+}
+.price-cta {
+  margin-top: auto;
+  align-self: flex-start;
+  background: var(--text-on-dark);
+  color: #0d0d10;
+}
+.price-cta:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.prices-note {
+  max-width: 1300px;
+  margin: clamp(2rem, 5vh, 3rem) auto 0;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+/* ============================================================================
+   БЛОК 6 — ЧТО ПОЛУЧАЕТЕ: bento, пятно света за курсором (MagicBento)
+   ============================================================================ */
+.offer {
+  position: relative;
+  background: var(--bg-dark);
+  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+}
+.offer-head {
+  max-width: 1300px;
+  margin: 0 auto clamp(2.5rem, 7vh, 4.5rem);
+}
+.offer-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.offer-title {
+  margin: clamp(0.7rem, 2vh, 1.2rem) 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: var(--text-4xl);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+}
+.bento {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(150px, auto);
+  gap: clamp(0.8rem, 1.6vw, 1.2rem);
+}
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(244, 242, 238, 0.1);
+  background: var(--bg-dark-2);
+  padding: clamp(1.3rem, 2.4vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  transition: border-color 0.4s var(--ease-expo), transform 0.4s var(--ease-expo);
+  will-change: transform, opacity;
+}
+.bento-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(244, 242, 238, 0.14),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-expo);
+  pointer-events: none;
+}
+.bento-card:hover {
+  border-color: rgba(244, 242, 238, 0.3);
+}
+.bento-card:hover::before {
+  opacity: 1;
+}
+.bento-card h3 {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+  letter-spacing: -0.01em;
+  color: var(--text-on-dark);
+}
+.bento-card p {
+  position: relative;
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: rgba(244, 242, 238, 0.6);
+}
+.bento-a {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.bento-a h3 {
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+}
+.bento-a p {
+  font-size: var(--text-base);
+  max-width: 34ch;
+}
+.bento-b { grid-column: span 2; }
+.bento-e { grid-column: span 2; }
+.bento-h { grid-column: span 2; }
+
+/* ============================================================================
+   БЛОК 8 — FAQ: аккордеон, ответ собирается из разлетевшихся букв
+   ============================================================================ */
+.faq {
+  position: relative;
+  background: var(--bg-dark);
+  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+}
+.faq-head {
+  max-width: 1000px;
+  margin: 0 auto clamp(2rem, 5vh, 3.5rem);
+}
+.faq-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.faq-title {
+  margin: clamp(0.7rem, 2vh, 1.2rem) 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: var(--text-4xl);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+}
+.faq-list {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.faq-item {
+  border-top: 1px solid rgba(244, 242, 238, 0.14);
+}
+.faq-item:last-child {
+  border-bottom: 1px solid rgba(244, 242, 238, 0.14);
+}
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: clamp(1.1rem, 2.6vh, 1.7rem) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.15rem, 2.4vw, 1.75rem);
+  letter-spacing: -0.01em;
+  color: rgba(244, 242, 238, 0.7);
+  transition: color 0.3s var(--ease-expo);
+}
+.faq-item.is-open .faq-q,
+.faq-q:hover {
+  color: var(--text-on-dark);
+}
+.faq-sign {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+.faq-sign::before,
+.faq-sign::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+  transition: transform 0.4s var(--ease-expo), opacity 0.4s var(--ease-expo);
+}
+.faq-sign::before {
+  top: 8px;
+  left: 0;
+  width: 18px;
+  height: 2px;
+}
+.faq-sign::after {
+  left: 8px;
+  top: 0;
+  width: 2px;
+  height: 18px;
+}
+.faq-item.is-open .faq-sign::after {
+  transform: scaleY(0);
+  opacity: 0;
+}
+.faq-a-wrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.55s var(--ease-expo);
+}
+.faq-item.is-open .faq-a-wrap {
+  max-height: 44vh;
+}
+.faq-a p {
+  margin: 0;
+  padding: 0 0 clamp(1.2rem, 3vh, 2rem);
+  max-width: 64ch;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  color: rgba(244, 242, 238, 0.66);
+}
+.faq-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.faq-ch {
+  display: inline-block;
+  white-space: pre;
+  will-change: transform, opacity;
+}
+
+/* ============================================================================
+   БЛОК 9 — ОТЗЫВЫ: парящие карточки-цитаты (черновые плейсхолдеры)
+   ============================================================================ */
+.reviews {
+  position: relative;
+  background: var(--bg-sunken);
+  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+}
+.reviews-head {
+  max-width: 1300px;
+  margin: 0 auto clamp(2.5rem, 6vh, 4rem);
+}
+.reviews-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.reviews-title {
+  margin: clamp(0.7rem, 2vh, 1.2rem) 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: var(--text-4xl);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+}
+.rev-grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+.rev-card {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(244, 242, 238, 0.1);
+  background: var(--bg-dark-2);
+  padding: clamp(1.6rem, 3vw, 2.6rem);
+  will-change: transform, opacity;
+}
+.rev-quote {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 3rem;
+  line-height: 0.5;
+  color: rgba(244, 242, 238, 0.3);
+}
+.rev-card blockquote {
+  margin: 1rem 0 1.6rem;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--text-on-dark);
+}
+.rev-card figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.rev-name {
+  font-weight: 600;
+  color: var(--text-on-dark);
+}
+.rev-role {
+  font-size: var(--text-sm);
+  color: rgba(244, 242, 238, 0.5);
+}
+
+/* ============================================================================
+   БЛОК 10 — КОНТАКТ: финал, предвкушение, возврат к точке-A
+   ============================================================================ */
+.contact {
+  position: relative;
+  background: var(--bg-dark);
+  padding: clamp(5rem, 13vh, 11rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 9rem);
+  overflow: hidden;
+}
+.contact-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.contact-kicker {
+  display: inline-block;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.contact-title {
+  margin: clamp(1rem, 3vh, 2rem) 0 0;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 11vw, 9rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
+}
+.contact-sub {
+  max-width: 46ch;
+  margin: clamp(1.4rem, 4vh, 2.4rem) 0 0;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: rgba(244, 242, 238, 0.66);
+}
+.contact-channels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.8rem, 1.6vw, 1.2rem);
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+}
+.contact-ch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: clamp(1.2rem, 2.4vw, 1.8rem);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(244, 242, 238, 0.16);
+  text-decoration: none;
+  transition: border-color 0.3s var(--ease-expo), background 0.3s var(--ease-expo);
+}
+.contact-ch:hover {
+  border-color: rgba(244, 242, 238, 0.4);
+  background: rgba(244, 242, 238, 0.04);
+}
+.contact-ch-l {
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.contact-ch-v {
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  color: var(--text-on-dark);
+}
+.contact-foot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  padding-top: clamp(1.4rem, 3vh, 2rem);
+  border-top: 1px solid rgba(244, 242, 238, 0.14);
+}
+.contact-geo {
+  flex: 0 0 auto;
+  width: 42px;
+  height: auto;
+}
+.contact-geo polygon {
+  fill: none;
+  stroke: rgba(244, 242, 238, 0.4);
+  stroke-width: 2;
+}
+.contact-geo circle {
+  fill: rgba(244, 242, 238, 0.7);
+}
+.contact-sign {
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: rgba(244, 242, 238, 0.55);
+}
+
+/* ============================================================================
+   АДАПТАЦИЯ ПОД ТЕЛЕФОН — блоки 6–10
+   ============================================================================ */
+@media (max-width: 860px) {
+  .price-grid {
+    grid-template-columns: 1fr;
+  }
+  .price-card--rec {
+    order: -1;
+  }
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bento-a {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
+  .rev-grid {
+    grid-template-columns: 1fr;
+  }
+  .contact-channels {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .bento-card::before {
+    display: none;
+  }
+  .contact-title {
+    font-size: clamp(2.6rem, 15vw, 4rem);
   }
 }

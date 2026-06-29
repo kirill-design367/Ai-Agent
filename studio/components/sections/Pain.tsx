@@ -97,23 +97,6 @@ export default function Pain() {
           if (note) t.fromTo(note, { yPercent: -55 }, { yPercent: 55, ease: "none" }, 0);
         });
 
-      // «Мы строим работу иначе»: задержка для чтения → налёт сквозь зрителя
-      const turn = root.current!.querySelector(".pain-turn");
-      if (turn) {
-        const tt = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".pain-item--turn",
-            start: "top top",
-            end: "+=170%",
-            scrub: 0.7,
-            pin: true,
-          },
-        });
-        tt.fromTo(turn, { scale: 0.9, opacity: 0.5 }, { scale: 1, opacity: 1, ease: "power2.out", duration: 0.35 })
-          .to(turn, { duration: 0.3 }) // удержание — пользователь читает
-          .to(turn, { scale: 11, opacity: 0, ease: "power2.in", duration: 0.55 });
-      }
-
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
     { scope: root }
@@ -170,14 +153,6 @@ export default function Pain() {
           <p className="pain-note">{p.note}</p>
         </div>
       ))}
-
-      {/* поворот → налёт сквозь зрителя → Процесс */}
-      <div className="pain-item pain-item--turn" data-side="c">
-        <h2 className="pain-big pain-turn">
-          <span className="l">Мы строим</span>
-          <span className="l">работу иначе.</span>
-        </h2>
-      </div>
     </section>
   );
 }

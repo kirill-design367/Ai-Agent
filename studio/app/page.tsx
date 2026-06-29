@@ -9,6 +9,11 @@ import Works from "@/components/sections/Works";
 import Pain from "@/components/sections/Pain";
 import Process from "@/components/sections/Process";
 import Advantages from "@/components/sections/Advantages";
+import Prices from "@/components/sections/Prices";
+import Offer from "@/components/sections/Offer";
+import Faq from "@/components/sections/Faq";
+import Reviews from "@/components/sections/Reviews";
+import Contact from "@/components/sections/Contact";
 
 /*
   AUREA — full rebuild in progress. The site is being recreated from scratch as
@@ -31,6 +36,11 @@ export default function Home() {
         <Pain />
         <Process />
         <Advantages />
+        <Prices />
+        <Offer />
+        <Faq />
+        <Reviews />
+        <Contact />
       </main>
     </SmoothScroll>
   );
