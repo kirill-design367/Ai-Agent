@@ -10,43 +10,40 @@ const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
 });
 
 /*
-  HERO — отвечает на вопрос клиента: «Вы делаете то, что мне нужно?»
-
-  Композиция «хаос по золотому сечению»: заголовок не стоит ровным столбцом —
-  строки разбиты и сдвинуты по разным зонам экрана (0.382 / 0.618), вокруг —
-  геометрия бренда (контурный треугольник-A с точкой, hairline-сетка, kicker-
-  метки). Буквы заголовка чуть разбросаны (хаос); когда уходит интро, они мягко
-  встают на места — «из хаоса рождается система».
+  HERO — отвечает на вопрос клиента «Вы делаете то, что мне нужно?».
+  Заголовок собирается из хаоса в систему; подзаголовок встаёт следом, прямо
+  под заголовком, тем же мягким движением. Композиция «золотое сечение»:
+  геометрия бренда + hairline-сетка, без лишних надписей сверху.
 */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const headline = useRef<HTMLHeadingElement>(null);
+  const sub = useRef<HTMLParagraphElement>(null);
 
   useGSAP(
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const fades = gsap.utils.toArray<HTMLElement>("[data-hero-fade]");
-      // words+chars so words never break mid-line (chars animate, words stay whole)
       const split = new SplitText(headline.current!, { type: "words,chars" });
+      const subSplit = new SplitText(sub.current!, { type: "words" });
 
       if (reduce) {
-        gsap.set([split.chars, fades], { clearProps: "all" });
+        gsap.set([split.chars, subSplit.words, fades], { clearProps: "all" });
         return;
       }
 
-      // chaos: each letter nudged a few px, slightly rotated, dimmed
       gsap.set(split.chars, {
         x: () => gsap.utils.random(-14, 14),
         y: () => gsap.utils.random(-16, 16),
         rotation: () => gsap.utils.random(-9, 9),
         opacity: 0.4,
       });
+      gsap.set(subSplit.words, { y: 22, opacity: 0 });
       gsap.set(fades, { opacity: 0, y: 24 });
 
       const play = () => {
         const tl = gsap.timeline();
-        // order: letters settle into place
         tl.to(split.chars, {
           x: 0,
           y: 0,
@@ -55,11 +52,23 @@ export default function Hero() {
           duration: 1.4,
           ease: "expo.out",
           stagger: { each: 0.016, from: "random" },
-        }).to(
-          fades,
-          { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
-          "-=0.95"
-        );
+        })
+          .to(
+            subSplit.words,
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.9,
+              ease: "expo.out",
+              stagger: 0.04,
+            },
+            "-=0.85"
+          )
+          .to(
+            fades,
+            { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
+            "-=0.7"
+          );
       };
 
       if (document.documentElement.classList.contains("intro-done")) play();
@@ -74,36 +83,34 @@ export default function Hero() {
         <SplashCursor />
       </div>
 
-      {/* геометрия бренда: контурный треугольник-A с точкой */}
+      {/* геометрия бренда — контурный треугольник-A с точкой */}
       <svg className="hero-geo" viewBox="0 0 400 360" aria-hidden data-hero-fade>
         <polygon points="200,24 376,336 24,336" />
         <circle cx="200" cy="246" r="6" />
         <line x1="200" y1="24" x2="200" y2="336" />
       </svg>
 
-      {/* верхняя строка-сетка: марка + индекс вопроса */}
+      {/* верхняя hairline-строка: только марка */}
       <header className="hero-top">
         <span className="hero-mark" data-hero-fade>
           AUREA<sup>®</sup>
         </span>
-        <span className="hero-kicker" data-hero-fade>
-          <i>(01)</i> Вы&nbsp;делаете то, что&nbsp;мне нужно?
-        </span>
       </header>
 
-      {/* заголовок — ломаные строки по золотому сечению */}
-      <h1 className="hero-headline" ref={headline}>
-        <span className="hl-line hl-a">Первое</span>
-        <span className="hl-line hl-b">впечатление</span>
-        <span className="hl-line hl-c">невозможно</span>
-        <span className="hl-line hl-d">повторить</span>
-      </h1>
+      {/* заголовок + подзаголовок под ним */}
+      <div className="hero-mid">
+        <h1 className="hero-headline" ref={headline}>
+          <span className="hl-line hl-a">Первое</span>
+          <span className="hl-line hl-b">впечатление</span>
+          <span className="hl-line hl-c">невозможно</span>
+          <span className="hl-line hl-d">повторить</span>
+        </h1>
 
-      {/* подзаголовок — отдельная зона справа-внизу */}
-      <p className="hero-sub" data-hero-fade>
-        Поэтому мы&nbsp;создаём сайты, которые помогают бизнесу выделяться,
-        вызывать доверие и&nbsp;получать больше&nbsp;заявок.
-      </p>
+        <p className="hero-sub" ref={sub}>
+          Поэтому мы&nbsp;создаём сайты, которые помогают бизнесу выделяться,
+          вызывать доверие и&nbsp;получать больше&nbsp;заявок.
+        </p>
+      </div>
 
       {/* нижняя зона: действие + фишки на hairline-сетке */}
       <div className="hero-foot">

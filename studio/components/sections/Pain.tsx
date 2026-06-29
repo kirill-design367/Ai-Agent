@@ -7,11 +7,11 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 /*
   БОЛЬ — отвечает на возражение «У меня уже есть сайт, зачем новый?».
 
-  Перетекание из Кейсов: круговая вращающаяся надпись «А ТЕПЕРЬ — О НАБОЛЕВШЕМ»
-  (референс maheshppai) зумится тоннелем внутрь. Дальше — тоннель-параллакс:
-  боли не по центру, а по золотому сечению. Огромная фраза с одной стороны,
-  поясняющий текст — с противоположной, следующая боль — зеркально. Асимметрия,
-  гигантская типографика, которая собирается в чёткий образ.
+  Перетекание из Кейсов: круговая надпись «А ТЕПЕРЬ — О НАБОЛЕВШЕМ» появляется
+  из ниоткуда справа, делает дугу вверх и на скролле уходит влево. Дальше —
+  тоннель-параллакс: боли по золотому сечению (огромная фраза с одной стороны,
+  пояснение — с противоположной). Финальная строка «Мы строим работу иначе»
+  при скролле приближается и пролетает сквозь зрителя — переход в Процесс.
 */
 const PAINS = [
   {
@@ -45,52 +45,74 @@ export default function Pain() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // круговой портал → тоннельный зум на выходе
+      // круговая надпись: из ниоткуда справа → дуга вверх → уходит влево
       const ring = root.current!.querySelector(".portal-ring");
       if (ring) {
-        gsap.to(ring, {
-          scale: 4.6,
-          opacity: 0,
-          ease: "none",
+        const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".pain-portal",
             start: "top top",
-            end: "bottom top",
-            scrub: 0.5,
+            end: "+=130%",
+            scrub: 0.6,
+            pin: true,
           },
+        });
+        tl.fromTo(
+          ring,
+          { x: "74vw", y: "16vh", autoAlpha: 0, rotate: -28 },
+          { x: "0vw", y: "-9vh", autoAlpha: 1, rotate: 0, ease: "sine.out", duration: 0.5 }
+        ).to(ring, {
+          x: "-74vw",
+          y: "16vh",
+          autoAlpha: 0,
+          rotate: 28,
+          ease: "sine.in",
+          duration: 0.5,
         });
       }
 
-      // тоннель-параллакс по каждой боли
-      gsap.utils.toArray<HTMLElement>(".pain-item").forEach((item) => {
-        const big = item.querySelector(".pain-big");
-        const note = item.querySelector(".pain-note");
-        const idx = item.querySelector(".pain-idx");
-        const tl = gsap.timeline({
+      // тоннель-параллакс по болям (lead/turn исключены — у них своя режиссура)
+      gsap.utils
+        .toArray<HTMLElement>(".pain-item:not(.pain-item--lead):not(.pain-item--turn)")
+        .forEach((item) => {
+          const big = item.querySelector(".pain-big");
+          const note = item.querySelector(".pain-note");
+          const idx = item.querySelector(".pain-idx");
+          const t = gsap.timeline({
+            scrollTrigger: {
+              trigger: item,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.6,
+            },
+          });
+          if (big)
+            t.fromTo(
+              big,
+              { yPercent: 24, scale: 0.92 },
+              { yPercent: -24, scale: 1.07, ease: "none" },
+              0
+            );
+          if (idx) t.fromTo(idx, { yPercent: 60 }, { yPercent: -60, ease: "none" }, 0);
+          if (note) t.fromTo(note, { yPercent: -55 }, { yPercent: 55, ease: "none" }, 0);
+        });
+
+      // «Мы строим работу иначе»: задержка для чтения → налёт сквозь зрителя
+      const turn = root.current!.querySelector(".pain-turn");
+      if (turn) {
+        const tt = gsap.timeline({
           scrollTrigger: {
-            trigger: item,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.6,
+            trigger: ".pain-item--turn",
+            start: "top top",
+            end: "+=170%",
+            scrub: 0.7,
+            pin: true,
           },
         });
-        if (big)
-          tl.fromTo(
-            big,
-            { yPercent: 24, scale: 0.92 },
-            { yPercent: -24, scale: 1.07, ease: "none" },
-            0
-          );
-        if (idx)
-          tl.fromTo(idx, { yPercent: 60 }, { yPercent: -60, ease: "none" }, 0);
-        if (note)
-          tl.fromTo(
-            note,
-            { yPercent: -55 },
-            { yPercent: 55, ease: "none" },
-            0
-          );
-      });
+        tt.fromTo(turn, { scale: 0.9, opacity: 0.5 }, { scale: 1, opacity: 1, ease: "power2.out", duration: 0.35 })
+          .to(turn, { duration: 0.3 }) // удержание — пользователь читает
+          .to(turn, { scale: 11, opacity: 0, ease: "power2.in", duration: 0.55 });
+      }
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
@@ -101,16 +123,12 @@ export default function Pain() {
 
   return (
     <section id="pain" className="theme-dark pain" ref={root}>
-      {/* перетекание из кейсов — круговая надпись + тоннельный зум */}
+      {/* перетекание из кейсов — круговая надпись, дуга справа налево */}
       <div className="pain-portal">
         <div className="portal-ring">
           <svg viewBox="0 0 240 240" aria-hidden>
             <defs>
-              <path
-                id="painCircle"
-                d="M120,32 a88,88 0 1,1 -0.1,0"
-                fill="none"
-              />
+              <path id="painCircle" d="M120,32 a88,88 0 1,1 -0.1,0" fill="none" />
             </defs>
             <text>
               <textPath href="#painCircle" startOffset="0">
@@ -122,7 +140,6 @@ export default function Pain() {
             ↓
           </span>
         </div>
-        <p className="portal-cap">А теперь — о наболевшем</p>
       </div>
 
       {/* интро-фраза */}
@@ -154,7 +171,7 @@ export default function Pain() {
         </div>
       ))}
 
-      {/* поворот → ведёт в Процесс */}
+      {/* поворот → налёт сквозь зрителя → Процесс */}
       <div className="pain-item pain-item--turn" data-side="c">
         <h2 className="pain-big pain-turn">
           <span className="l">Мы строим</span>

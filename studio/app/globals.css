@@ -276,125 +276,141 @@ html.lenis body {
   }
 }
 
-/* — WORKS: sticky stacking cinema (ScrollStack-style, on our Lenis + GSAP) */
-.works {
+/* — WORKS: бесконечная лента-баннер (две встречные строки кейсов в движении) */
+.worksm {
   position: relative;
   background: var(--bg-dark);
-  padding: clamp(4rem, 10vh, 9rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
+  padding: clamp(2.4rem, 6vh, 4rem) 0 clamp(3rem, 8vh, 5.5rem);
+  overflow: hidden;
 }
-.works-head {
-  max-width: 1400px;
-  margin: 0 auto clamp(2.5rem, 7vh, 5rem);
+.worksm-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 1500px;
+  margin: 0 auto clamp(1.6rem, 4vh, 2.6rem);
+  padding: 0 clamp(1.4rem, 5vw, 4.5rem);
 }
-.works-stack {
-  max-width: 1200px;
-  margin: 0 auto;
+.worksm-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.worksm-kicker--r {
+  color: rgba(244, 242, 238, 0.78);
+}
+.mq {
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 6vh, 5rem);
+  gap: clamp(0.8rem, 1.6vw, 1.4rem);
 }
-.work-card {
-  position: sticky;
-  top: 14vh;
-  height: min(64vh, 620px);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid rgba(244, 242, 238, 0.08);
-  transform-origin: center top;
+.mq-row {
+  display: flex;
+  gap: clamp(0.8rem, 1.6vw, 1.4rem);
+  width: max-content;
   will-change: transform;
-  backface-visibility: hidden;
 }
-.work-shade {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: #0a0a0b;
-  opacity: 0;
-  pointer-events: none;
+.mq-row--left {
+  animation: mqleft 48s linear infinite;
 }
-.work-card img {
+.mq-row--right {
+  animation: mqright 48s linear infinite;
+}
+.mq:hover .mq-row {
+  animation-play-state: paused;
+}
+@keyframes mqleft {
+  to { transform: translateX(-50%); }
+}
+@keyframes mqright {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.mq-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(260px, 30vw, 440px);
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(244, 242, 238, 0.08);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-dark-2);
+}
+.mq-card img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1s var(--ease-expo);
+  object-position: top center;
+  transition: transform 0.9s var(--ease-expo);
 }
-.work-card:hover img {
-  transform: scale(1.04);
+.mq-card:hover img {
+  transform: scale(1.05);
 }
-.work-card::after {
+.mq-card::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 45%, rgba(8, 8, 9, 0.82) 100%);
-  pointer-events: none;
+  background: linear-gradient(180deg, transparent 50%, rgba(8, 8, 9, 0.85) 100%);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-expo);
 }
-.work-cap {
+.mq-card:hover::after {
+  opacity: 1;
+}
+.mq-cap {
   position: absolute;
-  left: clamp(1.5rem, 4vw, 3rem);
-  right: clamp(1.5rem, 4vw, 3rem);
-  bottom: clamp(1.5rem, 4vw, 2.5rem);
+  left: 1rem;
+  right: 1rem;
+  bottom: 0.9rem;
   z-index: 2;
   display: flex;
-  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.6rem 1.5rem;
+  gap: 0.6rem;
   color: var(--text-on-dark);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s var(--ease-expo), transform 0.5s var(--ease-expo);
 }
-.work-cap h3 {
+.mq-card:hover .mq-cap {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mq-cap h3 {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 500;
-  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-size: var(--text-lg);
   letter-spacing: -0.01em;
 }
-.work-cap .meta {
-  font-size: var(--text-sm);
-  letter-spacing: 0.1em;
+.mq-cap .meta {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(244, 242, 238, 0.7);
+  white-space: nowrap;
 }
-.work-num {
-  position: absolute;
-  top: clamp(1.2rem, 3vw, 2rem);
-  left: clamp(1.5rem, 4vw, 3rem);
-  z-index: 2;
-  font-family: var(--font-geometric), sans-serif;
-  font-weight: 600;
-  font-size: var(--text-sm);
-  letter-spacing: 0.2em;
-  color: rgba(244, 242, 238, 0.85);
-  mix-blend-mode: difference;
-}
-
-/* — WORKS адаптив: узкие вертикальные карточки под телефон (а не широкий десктоп-скрин).
-   Ландшафтные скрины кропаются в портрет и привязаны к верху страницы кейса. */
 @media (max-width: 760px) {
-  .works {
-    padding: clamp(3rem, 8vh, 5rem) 1.1rem clamp(6rem, 16vh, 10rem);
+  .mq-card {
+    width: 70vw;
+    aspect-ratio: 4 / 3;
   }
-  .works-stack {
-    gap: 1.4rem;
+  .mq-cap {
+    opacity: 1;
+    transform: none;
   }
-  .work-card {
-    height: auto;
-    aspect-ratio: 4 / 5;
-    width: 100%;
-    max-width: 340px;
-    margin: 0 auto;
-    top: 8vh;
-    border-radius: var(--radius-md);
+  .mq-card::after {
+    opacity: 0.9;
   }
-  .work-card img {
-    object-position: top center;
-  }
-  .work-cap {
-    left: 1.1rem;
-    right: 1.1rem;
-    bottom: 1.1rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-row--left,
+  .mq-row--right {
+    animation: none;
   }
 }
 
@@ -491,10 +507,14 @@ html.lenis body {
 }
 
 /* заголовок — ломаные строки по золотому сечению (кинетика хаос→система) */
-.hero-headline {
+.hero-mid {
   grid-column: 1 / -1;
   grid-row: 2;
-  align-self: end;
+  align-self: center;
+  position: relative;
+  z-index: 2;
+}
+.hero-headline {
   margin: 0;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
@@ -521,21 +541,14 @@ html.lenis body {
   margin-left: 14vw;
 }
 
-/* подзаголовок — отдельная зона справа-внизу */
+/* подзаголовок — прямо под заголовком, тем же мягким движением */
 .hero-sub {
-  grid-column: 7 / 13;
-  grid-row: 2;
-  align-self: start;
-  justify-self: end;
-  max-width: 34ch;
-  margin: 0 0 clamp(0.5rem, 2vh, 1.5rem);
+  max-width: 40ch;
+  margin: clamp(1.4rem, 3.5vh, 2.4rem) 0 0 clamp(0rem, 8vw, 9rem);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--text-lg);
   line-height: 1.5;
-  text-align: right;
   color: rgba(244, 242, 238, 0.72);
-  position: relative;
-  z-index: 2;
 }
 
 /* нижняя hairline-строка: действие + нумерованные фишки */
@@ -606,9 +619,11 @@ html.lenis body {
     text-align: left;
     max-width: 30ch;
   }
-  .hero-headline {
+  .hero-mid {
     grid-column: 1;
     align-self: end;
+  }
+  .hero-headline {
     font-size: clamp(1.7rem, 8.6vw, 2.6rem);
     line-height: 1.02;
   }
@@ -622,12 +637,8 @@ html.lenis body {
     margin-left: 2.4rem;
   }
   .hero-sub {
-    grid-column: 1;
-    justify-self: start;
-    align-self: start;
-    text-align: left;
     max-width: 42ch;
-    margin-bottom: 0;
+    margin-left: 0;
     font-size: var(--text-base);
   }
   .hero-foot {
@@ -1044,23 +1055,51 @@ html.lenis body {
   padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem)
     clamp(6rem, 14vh, 12rem);
 }
-.proc-head {
+.proc-intro {
+  position: relative;
   max-width: 1300px;
+  min-height: clamp(34vh, 46vh, 60vh);
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.proc-questions {
+  position: absolute;
+  inset: -6% 0;
+  pointer-events: none;
+}
+.proc-q {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", monospace;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  will-change: transform;
 }
 .proc-kicker {
-  font-size: var(--text-xs);
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-geometric), sans-serif;
+  font-size: var(--text-sm);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
   color: var(--text-tertiary);
 }
-.proc-title {
-  margin: clamp(0.8rem, 2vh, 1.4rem) 0 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  font-size: var(--text-4xl);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+.proc-bigtitle {
+  position: relative;
+  z-index: 2;
+  margin: clamp(0.6rem, 1.6vh, 1rem) 0 0;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 7.5vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
   color: var(--text-primary);
 }
 .proc-steps {
@@ -1080,7 +1119,6 @@ html.lenis body {
   bottom: 0.6rem;
   width: 2px;
   background: var(--border-soft);
-  overflow: hidden;
 }
 .proc-fill {
   display: block;
@@ -1088,6 +1126,18 @@ html.lenis body {
   height: 100%;
   background: var(--text-primary);
   transform-origin: top center;
+}
+/* «комета» — точка едет вниз вместе с линией, линия за ней остаётся */
+.proc-comet {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 5px rgba(22, 22, 26, 0.12), 0 0 18px rgba(22, 22, 26, 0.35);
 }
 .proc-step {
   position: relative;
@@ -1151,71 +1201,74 @@ html.lenis body {
   box-shadow: 0 -50px 90px rgba(0, 0, 0, 0.6);
   overflow: hidden;
 }
-.adv-hero {
+.adv-stage {
   position: relative;
-  height: 100svh;
-  min-height: 620px;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-.adv-giant {
-  position: absolute;
-  inset: 0;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 0;
-  pointer-events: none;
+  justify-content: center;
+  padding: clamp(4rem, 10vh, 8rem) clamp(1.4rem, 6vw, 7rem) 0;
+  overflow: hidden;
 }
-.adv-giant .g {
+/* вопрос крупными буквами ИЗ ТОЧЕК, столбик чуть хаотично по золотому сечению */
+.adv-quest {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 1100px);
+}
+.adv-qw {
   display: block;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 800;
-  font-size: clamp(3.4rem, 16vw, 15rem);
-  line-height: 0.84;
+  font-size: clamp(2.1rem, 6.6vw, 5.6rem);
+  line-height: 0.96;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  white-space: nowrap;
   color: transparent;
-  /* halftone-заливка глифов точечным паттерном (dithered) */
   background-image: radial-gradient(
-    rgba(244, 242, 238, 0.55) 21%,
-    transparent 23%
+    rgba(244, 242, 238, 0.92) 26%,
+    transparent 29%
   );
-  background-size: 0.15em 0.15em;
+  background-size: 0.1em 0.1em;
   -webkit-background-clip: text;
   background-clip: text;
-  will-change: transform;
+  will-change: transform, opacity, filter;
 }
-.adv-giant .g:nth-child(2) {
-  align-self: stretch;
-  text-align: center;
-}
-.adv-hero-center {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(1.1rem, 3vh, 1.8rem);
-  max-width: 30ch;
-  text-align: center;
-  padding: clamp(1.4rem, 4vw, 2.4rem);
-}
-.adv-tag {
-  font-size: var(--text-xs);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.55);
-}
-.adv-claim {
-  margin: 0;
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
-  line-height: 1.4;
+.adv-qw-0 { margin-left: 0; }
+.adv-qw-1 { margin-left: 9vw; }
+.adv-qw-2 { margin-left: 3vw; }
+.adv-qw-3 { margin-left: 14vw; }
+.adv-qw-4 { margin-left: 5vw; }
+.adv-qmark {
+  -webkit-text-fill-color: var(--text-on-dark);
   color: var(--text-on-dark);
+  background: none;
+  font-size: 0.82em;
+}
+/* «вода» из «?» — стекает и наливает блок ответов */
+.adv-drip {
+  position: relative;
+  display: block;
+  width: 2px;
+  height: clamp(3rem, 9vh, 7rem);
+  margin-top: clamp(1rem, 3vh, 2rem);
+  background: linear-gradient(
+    to bottom,
+    rgba(244, 242, 238, 0.85),
+    rgba(244, 242, 238, 0)
+  );
+  transform-origin: top center;
+}
+.adv-drop {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 9px;
+  height: 11px;
+  margin-left: -4.5px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--text-on-dark);
 }
 
 /* 6 преимуществ — редакторская асимметрия (12 колонок) */
@@ -1268,6 +1321,12 @@ html.lenis body {
   color: rgba(244, 242, 238, 0.6);
 }
 
+.adv-cta {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: clamp(1rem, 3vh, 2rem);
+}
+
 /* ============================================================================
    АДАПТАЦИЯ ПОД ТЕЛЕФОН — блоки 3–5
    ============================================================================ */
@@ -1277,8 +1336,9 @@ html.lenis body {
     padding: 0 1.3rem;
   }
   .pain-big {
-    font-size: clamp(2.3rem, 13vw, 3.6rem);
+    font-size: clamp(1.6rem, 8.6vw, 2.7rem);
     max-width: 100%;
+    line-height: 0.96;
   }
   .pain-note {
     position: static;
@@ -1309,8 +1369,14 @@ html.lenis body {
     font-size: 64vw;
   }
 
-  .proc-title {
-    font-size: var(--text-3xl);
+  .proc-bigtitle {
+    font-size: clamp(2rem, 11vw, 3.2rem);
+  }
+  .proc-q {
+    font-size: 0.78em !important;
+  }
+  .proc-intro {
+    min-height: 42vh;
   }
   .proc-note,
   .proc-step[data-i="1"] .proc-note,
@@ -1325,9 +1391,11 @@ html.lenis body {
     padding-left: 1.7rem;
   }
 
-  .adv-giant .g {
-    font-size: clamp(2.8rem, 20vw, 5rem);
+  .adv-qw {
+    font-size: clamp(1.5rem, 10.5vw, 2.8rem);
   }
+  .adv-qw-1 { margin-left: 8vw; }
+  .adv-qw-3 { margin-left: 12vw; }
   .adv-list {
     grid-template-columns: 1fr;
   }
