@@ -872,3 +872,471 @@ html.lenis body {
     display: none;
   }
 }
+
+/* ============================================================================
+   БЛОК 3 — БОЛЬ: круговой портал-перетекание + тоннель-параллакс
+   ============================================================================ */
+.pain {
+  position: relative;
+  background: #070708;
+  overflow: hidden;
+}
+
+/* круговая вращающаяся надпись «А ТЕПЕРЬ — О НАБОЛЕВШЕМ» (перетекание из кейсов) */
+.pain-portal {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+}
+.portal-ring {
+  position: relative;
+  width: min(74vw, 540px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+}
+.portal-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: portalspin 22s linear infinite;
+}
+.portal-ring text {
+  fill: rgba(244, 242, 238, 0.78);
+  font-family: var(--font-geometric), sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: 0.12em;
+}
+.portal-core {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: var(--text-on-dark);
+  line-height: 1;
+  animation: portalbob 2.4s var(--ease-expo) infinite;
+}
+.portal-cap {
+  position: absolute;
+  bottom: clamp(2rem, 6vh, 4rem);
+  font-size: var(--text-xs);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.45);
+  margin: 0;
+}
+@keyframes portalspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes portalbob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* тоннель болей */
+.pain-item {
+  position: relative;
+  min-height: 92svh;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(1.4rem, 6vw, 7rem);
+}
+.pain-big {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  max-width: 13ch;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.7rem, 10.5vw, 10.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
+  will-change: transform;
+}
+.pain-big .l {
+  display: block;
+}
+.pain-big .pain-dim {
+  color: rgba(244, 242, 238, 0.4);
+}
+.pain-note {
+  position: absolute;
+  z-index: 2;
+  max-width: 30ch;
+  margin: 0;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: rgba(244, 242, 238, 0.62);
+  will-change: transform;
+}
+/* гигантский номер-водяной знак для тоннельной глубины */
+.pain-idx {
+  position: absolute;
+  z-index: 1;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 42vw;
+  line-height: 0.7;
+  color: rgba(244, 242, 238, 0.035);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* золотое сечение: боль с одной стороны, пояснение — с противоположной */
+.pain-item[data-side="l"] .pain-big {
+  margin-right: auto;
+}
+.pain-item[data-side="l"] .pain-idx {
+  right: 4vw;
+  top: 8%;
+}
+.pain-item[data-side="l"] .pain-note {
+  right: clamp(1.4rem, 6vw, 7rem);
+  bottom: 18%;
+  text-align: right;
+}
+.pain-item[data-side="r"] .pain-big {
+  margin-left: auto;
+  text-align: right;
+}
+.pain-item[data-side="r"] .pain-idx {
+  left: 4vw;
+  bottom: 8%;
+}
+.pain-item[data-side="r"] .pain-note {
+  left: clamp(1.4rem, 6vw, 7rem);
+  top: 18%;
+  text-align: left;
+}
+/* интро и поворот — по центру, во весь голос */
+.pain-item--lead,
+.pain-item--turn {
+  justify-content: center;
+  text-align: center;
+}
+.pain-item--lead .pain-big,
+.pain-item--turn .pain-big {
+  max-width: 18ch;
+  text-align: center;
+}
+.pain-turn {
+  color: var(--text-on-dark);
+}
+
+/* ============================================================================
+   БЛОК 4 — ПРОЦЕСС: светлый, занавес-перетекание, текст становится дизайном
+   ============================================================================ */
+.process {
+  position: relative;
+  z-index: 3;
+  overflow-x: clip;
+  margin-top: -7vh;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  border-radius: clamp(28px, 5vw, 60px) clamp(28px, 5vw, 60px) 0 0;
+  box-shadow: 0 -50px 90px rgba(0, 0, 0, 0.55);
+  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem)
+    clamp(6rem, 14vh, 12rem);
+}
+.proc-head {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.proc-kicker {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.proc-title {
+  margin: clamp(0.8rem, 2vh, 1.4rem) 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: var(--text-4xl);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.proc-steps {
+  position: relative;
+  list-style: none;
+  max-width: 1300px;
+  margin: clamp(3rem, 8vh, 6rem) auto 0;
+  padding: 0 0 0 clamp(2.2rem, 6vw, 5rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 9vh, 8rem);
+}
+.proc-line {
+  position: absolute;
+  left: clamp(0.5rem, 1.6vw, 1.1rem);
+  top: 0.6rem;
+  bottom: 0.6rem;
+  width: 2px;
+  background: var(--border-soft);
+  overflow: hidden;
+}
+.proc-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--text-primary);
+  transform-origin: top center;
+}
+.proc-step {
+  position: relative;
+}
+.proc-dot {
+  position: absolute;
+  left: calc(clamp(0.5rem, 1.6vw, 1.1rem) - clamp(2.2rem, 6vw, 5rem) + 1px);
+  top: 0.8em;
+  width: 11px;
+  height: 11px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  transform: scale(0.7);
+  transition: background var(--dur-micro) var(--ease-expo);
+}
+.proc-dot.is-on {
+  background: var(--text-primary);
+}
+.proc-idx {
+  display: block;
+  font-family: var(--font-geometric), sans-serif;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: var(--text-tertiary);
+}
+.proc-verb {
+  margin: 0.3em 0 0;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.1rem, 7vw, 5.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  transform-origin: left center;
+  will-change: transform;
+}
+.proc-note {
+  max-width: 42ch;
+  margin: clamp(0.8rem, 2vh, 1.4rem) 0 0 clamp(0rem, 8vw, 9rem);
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.proc-step[data-i="1"] .proc-note,
+.proc-step[data-i="3"] .proc-note {
+  margin-left: clamp(0rem, 16vw, 18rem);
+}
+
+/* ============================================================================
+   БЛОК 5 — ПРЕИМУЩЕСТВА: halftone-манифест (TrucknRoll) + редакторская сетка
+   ============================================================================ */
+.adv {
+  position: relative;
+  z-index: 4;
+  margin-top: -7vh;
+  background: #08080a;
+  border-radius: clamp(28px, 5vw, 60px) clamp(28px, 5vw, 60px) 0 0;
+  box-shadow: 0 -50px 90px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.adv-hero {
+  position: relative;
+  height: 100svh;
+  min-height: 620px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.adv-giant {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  pointer-events: none;
+}
+.adv-giant .g {
+  display: block;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(3.4rem, 16vw, 15rem);
+  line-height: 0.84;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: transparent;
+  /* halftone-заливка глифов точечным паттерном (dithered) */
+  background-image: radial-gradient(
+    rgba(244, 242, 238, 0.55) 21%,
+    transparent 23%
+  );
+  background-size: 0.15em 0.15em;
+  -webkit-background-clip: text;
+  background-clip: text;
+  will-change: transform;
+}
+.adv-giant .g:nth-child(2) {
+  align-self: stretch;
+  text-align: center;
+}
+.adv-hero-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.1rem, 3vh, 1.8rem);
+  max-width: 30ch;
+  text-align: center;
+  padding: clamp(1.4rem, 4vw, 2.4rem);
+}
+.adv-tag {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.55);
+}
+.adv-claim {
+  margin: 0;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+  line-height: 1.4;
+  color: var(--text-on-dark);
+}
+
+/* 6 преимуществ — редакторская асимметрия (12 колонок) */
+.adv-list {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(4rem, 10vh, 9rem) clamp(1.4rem, 6vw, 7rem)
+    clamp(6rem, 14vh, 12rem);
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: clamp(1.2rem, 3vw, 3rem);
+  row-gap: clamp(2.4rem, 6vh, 5rem);
+}
+.adv-item {
+  border-top: 1px solid rgba(244, 242, 238, 0.16);
+  padding-top: clamp(1.1rem, 2.5vh, 1.6rem);
+  will-change: transform, opacity;
+}
+.adv-item[data-i="0"] { grid-column: 1 / 7; }
+.adv-item[data-i="1"] { grid-column: 8 / 13; }
+.adv-item[data-i="2"] { grid-column: 1 / 5; }
+.adv-item[data-i="3"] { grid-column: 6 / 9; }
+.adv-item[data-i="4"] { grid-column: 10 / 13; }
+.adv-item[data-i="5"] { grid-column: 1 / 8; }
+.adv-num {
+  display: block;
+  font-family: var(--font-geometric), sans-serif;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: rgba(244, 242, 238, 0.4);
+}
+.adv-t {
+  margin: clamp(0.7rem, 1.6vh, 1.1rem) 0 0;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.4vw, 2.05rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+}
+.adv-item[data-i="0"] .adv-t {
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+}
+.adv-n {
+  margin: clamp(0.6rem, 1.4vh, 1rem) 0 0;
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: rgba(244, 242, 238, 0.6);
+}
+
+/* ============================================================================
+   АДАПТАЦИЯ ПОД ТЕЛЕФОН — блоки 3–5
+   ============================================================================ */
+@media (max-width: 760px) {
+  .pain-item {
+    min-height: 86svh;
+    padding: 0 1.3rem;
+  }
+  .pain-big {
+    font-size: clamp(2.3rem, 13vw, 3.6rem);
+    max-width: 100%;
+  }
+  .pain-note {
+    position: static;
+    max-width: 100%;
+    margin-top: 1.4rem;
+    text-align: left !important;
+  }
+  .pain-item[data-side="l"],
+  .pain-item[data-side="r"] {
+    align-items: center;
+  }
+  .pain-item[data-side="l"] .pain-big,
+  .pain-item[data-side="r"] .pain-big {
+    margin: 0;
+    text-align: left;
+  }
+  /* на телефоне боль и пояснение в один поток (golden-ratio не читается узко) */
+  .pain-item:not(.pain-item--lead):not(.pain-item--turn) {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .pain-item[data-side="r"] .pain-note,
+  .pain-item[data-side="l"] .pain-note {
+    inset: auto;
+  }
+  .pain-idx {
+    font-size: 64vw;
+  }
+
+  .proc-title {
+    font-size: var(--text-3xl);
+  }
+  .proc-note,
+  .proc-step[data-i="1"] .proc-note,
+  .proc-step[data-i="3"] .proc-note {
+    margin-left: 0;
+    font-size: var(--text-base);
+  }
+  .proc-verb {
+    font-size: clamp(1.4rem, 7.2vw, 2.3rem);
+  }
+  .proc-steps {
+    padding-left: 1.7rem;
+  }
+
+  .adv-giant .g {
+    font-size: clamp(2.8rem, 20vw, 5rem);
+  }
+  .adv-list {
+    grid-template-columns: 1fr;
+  }
+  .adv-item[data-i="0"],
+  .adv-item[data-i="1"],
+  .adv-item[data-i="2"],
+  .adv-item[data-i="3"],
+  .adv-item[data-i="4"],
+  .adv-item[data-i="5"] {
+    grid-column: 1;
+  }
+}

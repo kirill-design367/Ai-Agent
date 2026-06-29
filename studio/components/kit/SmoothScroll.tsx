@@ -16,6 +16,8 @@ function LenisGsapBridge() {
   useEffect(() => {
     registerGsap();
     if (!lenis) return;
+    // Expose for tooling (screenshot harness jumps to exact scroll positions).
+    (window as unknown as { __lenis?: unknown }).__lenis = lenis;
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
     return () => {
