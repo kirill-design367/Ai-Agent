@@ -3,7 +3,7 @@ import CustomCursor from "@/components/kit/CustomCursor";
 import MagneticTargets from "@/components/kit/MagneticTargets";
 import GrainOverlay from "@/components/kit/GrainOverlay";
 import ScrollProgress from "@/components/kit/ScrollProgress";
-import Preloader from "@/components/kit/Preloader";
+import Intro from "@/components/kit/Intro";
 import MessengerFab from "@/components/kit/MessengerFab";
 import Hero from "@/components/sections/Hero";
 import Pain from "@/components/sections/Pain";
@@ -24,7 +24,7 @@ import Contact from "@/components/sections/Contact";
 export default function Home() {
   return (
     <SmoothScroll>
-      <Preloader />
+      <Intro />
       <ScrollProgress />
       <CustomCursor />
       <MagneticTargets />

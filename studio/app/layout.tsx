@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Manrope } from "next/font/google";
+import { Playfair_Display, Manrope, Montserrat } from "next/font/google";
 import "./globals.css";
 
 /*
@@ -23,6 +23,14 @@ const body = Manrope({
   display: "swap",
 });
 
+// Geometric sans for the AUREA wordmark (logo) — clean, triangular A.
+const geometric = Montserrat({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-geometric",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Сайт за 1–5 дней — красивый, быстрый, продающий",
   description:
@@ -35,7 +43,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru" className={`${display.variable} ${body.variable}`}>
+    <html
+      lang="ru"
+      className={`${display.variable} ${body.variable} ${geometric.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
