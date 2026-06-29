@@ -5,6 +5,7 @@ import ScrollProgress from "@/components/kit/ScrollProgress";
 import Intro from "@/components/kit/Intro";
 import MessengerFab from "@/components/kit/MessengerFab";
 import Hero from "@/components/sections/Hero";
+import Works from "@/components/sections/Works";
 
 /*
   AUREA — full rebuild in progress. The site is being recreated from scratch as
@@ -23,6 +24,7 @@ export default function Home() {
 
       <main>
         <Hero />
+        <Works />
       </main>
     </SmoothScroll>
   );

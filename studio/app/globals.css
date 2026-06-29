@@ -276,6 +276,91 @@ html.lenis body {
   }
 }
 
+/* — WORKS: sticky stacking cinema (ScrollStack-style, on our Lenis + GSAP) */
+.works {
+  position: relative;
+  background: var(--bg-dark);
+  padding: clamp(4rem, 10vh, 9rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
+}
+.works-head {
+  max-width: 1400px;
+  margin: 0 auto clamp(2.5rem, 7vh, 5rem);
+}
+.works-stack {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 6vh, 5rem);
+}
+.work-card {
+  position: sticky;
+  top: 10vh;
+  height: min(78vh, 760px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(244, 242, 238, 0.08);
+  transform-origin: center top;
+  will-change: transform;
+}
+.work-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s var(--ease-expo);
+}
+.work-card:hover img {
+  transform: scale(1.04);
+}
+.work-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(8, 8, 9, 0.82) 100%);
+  pointer-events: none;
+}
+.work-cap {
+  position: absolute;
+  left: clamp(1.5rem, 4vw, 3rem);
+  right: clamp(1.5rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 4vw, 2.5rem);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem 1.5rem;
+  color: var(--text-on-dark);
+}
+.work-cap h3 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  letter-spacing: -0.01em;
+}
+.work-cap .meta {
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.7);
+}
+.work-num {
+  position: absolute;
+  top: clamp(1.2rem, 3vw, 2rem);
+  left: clamp(1.5rem, 4vw, 3rem);
+  z-index: 2;
+  font-family: var(--font-geometric), sans-serif;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: rgba(244, 242, 238, 0.85);
+  mix-blend-mode: difference;
+}
+
 /* — NEW HERO (reference-level: fluid cursor + kinetic type + spinning CTA) */
 .hero {
   position: relative;
