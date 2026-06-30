@@ -45,9 +45,20 @@ export default function Pain() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // круговая надпись: из ниоткуда справа → дуга вверх → уходит влево
-      const ring = root.current!.querySelector(".portal-ring");
-      if (ring) {
+      // волновая строка: выезжает справа → проходит по центру → уходит влево,
+      // при этом буквы непрерывно «огибаются» бегущей волной (traveling wave).
+      const waveChars = gsap.utils.toArray<HTMLElement>(".pain-wave-ch");
+      if (waveChars.length) {
+        // непрерывная бегущая волна по буквам
+        gsap.to(waveChars, {
+          y: -26,
+          ease: "sine.inOut",
+          duration: 1.2,
+          repeat: -1,
+          yoyo: true,
+          stagger: { each: 0.05, from: "start" },
+        });
+        // проезд справа налево, привязан к скроллу (пин — чтобы зритель задержался)
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".pain-portal",
@@ -58,14 +69,12 @@ export default function Pain() {
           },
         });
         tl.fromTo(
-          ring,
-          { x: "74vw", y: "16vh", autoAlpha: 0, rotate: -28 },
-          { x: "0vw", y: "-9vh", autoAlpha: 1, rotate: 0, ease: "sine.out", duration: 0.5 }
-        ).to(ring, {
-          x: "-74vw",
-          y: "16vh",
+          ".pain-wave",
+          { x: "64vw", autoAlpha: 0 },
+          { x: "0vw", autoAlpha: 1, ease: "sine.out", duration: 0.5 }
+        ).to(".pain-wave", {
+          x: "-64vw",
           autoAlpha: 0,
-          rotate: 28,
           ease: "sine.in",
           duration: 0.5,
         });
@@ -102,26 +111,18 @@ export default function Pain() {
     { scope: root }
   );
 
-  const phrase = "А ТЕПЕРЬ — О НАБОЛЕВШЕМ — ";
+  const phrase = "А теперь — о наболевшем";
 
   return (
     <section id="pain" className="theme-dark pain" ref={root}>
-      {/* перетекание из кейсов — круговая надпись, дуга справа налево */}
+      {/* перетекание из кейсов — волновая строка, проезд справа налево */}
       <div className="pain-portal">
-        <div className="portal-ring">
-          <svg viewBox="0 0 240 240" aria-hidden>
-            <defs>
-              <path id="painCircle" d="M120,32 a88,88 0 1,1 -0.1,0" fill="none" />
-            </defs>
-            <text>
-              <textPath href="#painCircle" startOffset="0">
-                {phrase + phrase}
-              </textPath>
-            </text>
-          </svg>
-          <span className="portal-core" aria-hidden>
-            ↓
-          </span>
+        <div className="pain-wave" aria-label={phrase}>
+          {phrase.split("").map((ch, i) => (
+            <span className="pain-wave-ch" key={i} aria-hidden>
+              {ch === " " ? " " : ch}
+            </span>
+          ))}
         </div>
       </div>
 

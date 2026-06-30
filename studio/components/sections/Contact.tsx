@@ -1,17 +1,35 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 
 /*
-  КОНТАКТ — финал. Не сухая форма, а предвкушение. Гигантский заголовок,
-  магнитные кнопки реальных каналов, и возврат к точке-треугольнику-A —
-  замыкаем петлю бренда (точка → … → шедевр), с чего начинали в интро.
+  КОНТАКТ — финал. Не сухая форма, а предвкушение. Гигантский заголовок и живая
+  форма заявки: имя + любой удобный контакт + пара слов о проекте. Сайт —
+  статика (GitHub Pages, без сервера), поэтому заявка уходит прямо в WhatsApp
+  владельца готовым сообщением. Ниже — прямые каналы («мои данные»).
 */
+const WHATSAPP = "79185367424";
+
 export default function Contact() {
   const root = useRef<HTMLElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [about, setAbout] = useState("");
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const lines = [
+      "Здравствуйте! Заявка с сайта AUREA.",
+      `Имя: ${name || "—"}`,
+      `Контакт: ${contact || "—"}`,
+      about ? `О проекте: ${about}` : "",
+    ].filter(Boolean);
+    const text = encodeURIComponent(lines.join("\n"));
+    window.open(`https://wa.me/${WHATSAPP}?text=${text}`, "_blank", "noopener");
+  };
 
   useGSAP(
     () => {
@@ -58,6 +76,51 @@ export default function Contact() {
           Идея, сроки, бюджет — в&nbsp;двух словах. Дальше придумаю я. Отвечаю
           лично, обычно в&nbsp;течение пары часов.
         </p>
+
+        {/* форма заявки — уходит готовым сообщением в WhatsApp */}
+        <form className="contact-form contact-row" onSubmit={submit}>
+          <div className="contact-field">
+            <label htmlFor="cf-name">Как вас зовут</label>
+            <input
+              id="cf-name"
+              className="field"
+              type="text"
+              placeholder="Имя"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="contact-field">
+            <label htmlFor="cf-contact">Любой удобный контакт</label>
+            <input
+              id="cf-contact"
+              className="field"
+              type="text"
+              placeholder="Телефон, WhatsApp, Telegram или e-mail"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              required
+            />
+          </div>
+          <div className="contact-field contact-field--wide">
+            <label htmlFor="cf-about">Пара слов о проекте (по желанию)</label>
+            <textarea
+              id="cf-about"
+              className="field"
+              rows={3}
+              placeholder="Что за бизнес, какой нужен сайт, сроки…"
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="btn btn--primary contact-submit" data-magnetic>
+            <span className="btn-cta-label">Отправить заявку</span>
+            <span className="btn-cta-arrow" aria-hidden>→</span>
+          </button>
+        </form>
+
+        <p className="contact-or contact-row">или напишите напрямую</p>
 
         <div className="contact-channels contact-row">
           <a className="contact-ch" href="https://t.me/Sk_Mac1" target="_blank" rel="noopener" data-magnetic>

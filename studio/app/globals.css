@@ -260,6 +260,55 @@ html.lenis body {
   border-color: var(--accent);
   color: var(--accent);
 }
+/* креативная CTA «Хочу сайт как у вас» — стрелка выезжает, лейбл смещается,
+   по поверхности проходит блик (shine). */
+.adv-cta {
+  position: relative;
+  gap: 0.7em;
+  padding-right: calc(var(--space-xl) - 0.2em);
+  overflow: hidden;
+}
+.adv-cta .btn-cta-label,
+.adv-cta .btn-cta-arrow,
+.contact-submit .btn-cta-label,
+.contact-submit .btn-cta-arrow {
+  position: relative;
+  z-index: 1;
+  transition: transform var(--dur-base, 0.4s) var(--ease-expo);
+}
+.adv-cta .btn-cta-arrow,
+.contact-submit .btn-cta-arrow {
+  display: inline-block;
+  font-size: 1.15em;
+}
+.adv-cta:hover .btn-cta-arrow,
+.contact-submit:hover .btn-cta-arrow {
+  transform: translateX(5px);
+}
+.adv-cta:hover .btn-cta-label,
+.contact-submit:hover .btn-cta-label {
+  transform: translateX(-2px);
+}
+/* пробегающий блик */
+.adv-cta::before,
+.contact-submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s var(--ease-expo);
+  pointer-events: none;
+}
+.adv-cta:hover::before,
+.contact-submit:hover::before {
+  transform: translateX(130%);
+}
 
 /* — Сравнение (split-world). Asymmetric pair: "Со мной" dominant, "Студия"
    muted. Collapses to a single column on mobile (each cell self-labels). */
@@ -286,39 +335,45 @@ html.lenis body {
   position: relative;
   overflow: hidden;
   margin: 0 0 clamp(2.5rem, 7vh, 5rem);
-  padding: clamp(1rem, 2.5vh, 1.8rem) 0;
-  border-top: 1px solid rgba(244, 242, 238, 0.14);
-  border-bottom: 1px solid rgba(244, 242, 238, 0.14);
+  padding: clamp(0.6rem, 2vh, 1.4rem) 0;
 }
+/* compositor-only transform animation → не дёргается при скролле */
 .works-ticker {
   display: flex;
   width: max-content;
-  animation: worksticker 26s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  animation: worksticker 32s linear infinite;
+}
+.works-ticker-group {
+  display: flex;
+  flex-shrink: 0;
 }
 .works-ticker span {
   display: inline-flex;
   align-items: center;
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+  padding-right: clamp(3rem, 8vw, 7rem);
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(1.8rem, 5.4vw, 4.4rem);
+  font-size: clamp(2.6rem, 8vw, 6.5rem);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   text-transform: uppercase;
   color: var(--text-on-dark);
   white-space: nowrap;
 }
 .works-ticker span i {
+  display: inline-block;
   font-style: normal;
-  color: rgba(244, 242, 238, 0.38);
-  font-size: 0.6em;
+  color: rgba(244, 242, 238, 0.32);
+  font-size: 0.5em;
+  margin-left: clamp(3rem, 8vw, 7rem);
+  transform: translateY(-0.12em);
 }
-.works:hover .works-ticker {
-  animation-play-state: paused;
-}
+/* два идентичных трека → -50% сдвигает ровно на один трек, шов невидим */
 @keyframes worksticker {
-  to { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 .works-stack {
   max-width: 1200px;
@@ -408,7 +463,11 @@ html.lenis body {
     padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(6rem, 16vh, 10rem);
   }
   .works-ticker span {
-    font-size: clamp(1.5rem, 9vw, 2.6rem);
+    font-size: clamp(2.4rem, 13vw, 4rem);
+    padding-right: clamp(2rem, 9vw, 3.5rem);
+  }
+  .works-ticker span i {
+    margin-left: clamp(2rem, 9vw, 3.5rem);
   }
   .works-stack {
     gap: 1.4rem;
@@ -541,7 +600,7 @@ html.lenis body {
   margin: 0;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.4rem, 7vw, 6.6rem);
+  font-size: clamp(2.4rem, 6.1vw, 5.6rem);
   line-height: 1;
   letter-spacing: -0.022em;
   text-transform: uppercase;
@@ -554,14 +613,14 @@ html.lenis body {
   white-space: nowrap;
 }
 .hero-headline .hl-b {
-  margin-left: 8vw;
+  margin-left: 6vw;
 }
 .hero-headline .hl-c {
   margin-left: 2.5vw;
   color: rgba(244, 242, 238, 0.42);
 }
 .hero-headline .hl-d {
-  margin-left: 14vw;
+  margin-left: 9.5vw;
 }
 
 /* подзаголовок — прямо под заголовком, тем же мягким движением */
@@ -647,7 +706,7 @@ html.lenis body {
     align-self: end;
   }
   .hero-headline {
-    font-size: clamp(1.7rem, 8.6vw, 2.6rem);
+    font-size: clamp(2rem, 9.8vw, 3.1rem);
     line-height: 1.02;
   }
   .hero-headline .hl-b {
@@ -860,58 +919,30 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* круговая вращающаяся надпись «А ТЕПЕРЬ — О НАБОЛЕВШЕМ» (перетекание из кейсов) */
+/* волновая строка «А теперь — о наболевшем» (перетекание из кейсов) */
 .pain-portal {
   position: relative;
   height: 100svh;
   display: grid;
   place-items: center;
+  overflow: hidden;
 }
-.portal-ring {
-  position: relative;
-  width: min(74vw, 540px);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  will-change: transform;
-}
-.portal-ring svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  animation: portalspin 22s linear infinite;
-}
-.portal-ring text {
-  fill: rgba(244, 242, 238, 0.78);
-  font-family: var(--font-geometric), sans-serif;
-  font-weight: 600;
-  font-size: 13.5px;
-  letter-spacing: 0.12em;
-}
-.portal-core {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
-  color: var(--text-on-dark);
-  line-height: 1;
-  animation: portalbob 2.4s var(--ease-expo) infinite;
-}
-.portal-cap {
-  position: absolute;
-  bottom: clamp(2rem, 6vh, 4rem);
-  font-size: var(--text-xs);
-  letter-spacing: 0.24em;
+.pain-wave {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 7vw, 6rem);
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.45);
-  margin: 0;
+  color: var(--text-on-dark);
 }
-@keyframes portalspin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes portalbob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+.pain-wave-ch {
+  display: inline-block;
+  white-space: pre;
+  will-change: transform;
 }
 
 /* тоннель болей */
@@ -1021,14 +1052,16 @@ html.lenis body {
 /* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок */
 .proc-enter {
   position: relative;
-  height: 100svh;
+  height: 100dvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
+  /* фон-страховка: тёмный, чтобы под завесой никогда не светилась белая полоса */
+  background: #070708;
 }
 .proc-veil {
   position: absolute;
-  inset: 0;
+  inset: -2px 0;
   z-index: 5;
   display: grid;
   place-items: center;
@@ -1061,12 +1094,14 @@ html.lenis body {
   align-items: center;
   justify-content: center;
   text-align: center;
+  background: var(--bg-base);
   will-change: transform;
 }
 .proc-questions {
   position: absolute;
   inset: -6% 0;
   pointer-events: none;
+  will-change: transform;
 }
 .proc-q {
   position: absolute;
@@ -1077,6 +1112,10 @@ html.lenis body {
   text-transform: uppercase;
   color: var(--text-secondary);
   white-space: nowrap;
+  will-change: transform;
+}
+.proc-q-float {
+  display: inline-block;
   will-change: transform;
 }
 .proc-kicker {
@@ -1166,7 +1205,7 @@ html.lenis body {
   margin: 0.3em 0 0;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.1rem, 7vw, 5.8rem);
+  font-size: clamp(2.6rem, 8.4vw, 7.2rem);
   line-height: 0.95;
   letter-spacing: -0.025em;
   text-transform: uppercase;
@@ -1194,9 +1233,21 @@ html.lenis body {
   z-index: 4;
   margin-top: -7vh;
   background: #08080a;
-  border-radius: clamp(28px, 5vw, 60px) clamp(28px, 5vw, 60px) 0 0;
   box-shadow: 0 -50px 90px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
+  /* по вертикали overflow видим — волна-чернила выходит вверх в Процесс */
+  overflow-x: clip;
+}
+/* переход-вход: волна-чернила, тёмный верхний край блока, бьющий вверх в светлый Процесс */
+.adv-wave {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  width: 100%;
+  height: clamp(46px, 8vw, 130px);
+  margin-bottom: -1px;
+  display: block;
+  pointer-events: none;
+  will-change: transform;
 }
 .adv-stage {
   position: relative;
@@ -1268,7 +1319,7 @@ html.lenis body {
   background: var(--text-on-dark);
 }
 
-/* 6 преимуществ — редакторская асимметрия (12 колонок) */
+/* 8 преимуществ — редакторская асимметрия (12 колонок) + спинной ручей слева */
 .adv-list {
   position: relative;
   max-width: 1320px;
@@ -1280,6 +1331,34 @@ html.lenis body {
   column-gap: clamp(1.2rem, 3vw, 3rem);
   row-gap: clamp(2.4rem, 6vh, 5rem);
 }
+/* спинной ручей — вопрос «втекает» вниз сквозь ответы */
+.adv-spine {
+  position: absolute;
+  left: clamp(0.6rem, 2.6vw, 2.4rem);
+  top: clamp(2rem, 6vh, 5rem);
+  bottom: clamp(6rem, 14vh, 12rem);
+  width: 2px;
+  background: rgba(244, 242, 238, 0.12);
+  pointer-events: none;
+}
+.adv-spine-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(244, 242, 238, 0.95), rgba(244, 242, 238, 0.55));
+  transform-origin: top center;
+}
+.adv-spine-comet {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--text-on-dark);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px rgba(244, 242, 238, 0.6);
+}
 .adv-item {
   border-top: 1px solid rgba(244, 242, 238, 0.16);
   padding-top: clamp(1.1rem, 2.5vh, 1.6rem);
@@ -1290,14 +1369,35 @@ html.lenis body {
 .adv-item[data-i="2"] { grid-column: 1 / 5; }
 .adv-item[data-i="3"] { grid-column: 6 / 9; }
 .adv-item[data-i="4"] { grid-column: 10 / 13; }
-.adv-item[data-i="5"] { grid-column: 1 / 8; }
+.adv-item[data-i="5"] { grid-column: 1 / 6; }
+.adv-item[data-i="6"] { grid-column: 7 / 13; }
+.adv-item[data-i="7"] { grid-column: 1 / 8; }
 .adv-num {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
   font-family: var(--font-geometric), sans-serif;
   font-weight: 600;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
   color: rgba(244, 242, 238, 0.4);
+  transition: color 0.5s var(--ease-expo);
+}
+/* номер загорается, когда ручей до него «дотекает» */
+.adv-num::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(244, 242, 238, 0.22);
+  transition: background 0.5s var(--ease-expo), box-shadow 0.5s var(--ease-expo);
+}
+.adv-num.is-lit {
+  color: var(--text-on-dark);
+}
+.adv-num.is-lit::before {
+  background: var(--text-on-dark);
+  box-shadow: 0 0 12px rgba(244, 242, 238, 0.7);
 }
 .adv-t {
   margin: clamp(0.7rem, 1.6vh, 1.1rem) 0 0;
@@ -1396,13 +1496,11 @@ html.lenis body {
   .adv-list {
     grid-template-columns: 1fr;
   }
-  .adv-item[data-i="0"],
-  .adv-item[data-i="1"],
-  .adv-item[data-i="2"],
-  .adv-item[data-i="3"],
-  .adv-item[data-i="4"],
-  .adv-item[data-i="5"] {
-    grid-column: 1;
+  .adv-item {
+    grid-column: 1 !important;
+  }
+  .adv-spine {
+    display: none;
   }
 }
 
@@ -1421,7 +1519,64 @@ html.lenis body {
   position: relative;
   background: var(--bg-base);
   color: var(--text-primary);
-  padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+  padding: 0 clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+}
+/* портал-вход: пиксельное табло ₽, наезжает и растворяется */
+.prices-portal {
+  position: relative;
+  height: 100dvh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  background: var(--bg-base);
+}
+.prices-reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 0 clamp(1.4rem, 6vw, 7rem);
+  background: var(--bg-base);
+  will-change: transform, opacity;
+}
+.prices-reveal .prices-head {
+  margin: 0;
+  text-align: center;
+}
+.rub-veil {
+  position: absolute;
+  inset: -2px 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: #08080a;
+  overflow: hidden;
+  will-change: opacity;
+}
+.rub-field {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: clamp(0.3rem, 1.2vw, 1rem);
+  width: min(120vw, 1100px);
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+.rub-cell {
+  font-family: ui-monospace, "SF Mono", "Roboto Mono", monospace;
+  font-weight: 700;
+  font-size: clamp(1rem, 3.4vw, 2.4rem);
+  line-height: 1;
+  text-align: center;
+  color: rgba(244, 242, 238, 0.85);
+  /* мерцание как у LED-табло → читается «пиксельно» */
+  animation: rubflicker 1.3s steps(2, end) infinite;
+}
+@keyframes rubflicker {
+  0%, 100% { opacity: 0.14; }
+  45% { opacity: 0.14; }
+  50% { opacity: 0.92; }
+  85% { opacity: 0.92; }
 }
 .prices-head {
   max-width: 1300px;
@@ -1447,13 +1602,28 @@ html.lenis body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(1rem, 2.5vw, 2rem);
-  align-items: stretch;
+  align-items: center;
+  perspective: 1400px;
 }
 .price-card {
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
   isolation: isolate;
+  will-change: transform, opacity;
+  transition: transform 0.55s var(--ease-expo), box-shadow 0.55s var(--ease-expo);
+}
+.price-card:hover {
+  transform: translateY(-10px);
+}
+/* рекомендуемый тариф крупнее и приподнят — визуальная иерархия */
+.price-card--rec {
+  z-index: 2;
+  transform: scale(1.05);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+}
+.price-card--rec:hover {
+  transform: scale(1.05) translateY(-10px);
 }
 .star-move {
   position: absolute;
@@ -1517,16 +1687,44 @@ html.lenis body {
   margin-bottom: 0.4rem;
 }
 .price-name {
-  font-size: var(--text-sm);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.62);
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.05rem, 1.8vw, 1.4rem);
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(244, 242, 238, 0.86);
 }
+/* типографическая иерархия цены: «от» мелко, число крупно, ₽ акцентом */
 .price-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.28em;
+  margin-top: 0.1rem;
   font-family: var(--font-headline), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
   letter-spacing: -0.02em;
+  line-height: 1;
+}
+.price-pre {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.5);
+}
+.price-num {
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-variant-numeric: tabular-nums;
+}
+.price-cur {
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  color: var(--accent);
+}
+.price-card--rec .price-num {
+  font-size: clamp(2.3rem, 4.8vw, 3.7rem);
 }
 .price-time {
   font-size: var(--text-sm);
@@ -1581,10 +1779,72 @@ html.lenis body {
   position: relative;
   background: var(--bg-dark);
   padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+  overflow: hidden;
+}
+/* космический фон — звёздная пыль + дрейфующие орбиты (невесомость) */
+.offer-space {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.offer-stars {
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(244, 242, 238, 0.5), transparent),
+    radial-gradient(1px 1px at 70% 60%, rgba(244, 242, 238, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 40% 80%, rgba(244, 242, 238, 0.45), transparent),
+    radial-gradient(1px 1px at 85% 20%, rgba(244, 242, 238, 0.35), transparent),
+    radial-gradient(1px 1px at 10% 70%, rgba(244, 242, 238, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(244, 242, 238, 0.4), transparent);
+  background-size: 320px 320px;
+  background-repeat: repeat;
+  opacity: 0.5;
+  animation: stardrift 90s linear infinite;
+}
+@keyframes stardrift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-320px, -160px, 0); }
+}
+.offer-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  mix-blend-mode: screen;
+}
+.offer-orb-1 {
+  width: 44vw;
+  height: 44vw;
+  top: -8%;
+  left: -6%;
+  background: rgba(110, 130, 200, 0.5);
+  animation: orbdrift1 26s ease-in-out infinite;
+}
+.offer-orb-2 {
+  width: 38vw;
+  height: 38vw;
+  bottom: -10%;
+  right: -8%;
+  background: rgba(200, 150, 120, 0.42);
+  animation: orbdrift2 32s ease-in-out infinite;
+}
+@keyframes orbdrift1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(8%, 6%); }
+}
+@keyframes orbdrift2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-7%, -5%); }
 }
 .offer-head {
+  position: relative;
+  z-index: 1;
   max-width: 1300px;
   margin: 0 auto clamp(2.5rem, 7vh, 4.5rem);
+  will-change: transform, opacity;
 }
 .offer-kicker {
   font-size: var(--text-xs);
@@ -1602,26 +1862,35 @@ html.lenis body {
   color: var(--text-on-dark);
 }
 .bento {
+  position: relative;
+  z-index: 1;
   max-width: 1300px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: minmax(150px, auto);
   gap: clamp(0.8rem, 1.6vw, 1.2rem);
+  perspective: 1300px;
+  transform-style: preserve-3d;
 }
 .bento-card {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(244, 242, 238, 0.1);
-  background: var(--bg-dark-2);
+  background: rgba(18, 18, 22, 0.72);
+  backdrop-filter: blur(6px);
   padding: clamp(1.3rem, 2.4vw, 2rem);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 0.5rem;
-  transition: border-color 0.4s var(--ease-expo), transform 0.4s var(--ease-expo);
+  transition: border-color 0.4s var(--ease-expo), box-shadow 0.4s var(--ease-expo);
   will-change: transform, opacity;
+  transform-style: preserve-3d;
+}
+.bento-card:hover {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
 }
 .bento-card::before {
   content: "";
@@ -1761,13 +2030,25 @@ html.lenis body {
   transform: scaleY(0);
   opacity: 0;
 }
+/* аккордеон на grid-template-rows — плавно, подстраивается под контент, без лагов */
 .faq-a-wrap {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.55s var(--ease-expo);
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-expo);
 }
 .faq-item.is-open .faq-a-wrap {
-  max-height: 44vh;
+  grid-template-rows: 1fr;
+}
+.faq-a {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.45s var(--ease-expo), transform 0.45s var(--ease-expo);
+}
+.faq-item.is-open .faq-a {
+  opacity: 1;
+  transform: translateY(0);
 }
 .faq-a p {
   margin: 0;
@@ -1777,15 +2058,6 @@ html.lenis body {
   font-size: var(--text-lg);
   line-height: 1.55;
   color: rgba(244, 242, 238, 0.66);
-}
-.faq-word {
-  display: inline-block;
-  white-space: nowrap;
-}
-.faq-ch {
-  display: inline-block;
-  white-space: pre;
-  will-change: transform, opacity;
 }
 
 /* ============================================================================
@@ -1815,12 +2087,15 @@ html.lenis body {
   letter-spacing: -0.02em;
   color: var(--text-on-dark);
 }
+/* хаотичная сетка по золотому сечению: разные ширины + вертикальный сдвиг */
 .rev-grid {
-  max-width: 1300px;
+  position: relative;
+  max-width: 1280px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(1rem, 2.5vw, 2rem);
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: clamp(1rem, 2.5vw, 2.4rem);
+  align-items: start;
 }
 .rev-card {
   position: relative;
@@ -1828,9 +2103,15 @@ html.lenis body {
   border-radius: var(--radius-lg);
   border: 1px solid rgba(244, 242, 238, 0.1);
   background: var(--bg-dark-2);
-  padding: clamp(1.6rem, 3vw, 2.6rem);
+  padding: clamp(1.5rem, 2.6vw, 2.3rem);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   will-change: transform, opacity;
 }
+/* размеры и сдвиги по золотому сечению — карточки не во весь экран */
+.rev-card[data-i="0"] { grid-column: 1 / 7;  margin-top: 0; }
+.rev-card[data-i="1"] { grid-column: 8 / 13; margin-top: clamp(2rem, 9vh, 6rem); }
+.rev-card[data-i="2"] { grid-column: 2 / 8;  margin-top: clamp(1.4rem, 5vh, 3.5rem); }
+.rev-card[data-i="3"] { grid-column: 9 / 13; margin-top: clamp(0rem, -1vh, 0rem); }
 .rev-quote {
   font-family: var(--font-display), Georgia, serif;
   font-size: 3rem;
@@ -1894,11 +2175,47 @@ html.lenis body {
   line-height: 1.5;
   color: rgba(244, 242, 238, 0.66);
 }
+/* форма заявки */
+.contact-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.9rem, 2vw, 1.4rem);
+  margin-top: clamp(2rem, 5vh, 3.4rem);
+  max-width: 760px;
+}
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.contact-field--wide {
+  grid-column: 1 / -1;
+}
+.contact-field label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.contact-submit {
+  grid-column: 1 / -1;
+  justify-self: start;
+  position: relative;
+  gap: 0.7em;
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+.contact-or {
+  margin: clamp(1.6rem, 4vh, 2.6rem) 0 0;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
 .contact-channels {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(0.8rem, 1.6vw, 1.2rem);
-  margin-top: clamp(2rem, 5vh, 3.5rem);
+  margin-top: clamp(1rem, 2.5vh, 1.6rem);
 }
 .contact-ch {
   display: flex;
@@ -1962,6 +2279,10 @@ html.lenis body {
   }
   .price-card--rec {
     order: -1;
+    transform: none;
+  }
+  .price-card--rec:hover {
+    transform: translateY(-10px);
   }
   .bento {
     grid-template-columns: repeat(2, 1fr);
@@ -1971,6 +2292,17 @@ html.lenis body {
     grid-row: span 1;
   }
   .rev-grid {
+    grid-template-columns: 1fr;
+    row-gap: 1.2rem;
+  }
+  .rev-card[data-i="0"],
+  .rev-card[data-i="1"],
+  .rev-card[data-i="2"],
+  .rev-card[data-i="3"] {
+    grid-column: 1;
+    margin-top: 0;
+  }
+  .contact-form {
     grid-template-columns: 1fr;
   }
   .contact-channels {

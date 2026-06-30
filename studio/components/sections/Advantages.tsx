@@ -7,9 +7,11 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 /*
   ПРЕИМУЩЕСТВА — отвечает на «Почему вы, а не агентство/фрилансер?».
 
-  Вопрос набран КРУПНЫМИ буквами из точек (как в референсе), слова встают в
-  столбик чуть хаотично по золотому сечению. Финальный «?» стекает водой вниз
-  и «наливает» блок ответов — преимущества проявляются в невесомости.
+  Переход из Процесса (светлый) — тёмная волна-чернила поднимается снизу и
+  «затапливает» блок. Вопрос набран КРУПНЫМИ буквами ИЗ ТОЧЕК, встаёт столбиком
+  по золотому сечению. Финальный «?» стекает в спинной «ручей», который наливается
+  по скроллу — и втекает в каждый ответ: номер ответа загорается, когда ручей
+  до него доходит. Прямая связь «вопрос → ответ».
 */
 const QWORDS = ["Почему", "выбирают", "меня,", "а не", "агентство"];
 
@@ -38,6 +40,14 @@ const ADV = [
     t: "Сайт ваш на 100%",
     n: "Код, домен и все доступы у вас. Никакой привязки и абонентской платы.",
   },
+  {
+    t: "Отвечаю лично и быстро",
+    n: "Обычно в течение пары часов — в Telegram или WhatsApp. Без тикетов и очередей.",
+  },
+  {
+    t: "Делаю, как для себя",
+    n: "Каждый проект — в моё портфолио. Мне важно, чтобы вы возвращались и рекомендовали.",
+  },
 ];
 
 export default function Advantages() {
@@ -49,15 +59,35 @@ export default function Advantages() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // слова вопроса СВАЛИВАЮТСЯ по скроллу — слово за словом
+      // ПЕРЕХОД-ВХОД: тёмная волна-чернила поднимается из Процесса и затапливает блок
+      const wave = root.current!.querySelector(".adv-wave");
+      if (wave) {
+        gsap.fromTo(
+          wave,
+          { yPercent: 36 },
+          {
+            yPercent: 0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".adv",
+              start: "top 96%",
+              end: "top 40%",
+              scrub: 0.7,
+            },
+          }
+        );
+      }
+
+      // слова вопроса СВАЛИВАЮТСЯ по скроллу — слово за словом, точки «проявляются»
       gsap.utils.toArray<HTMLElement>(".adv-qw").forEach((w, i) => {
         gsap.fromTo(
           w,
-          { y: -130, opacity: 0, rotateX: -55 },
+          { y: -130, opacity: 0, rotateX: -55, filter: "blur(8px)" },
           {
             y: 0,
             opacity: 1,
             rotateX: 0,
+            filter: "blur(0px)",
             ease: "power3.out",
             scrollTrigger: {
               trigger: ".adv-stage",
@@ -69,18 +99,14 @@ export default function Advantages() {
         );
       });
 
-      // «?» стекает водой → наливает блок ответов
+      // «?» стекает каплей в верх спинного ручья
       const drip = root.current!.querySelector(".adv-drip");
       const drop = root.current!.querySelector(".adv-drop");
       if (drip && drop) {
         const tl = gsap.timeline({
           scrollTrigger: { trigger: ".adv-stage", start: "top 30%" },
         });
-        tl.fromTo(
-          drip,
-          { scaleY: 0 },
-          { scaleY: 1, duration: 0.9, ease: "power1.in" }
-        ).fromTo(
+        tl.fromTo(drip, { scaleY: 0 }, { scaleY: 1, duration: 0.9, ease: "power1.in" }).fromTo(
           drop,
           { y: 0, opacity: 1, scale: 1 },
           { y: 120, opacity: 0, scale: 0.6, duration: 0.7, ease: "power1.in" },
@@ -88,7 +114,14 @@ export default function Advantages() {
         );
       }
 
-      // ответы проявляются и невесомо парят
+      // СПИННОЙ РУЧЕЙ наливается по скроллу (вопрос «втекает» вниз сквозь ответы)
+      const fill = root.current!.querySelector(".adv-spine-fill");
+      const comet = root.current!.querySelector(".adv-spine-comet");
+      const spineST = { trigger: ".adv-list", start: "top 72%", end: "bottom 80%", scrub: 0.6 };
+      if (fill) gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: spineST });
+      if (comet) gsap.fromTo(comet, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: spineST });
+
+      // ответы проявляются; номер загорается, когда ручей до него «дотекает»
       gsap.utils.toArray<HTMLElement>(".adv-item").forEach((item, i) => {
         gsap.fromTo(
           item,
@@ -101,8 +134,16 @@ export default function Advantages() {
             scrollTrigger: { trigger: item, start: "top 90%" },
           }
         );
+        const num = item.querySelector(".adv-num");
+        if (num)
+          ScrollTrigger.create({
+            trigger: item,
+            start: "top 64%",
+            onEnter: () => num.classList.add("is-lit"),
+            onLeaveBack: () => num.classList.remove("is-lit"),
+          });
         gsap.to(item, {
-          y: gsap.utils.random(-10, 10),
+          y: gsap.utils.random(-8, 8),
           duration: gsap.utils.random(3.5, 5.5),
           ease: "sine.inOut",
           repeat: -1,
@@ -118,6 +159,14 @@ export default function Advantages() {
 
   return (
     <section id="advantages" className="theme-dark adv" ref={root}>
+      {/* переход-вход: волна-чернила, поднимающаяся из Процесса */}
+      <svg className="adv-wave" viewBox="0 0 1440 140" preserveAspectRatio="none" aria-hidden>
+        <path
+          d="M0,70 C220,128 430,8 720,60 C1010,112 1230,18 1440,70 L1440,140 L0,140 Z"
+          fill="#08080a"
+        />
+      </svg>
+
       <div className="adv-stage">
         <div className="adv-quest">
           {QWORDS.map((w, i) => (
@@ -133,6 +182,12 @@ export default function Advantages() {
       </div>
 
       <div className="adv-list">
+        {/* спинной ручей — вопрос втекает в ответы */}
+        <span className="adv-spine" aria-hidden>
+          <span className="adv-spine-fill" />
+          <span className="adv-spine-comet" />
+        </span>
+
         {ADV.map((a, i) => (
           <article className="adv-item" data-i={i} key={a.t}>
             <span className="adv-num">{String(i + 1).padStart(2, "0")}</span>
@@ -141,7 +196,8 @@ export default function Advantages() {
           </article>
         ))}
         <a href="#contact" className="btn btn--primary adv-cta" data-magnetic>
-          Обсудить проект
+          <span className="btn-cta-label">Хочу сайт как у вас</span>
+          <span className="btn-cta-arrow" aria-hidden>→</span>
         </a>
       </div>
     </section>

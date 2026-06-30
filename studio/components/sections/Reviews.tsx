@@ -2,12 +2,13 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   ОТЗЫВЫ — социальное доказательство. Реальных отзывов пока нет — это ЧЕРНОВЫЕ
   плейсхолдеры со слотами под замену (имя/сфера/текст), без фальшивых «5 звёзд».
-  Карточки появляются и невесомо парят.
+  Карточки разного размера разбросаны по золотому сечению, чуть повёрнуты и
+  невесомо парят; на входе слетаются из разных сторон. Не «на весь экран».
 */
 const REVIEWS = [
   {
@@ -32,6 +33,10 @@ const REVIEWS = [
   },
 ];
 
+// базовый наклон каждой карточки (хаос по золотому сечению)
+const ROT = [-1.8, 1.3, 1.9, -1.2];
+const FROM_X = [-160, 160, -130, 150];
+
 export default function Reviews() {
   const root = useRef<HTMLElement>(null);
 
@@ -39,27 +44,51 @@ export default function Reviews() {
     () => {
       registerGsap();
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      // заголовок проявляется
+      gsap.fromTo(
+        ".reviews-head",
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: { trigger: ".reviews", start: "top 78%" },
+        }
+      );
+
       gsap.utils.toArray<HTMLElement>(".rev-card").forEach((card, i) => {
+        const rot = ROT[i % ROT.length];
+        // слетаются из разных сторон и встают под своим углом
         gsap.fromTo(
           card,
-          { y: 50, opacity: 0 },
+          { x: FROM_X[i % FROM_X.length], y: 70, opacity: 0, rotation: rot * 4 },
           {
+            x: 0,
             y: 0,
             opacity: 1,
-            duration: 0.9,
+            rotation: rot,
+            duration: 1.2,
             ease: "expo.out",
-            scrollTrigger: { trigger: card, start: "top 88%" },
+            scrollTrigger: { trigger: ".rev-grid", start: "top 82%" },
+            delay: i * 0.08,
+            onComplete: () => {
+              // невесомый дрейф вокруг своего угла (rotation сохраняется)
+              gsap.to(card, {
+                y: gsap.utils.random(-13, 13),
+                x: gsap.utils.random(-7, 7),
+                duration: gsap.utils.random(4, 6),
+                ease: "sine.inOut",
+                repeat: -1,
+                yoyo: true,
+              });
+            },
           }
         );
-        gsap.to(card, {
-          y: gsap.utils.random(-12, 12),
-          duration: gsap.utils.random(3.5, 5.5),
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-          delay: i * 0.25,
-        });
       });
+
+      return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
     { scope: root }
   );
@@ -73,7 +102,7 @@ export default function Reviews() {
 
       <div className="rev-grid">
         {REVIEWS.map((r, i) => (
-          <figure className="rev-card" key={i}>
+          <figure className="rev-card" data-i={i} key={i}>
             <span className="rev-quote" aria-hidden>
               &ldquo;
             </span>

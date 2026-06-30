@@ -31,17 +31,24 @@ const STEPS = [
   },
 ];
 
+/* Вопросы-страхи роятся ВОКРУГ заголовка (центральная зона x28–72 / y38–62
+   оставлена пустой, чтобы они не залезали за надпись). d — глубина параллакса. */
 const QUESTIONS = [
-  { t: "Сложно?", x: 8, y: 12, s: 1.5, o: 0.5 },
-  { t: "Долго?", x: 74, y: 8, s: 2.1, o: 0.6 },
-  { t: "Дорого?", x: 40, y: 70, s: 1.2, o: 0.4 },
-  { t: "А если не понравится?", x: 60, y: 44, s: 0.85, o: 0.35 },
-  { t: "С чего начать?", x: 14, y: 56, s: 1, o: 0.4 },
-  { t: "Сколько правок?", x: 82, y: 64, s: 0.8, o: 0.3 },
-  { t: "А поддержка?", x: 30, y: 26, s: 1.1, o: 0.45 },
-  { t: "Кто владелец?", x: 88, y: 30, s: 0.75, o: 0.28 },
-  { t: "?", x: 50, y: 18, s: 3.4, o: 0.16 },
-  { t: "?", x: 22, y: 78, s: 2.6, o: 0.14 },
+  { t: "Сложно?", x: 10, y: 16, s: 1.5, o: 0.5, d: 1.4 },
+  { t: "Долго?", x: 78, y: 12, s: 1.9, o: 0.55, d: 1.7 },
+  { t: "Дорого?", x: 13, y: 84, s: 1.7, o: 0.48, d: 1.5 },
+  { t: "А если не понравится?", x: 67, y: 85, s: 0.95, o: 0.4, d: 0.8 },
+  { t: "С чего начать?", x: 6, y: 42, s: 1.05, o: 0.42, d: 1.1 },
+  { t: "Сколько правок?", x: 87, y: 70, s: 0.9, o: 0.36, d: 0.9 },
+  { t: "А поддержка?", x: 23, y: 26, s: 1.15, o: 0.44, d: 1.2 },
+  { t: "Кто владелец сайта?", x: 90, y: 46, s: 0.8, o: 0.32, d: 0.7 },
+  { t: "А сроки?", x: 85, y: 58, s: 1.0, o: 0.34, d: 1.0 },
+  { t: "Нужен дизайнер?", x: 15, y: 70, s: 0.85, o: 0.32, d: 0.8 },
+  { t: "Сам разберусь?", x: 62, y: 13, s: 0.9, o: 0.34, d: 1.0 },
+  { t: "А править потом?", x: 40, y: 90, s: 0.95, o: 0.34, d: 1.3 },
+  { t: "Точно вовремя?", x: 50, y: 8, s: 0.85, o: 0.3, d: 1.1 },
+  { t: "?", x: 7, y: 8, s: 2.8, o: 0.12, d: 2.1 },
+  { t: "?", x: 91, y: 90, s: 2.6, o: 0.12, d: 2.3 },
 ];
 
 export default function Process() {
@@ -56,12 +63,13 @@ export default function Process() {
         return;
       }
 
-      // ПОРТАЛ-ВХОД: надпись приближается и растворяется, блок проявляется изнутри
+      // ПОРТАЛ-ВХОД: надпись приближается и растворяется, блок проявляется изнутри.
+      // Пин удлинён (+190%) — зритель задерживается; вопросы дрейфуют параллаксом.
       const enter = gsap.timeline({
         scrollTrigger: {
           trigger: ".proc-enter",
           start: "top top",
-          end: "+=130%",
+          end: "+=190%",
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
@@ -70,9 +78,30 @@ export default function Process() {
       enter
         .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 7, opacity: 0, ease: "power2.in" }, 0)
         .to(".proc-veil", { autoAlpha: 0, ease: "power1.in" }, 0.35)
-        .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out" }, 0.1);
+        .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out" }, 0.1)
+        // параллакс роя — общий медленный дрейф вверх, пока секция запинена
+        .to(".proc-questions", { yPercent: -14, ease: "none" }, 0);
 
-      // заголовок + вопросы (невесомый рой)
+      // у каждого вопроса своя глубина параллакса (плавно на скролле)
+      gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
+        const depth = parseFloat(q.dataset.depth || "1");
+        gsap.fromTo(
+          q,
+          { yPercent: 26 * depth },
+          {
+            yPercent: -26 * depth,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".proc-enter",
+              start: "top top",
+              end: "+=190%",
+              scrub: 1,
+            },
+          }
+        );
+      });
+
+      // заголовок + лёгкое «дыхание» роя (внутренний float на обёртке-флоут)
       const title = root.current!.querySelector(".proc-bigtitle");
       if (title)
         gsap.fromTo(
@@ -86,10 +115,10 @@ export default function Process() {
             scrollTrigger: { trigger: ".proc-enter", start: "top 30%" },
           }
         );
-      gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
+      gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
         gsap.to(q, {
-          y: gsap.utils.random(-18, 18),
-          x: gsap.utils.random(-12, 12),
+          y: gsap.utils.random(-14, 14),
+          x: gsap.utils.random(-10, 10),
           duration: gsap.utils.random(3, 5),
           ease: "sine.inOut",
           repeat: -1,
@@ -149,9 +178,10 @@ export default function Process() {
               <span
                 className="proc-q"
                 key={i}
+                data-depth={q.d}
                 style={{ left: `${q.x}%`, top: `${q.y}%`, fontSize: `${q.s}rem`, opacity: q.o }}
               >
-                {q.t}
+                <span className="proc-q-float">{q.t}</span>
               </span>
             ))}
           </div>

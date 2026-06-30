@@ -34,10 +34,10 @@ export default function Hero() {
       }
 
       gsap.set(split.chars, {
-        x: () => gsap.utils.random(-14, 14),
-        y: () => gsap.utils.random(-16, 16),
-        rotation: () => gsap.utils.random(-9, 9),
-        opacity: 0.4,
+        x: () => gsap.utils.random(-48, 48),
+        y: () => gsap.utils.random(-54, 54),
+        rotation: () => gsap.utils.random(-28, 28),
+        opacity: 0,
       });
       gsap.set(subSplit.words, { y: 22, opacity: 0 });
       gsap.set(fades, { opacity: 0, y: 24 });

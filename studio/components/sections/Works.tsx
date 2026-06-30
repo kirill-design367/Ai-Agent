@@ -53,13 +53,17 @@ export default function Works() {
 
   return (
     <section id="work" className="theme-dark works" ref={root}>
-      {/* бегущая лента-баннер вместо статичного заголовка */}
-      <div className="works-banner" aria-label="Доказательство — делом">
+      {/* бесконечная лента-баннер «Портфолио» — два идентичных трека для бесшовности */}
+      <div className="works-banner" aria-label="Портфолио">
         <div className="works-ticker">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <span key={i}>
-              Доказательство&nbsp;—&nbsp;делом<i>✦</i>
-            </span>
+          {Array.from({ length: 2 }).map((_, g) => (
+            <div className="works-ticker-group" key={g} aria-hidden={g === 1}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <span key={i}>
+                  Портфолио<i>✦</i>
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </div>

@@ -1,13 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { gsap } from "@/lib/gsap";
+import { useState } from "react";
 
 /*
   FAQ — снимает последние возражения перед заявкой.
-  При открытии ответ СОБИРАЕТСЯ ИЗ РАЗЛЕТЕВШИХСЯ БУКВ (каждая буква прилетает из
-  хаоса на место), активный вопрос подсвечивается. Буквы — React-овны спаны,
-  GSAP двигает только transform (без мутаций DOM — никаких конфликтов).
+  Аккордеон на grid-template-rows (0fr→1fr): открытие/закрытие плавное и дешёвое
+  по перформансу (без помегабайтной анимации каждой буквы — она лагала). Ответ
+  мягко проявляется со сдвигом. Высота подстраивается под контент автоматически.
 */
 const QA = [
   {
@@ -40,64 +39,10 @@ const QA = [
   },
 ];
 
-function Chars({ text }: { text: string }) {
-  const words = text.split(" ");
-  return (
-    <>
-      {words.map((word, wi) => (
-        <span key={wi}>
-          <span className="faq-word">
-            {word.split("").map((ch, ci) => (
-              <span className="faq-ch" key={ci}>
-                {ch}
-              </span>
-            ))}
-          </span>
-          {wi < words.length - 1 ? " " : null}
-        </span>
-      ))}
-    </>
-  );
-}
-
 export default function Faq() {
   const [open, setOpen] = useState<number | null>(0);
-  const ansRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const toggle = (i: number) => {
-    const next = open === i ? null : i;
-    setOpen(next);
-    if (next === i) {
-      // буквы прилетают из хаоса
-      requestAnimationFrame(() => {
-        const el = ansRefs.current[i];
-        if (!el) return;
-        const chars = el.querySelectorAll<HTMLElement>(".faq-ch");
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          gsap.set(chars, { clearProps: "all" });
-          return;
-        }
-        gsap.fromTo(
-          chars,
-          {
-            x: () => gsap.utils.random(-60, 60),
-            y: () => gsap.utils.random(-40, 40),
-            rotation: () => gsap.utils.random(-40, 40),
-            opacity: 0,
-          },
-          {
-            x: 0,
-            y: 0,
-            rotation: 0,
-            opacity: 1,
-            duration: 0.7,
-            ease: "expo.out",
-            stagger: { each: 0.006, from: "random" },
-          }
-        );
-      });
-    }
-  };
+  const toggle = (i: number) => setOpen((cur) => (cur === i ? null : i));
 
   return (
     <section id="faq" className="theme-dark faq">
@@ -114,15 +59,8 @@ export default function Faq() {
               <span className="faq-sign" aria-hidden />
             </button>
             <div className="faq-a-wrap">
-              <div
-                className="faq-a"
-                ref={(el) => {
-                  ansRefs.current[i] = el;
-                }}
-              >
-                <p>
-                  <Chars text={item.a} />
-                </p>
+              <div className="faq-a">
+                <p>{item.a}</p>
               </div>
             </div>
           </div>

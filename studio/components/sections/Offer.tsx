@@ -33,18 +33,60 @@ export default function Offer() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
+      const rnd = gsap.utils.random;
+
+      // заголовок всплывает невесомо
       gsap.fromTo(
-        ".bento-card",
-        { y: 44, opacity: 0 },
+        ".offer-head",
+        { y: 50, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.9,
-          ease: "expo.out",
-          stagger: { each: 0.07, from: "start" },
-          scrollTrigger: { trigger: ".bento", start: "top 78%" },
+          duration: 1.2,
+          ease: "power2.out",
+          scrollTrigger: { trigger: ".offer", start: "top 75%" },
         }
       );
+
+      // НЕВЕСОМОСТЬ: карточки прилетают из разбросанной 3D-глубины и оседают,
+      // затем бесконечно дрейфуют как в открытом космосе.
+      gsap.utils.toArray<HTMLElement>(".bento-card").forEach((card, i) => {
+        gsap.fromTo(
+          card,
+          {
+            x: rnd(-140, 140),
+            y: rnd(70, 200),
+            z: rnd(-260, -60),
+            rotateX: rnd(-32, 32),
+            rotateY: rnd(-32, 32),
+            opacity: 0,
+          },
+          {
+            x: 0,
+            y: 0,
+            z: 0,
+            rotateX: 0,
+            rotateY: 0,
+            opacity: 1,
+            duration: 1.5,
+            ease: "power2.out",
+            delay: i * 0.05,
+            scrollTrigger: { trigger: ".bento", start: "top 80%" },
+            onComplete: () => {
+              // вечный невесомый дрейф
+              gsap.to(card, {
+                y: rnd(-14, 14),
+                x: rnd(-9, 9),
+                rotateZ: rnd(-1.6, 1.6),
+                duration: rnd(5, 8),
+                ease: "sine.inOut",
+                repeat: -1,
+                yoyo: true,
+              });
+            },
+          }
+        );
+      });
 
       // пятно света следует за курсором по сетке
       const grid = root.current!.querySelector<HTMLElement>(".bento");
@@ -65,6 +107,13 @@ export default function Offer() {
 
   return (
     <section id="offer" className="theme-dark offer" ref={root}>
+      {/* космический фон — невесомость */}
+      <div className="offer-space" aria-hidden>
+        <span className="offer-stars" />
+        <span className="offer-orb offer-orb-1" />
+        <span className="offer-orb offer-orb-2" />
+      </div>
+
       <header className="offer-head">
         <span className="offer-kicker">(06) Что получаете</span>
         <h2 className="offer-title">Не просто «сайт». Рабочий инструмент.</h2>
