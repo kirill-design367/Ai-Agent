@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 import { asset } from "@/lib/asset";
@@ -20,6 +20,15 @@ export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const headline = useRef<HTMLHeadingElement>(null);
   const sub = useRef<HTMLParagraphElement>(null);
+  // WebGL флюид — только на десктопе с мышью: на мобиле непрерывный GPU-цикл
+  // бьёт по производительности и батарее.
+  const [fluid, setFluid] = useState(false);
+  useEffect(() => {
+    setFluid(
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+        window.innerWidth > 900
+    );
+  }, []);
 
   useGSAP(
     () => {
@@ -83,9 +92,7 @@ export default function Hero() {
 
   return (
     <section id="hero" className="theme-dark hero" ref={root}>
-      <div className="hero-fluid">
-        <SplashCursor />
-      </div>
+      <div className="hero-fluid">{fluid && <SplashCursor />}</div>
 
       {/* огромная полупрозрачная «А» с точкой — знак бренда на фоне */}
       <svg className="hero-bigA" viewBox="0 0 200 200" aria-hidden data-hero-fade>
