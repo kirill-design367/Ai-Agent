@@ -12,7 +12,9 @@ import Advantages from "@/components/sections/Advantages";
 import Prices from "@/components/sections/Prices";
 import Offer from "@/components/sections/Offer";
 import Faq from "@/components/sections/Faq";
+import BlackHole from "@/components/sections/BlackHole";
 import Reviews from "@/components/sections/Reviews";
+import Teleport from "@/components/sections/Teleport";
 import Contact from "@/components/sections/Contact";
 
 /*
@@ -39,7 +41,9 @@ export default function Home() {
         <Prices />
         <Offer />
         <Faq />
+        <BlackHole />
         <Reviews />
+        <Teleport />
         <Contact />
       </main>
     </SmoothScroll>
