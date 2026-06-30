@@ -47,8 +47,14 @@ const QUESTIONS = [
   { t: "Сам разберусь?", x: 62, y: 13, s: 0.9, o: 0.34, d: 1.0 },
   { t: "А править потом?", x: 40, y: 90, s: 0.95, o: 0.34, d: 1.3 },
   { t: "Точно вовремя?", x: 50, y: 8, s: 0.85, o: 0.3, d: 1.1 },
+  { t: "А мобильная версия?", x: 8, y: 54, s: 0.85, o: 0.34, d: 0.9 },
+  { t: "Сложно вести потом?", x: 88, y: 84, s: 0.82, o: 0.32, d: 1.0 },
+  { t: "А гарантия?", x: 70, y: 70, s: 1.0, o: 0.36, d: 1.2 },
+  { t: "Дизайн мой?", x: 30, y: 78, s: 0.9, o: 0.34, d: 0.85 },
+  { t: "С нуля?", x: 92, y: 20, s: 1.1, o: 0.4, d: 1.3 },
   { t: "?", x: 7, y: 8, s: 2.8, o: 0.12, d: 2.1 },
   { t: "?", x: 91, y: 90, s: 2.6, o: 0.12, d: 2.3 },
+  { t: "?", x: 50, y: 94, s: 2.0, o: 0.1, d: 1.8 },
 ];
 
 export default function Process() {
@@ -64,37 +70,40 @@ export default function Process() {
       }
 
       // ПОРТАЛ-ВХОД: надпись приближается и растворяется, блок проявляется изнутри.
-      // Пин удлинён (+190%) — зритель задерживается; вопросы дрейфуют параллаксом.
+      // Пин удлинён (+260%) с ПАУЗОЙ после раскрытия — зритель успевает рассмотреть
+      // вопросы вокруг, прежде чем скролл продолжится.
       const enter = gsap.timeline({
         scrollTrigger: {
           trigger: ".proc-enter",
           start: "top top",
-          end: "+=190%",
+          end: "+=260%",
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
         },
       });
       enter
-        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 7, opacity: 0, ease: "power2.in" }, 0)
-        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in" }, 0.35)
-        .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out" }, 0.1)
-        // параллакс роя — общий медленный дрейф вверх, пока секция запинена
-        .to(".proc-questions", { yPercent: -14, ease: "none" }, 0);
+        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 7, opacity: 0, ease: "power2.in", duration: 0.4 }, 0)
+        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
+        .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out", duration: 0.45 }, 0.1)
+        // лёгкий дрейф роя во время раскрытия
+        .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
+        // ПАУЗА: сцена замирает — можно рассмотреть вопросы (≈40% прокрутки пина)
+        .to({}, { duration: 0.6 });
 
       // у каждого вопроса своя глубина параллакса (плавно на скролле)
       gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
         const depth = parseFloat(q.dataset.depth || "1");
         gsap.fromTo(
           q,
-          { yPercent: 26 * depth },
+          { yPercent: 22 * depth },
           {
-            yPercent: -26 * depth,
+            yPercent: -22 * depth,
             ease: "none",
             scrollTrigger: {
               trigger: ".proc-enter",
               start: "top top",
-              end: "+=190%",
+              end: "+=260%",
               scrub: 1,
             },
           }
@@ -117,9 +126,10 @@ export default function Process() {
         );
       gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
         gsap.to(q, {
-          y: gsap.utils.random(-14, 14),
-          x: gsap.utils.random(-10, 10),
-          duration: gsap.utils.random(3, 5),
+          y: gsap.utils.random(-26, 26),
+          x: gsap.utils.random(-18, 18),
+          rotation: gsap.utils.random(-4, 4),
+          duration: gsap.utils.random(2.4, 4.2),
           ease: "sine.inOut",
           repeat: -1,
           yoyo: true,

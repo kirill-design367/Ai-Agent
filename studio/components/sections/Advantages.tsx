@@ -114,12 +114,12 @@ export default function Advantages() {
         );
       }
 
-      // СПИННОЙ РУЧЕЙ наливается по скроллу (вопрос «втекает» вниз сквозь ответы)
-      const fill = root.current!.querySelector(".adv-spine-fill");
-      const comet = root.current!.querySelector(".adv-spine-comet");
-      const spineST = { trigger: ".adv-list", start: "top 72%", end: "bottom 80%", scrub: 0.6 };
-      if (fill) gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: spineST });
-      if (comet) gsap.fromTo(comet, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: spineST });
+      // ВЕНОМ-ПОТОК: точка из вопроса перетекает вниз сквозь ответы (без статичной линии)
+      const trail = root.current!.querySelector(".adv-venom-trail");
+      const head = root.current!.querySelector(".adv-venom-head");
+      const venomST = { trigger: ".adv-list", start: "top 72%", end: "bottom 82%", scrub: 0.6 };
+      if (trail) gsap.fromTo(trail, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: venomST });
+      if (head) gsap.fromTo(head, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: venomST });
 
       // ответы проявляются; номер загорается, когда ручей до него «дотекает»
       gsap.utils.toArray<HTMLElement>(".adv-item").forEach((item, i) => {
@@ -167,6 +167,13 @@ export default function Advantages() {
         />
       </svg>
 
+      {/* космос — звёздная пыль и дрейфующие орбиты (невесомость) */}
+      <div className="adv-space" aria-hidden>
+        <span className="adv-stars" />
+        <span className="adv-orb adv-orb-1" />
+        <span className="adv-orb adv-orb-2" />
+      </div>
+
       <div className="adv-stage">
         <div className="adv-quest">
           {QWORDS.map((w, i) => (
@@ -182,10 +189,10 @@ export default function Advantages() {
       </div>
 
       <div className="adv-list">
-        {/* спинной ручей — вопрос втекает в ответы */}
-        <span className="adv-spine" aria-hidden>
-          <span className="adv-spine-fill" />
-          <span className="adv-spine-comet" />
+        {/* веном-поток: точка из вопроса перетекает вниз в ответы (без статичной линии) */}
+        <span className="adv-venom" aria-hidden>
+          <span className="adv-venom-trail" />
+          <span className="adv-venom-head" />
         </span>
 
         {ADV.map((a, i) => (
@@ -195,9 +202,8 @@ export default function Advantages() {
             <p className="adv-n">{a.n}</p>
           </article>
         ))}
-        <a href="#contact" className="btn btn--primary adv-cta" data-magnetic>
-          <span className="btn-cta-label">Хочу сайт как у вас</span>
-          <span className="btn-cta-arrow" aria-hidden>→</span>
+        <a href="#contact" className="btn btn--cut adv-cta" data-magnetic>
+          <span>Хочу сайт как у вас&nbsp;&nbsp;→</span>
         </a>
       </div>
     </section>
