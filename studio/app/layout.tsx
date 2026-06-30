@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Manrope, Montserrat, Unbounded } from "next/font/google";
 import "./globals.css";
 
@@ -47,6 +47,14 @@ export const metadata: Metadata = {
   title: "Сайт за 1–5 дней — красивый, быстрый, продающий",
   description:
     "Уникальный дизайн на чистом коде. Без шаблонов, без посредников, с пожизненной гарантией. От 30 000 ₽.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // запрет горизонтального «уезжания» и единый тёмный chrome браузера на мобиле
+  maximumScale: 5,
+  themeColor: "#0a0a0b",
 };
 
 export default function RootLayout({

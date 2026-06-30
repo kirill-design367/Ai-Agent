@@ -16,9 +16,9 @@ const CASES = [
   { img: "/work/case-1.jpg", title: "Volume — After Dark", meta: "Лендинг · 3 дня" },
   { img: "/work/case-2.jpg", title: "Aristide", meta: "Портфолио · 4 дня" },
   { img: "/work/case-3.jpg", title: "Анна Рыковская", meta: "Визитка · 2 дня" },
-  { img: "/work/case-4.png", title: "Garden Eight", meta: "Студия дизайна · 5 дней" },
-  { img: "/work/case-5.png", title: "Dream.doll", meta: "Интернет-магазин · 6 дней" },
-  { img: "/work/case-6.png", title: "Step into Web3", meta: "Лендинг · 3 дня" },
+  { img: "/work/case-4.jpg", title: "Garden Eight", meta: "Студия дизайна · 5 дней" },
+  { img: "/work/case-5.jpg", title: "Dream.doll", meta: "Интернет-магазин · 6 дней" },
+  { img: "/work/case-6.jpg", title: "Step into Web3", meta: "Лендинг · 3 дня" },
 ];
 
 export default function Works() {

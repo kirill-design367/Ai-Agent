@@ -4,16 +4,17 @@ import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
+import { asset } from "@/lib/asset";
 
 const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
   ssr: false,
 });
 
 /*
-  HERO — отвечает на вопрос клиента «Вы делаете то, что мне нужно?».
-  Заголовок собирается из хаоса в систему; подзаголовок встаёт следом, прямо
-  под заголовком, тем же мягким движением. Композиция «золотое сечение»:
-  геометрия бренда + hairline-сетка, без лишних надписей сверху.
+  HERO — отвечает на «Вы делаете то, что мне нужно?».
+  Живой фон: флюид-курсор + ОГРОМНАЯ полупрозрачная «А» с точкой (знак бренда)
+  вместо тонких линий. Сверху — логотип AUREA. Заголовок собирается из хаоса,
+  смещён влево; подзаголовок встаёт следом. Кнопки «вырезаются из фона» на ховере.
 */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
@@ -55,13 +56,7 @@ export default function Hero() {
         })
           .to(
             subSplit.words,
-            {
-              y: 0,
-              opacity: 1,
-              duration: 0.9,
-              ease: "expo.out",
-              stagger: 0.04,
-            },
+            { y: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.04 },
             "-=0.85"
           )
           .to(
@@ -69,6 +64,15 @@ export default function Hero() {
             { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
             "-=0.7"
           );
+        // мягкое «дыхание» фоновой А
+        gsap.to(".hero-bigA", {
+          scale: 1.04,
+          duration: 6,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+          transformOrigin: "50% 50%",
+        });
       };
 
       if (document.documentElement.classList.contains("intro-done")) play();
@@ -83,21 +87,25 @@ export default function Hero() {
         <SplashCursor />
       </div>
 
-      {/* геометрия бренда — контурный треугольник-A с точкой */}
-      <svg className="hero-geo" viewBox="0 0 400 360" aria-hidden data-hero-fade>
-        <polygon points="200,24 376,336 24,336" />
-        <circle cx="200" cy="246" r="6" />
-        <line x1="200" y1="24" x2="200" y2="336" />
+      {/* огромная полупрозрачная «А» с точкой — знак бренда на фоне */}
+      <svg className="hero-bigA" viewBox="0 0 200 200" aria-hidden data-hero-fade>
+        <path d="M100 16 L178 184 L150 184 L100 70 L50 184 L22 184 Z" />
+        <circle cx="100" cy="150" r="15" />
       </svg>
 
-      {/* верхняя hairline-строка: только марка */}
+      {/* верхняя строка: логотип AUREA */}
       <header className="hero-top">
-        <span className="hero-mark" data-hero-fade>
-          AUREA<sup>®</sup>
-        </span>
+        <img
+          className="hero-logo"
+          src={asset("/brand/logo-wordmark.jpg")}
+          alt="AUREA"
+          width={150}
+          height={36}
+          data-hero-fade
+        />
       </header>
 
-      {/* заголовок + подзаголовок под ним */}
+      {/* заголовок + подзаголовок */}
       <div className="hero-mid">
         <h1 className="hero-headline" ref={headline}>
           <span className="hl-line hl-a">Первое</span>
@@ -107,33 +115,27 @@ export default function Hero() {
         </h1>
 
         <p className="hero-sub" ref={sub}>
-          Поэтому мы&nbsp;создаём сайты, которые помогают бизнесу выделяться,
-          вызывать доверие и&nbsp;получать больше&nbsp;заявок.
+          Мы&nbsp;проектируем каждый пиксель так, чтобы он&nbsp;усиливал доверие
+          к&nbsp;вашему бизнесу, помогал получать больше обращений и&nbsp;делал
+          компанию сильнее в&nbsp;глазах клиентов.
         </p>
       </div>
 
-      {/* нижняя зона: действие + фишки на hairline-сетке */}
+      {/* нижняя зона: действие + микрокопия одной строкой */}
       <div className="hero-foot">
         <div className="hero-cta-row" data-hero-fade>
-          <a href="#contact" className="btn btn--primary" data-magnetic>
-            Обсудить проект
+          <a href="#contact" className="btn btn--cut" data-magnetic>
+            <span>Обсудить проект</span>
           </a>
-          <a href="#work" className="btn btn--ghost" data-magnetic>
-            Смотреть работы
+          <a href="#work" className="btn btn--cut btn--cut-ghost" data-magnetic>
+            <span>Смотреть работы</span>
           </a>
         </div>
 
-        <ul className="hero-feats" data-hero-fade>
-          <li>
-            <i>01</i> Полностью под&nbsp;ключ
-          </li>
-          <li>
-            <i>02</i> Индивидуальный дизайн
-          </li>
-          <li>
-            <i>03</i> Пожизненная гарантия
-          </li>
-        </ul>
+        <p className="hero-microcopy" data-hero-fade>
+          Индивидуальный дизайн <i>•</i> Пожизненная гарантия <i>•</i> Запуск
+          от&nbsp;5&nbsp;дней
+        </p>
       </div>
     </section>
   );

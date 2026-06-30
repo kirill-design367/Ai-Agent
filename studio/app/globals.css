@@ -128,10 +128,15 @@
 html {
   /* Lenis drives scroll; keep native smooth off to avoid double-easing. */
   scroll-behavior: auto;
+  /* clip любой горизонтальный вылет: на мобиле сайт больше нельзя «утащить» вбок */
+  overflow-x: clip;
+  width: 100%;
 }
 
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-body), system-ui, sans-serif;
@@ -139,7 +144,7 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Lenis smooth-scroll required styles */
@@ -259,6 +264,48 @@ html.lenis body {
 .btn--ghost:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+/* — CUT-OUT кнопка: на ховере из фона «вырезается» панель, текст-нокаут проявляется.
+   Заливка поднимается снизу, текст через mix-blend-difference читается то белым,
+   то тёмным — как буквально вырезанный из света. */
+.btn--cut {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: transparent;
+  border: 1px solid rgba(244, 242, 238, 0.5);
+  padding: 0 clamp(1.6rem, 2.4vw, 2.2rem);
+}
+.btn--cut-ghost {
+  border-color: rgba(244, 242, 238, 0.22);
+}
+.btn--cut > span {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  mix-blend-mode: difference;
+  transition: letter-spacing 0.5s var(--ease-expo);
+}
+.btn--cut::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #f4f2ee;
+  transform: translateY(101%);
+  transition: transform 0.55s var(--ease-expo);
+}
+.btn--cut:hover {
+  border-color: #f4f2ee;
+}
+.btn--cut:hover::before {
+  transform: translateY(0);
+}
+.btn--cut:hover > span {
+  letter-spacing: 0.04em;
+}
+.btn--cut:active {
+  transform: scale(0.98);
 }
 /* креативная CTA «Хочу сайт как у вас» — стрелка выезжает, лейбл смещается,
    по поверхности проходит блик (shine). */
@@ -525,67 +572,43 @@ html.lenis body {
   opacity: 0.9;
 }
 
-/* геометрия бренда — контурный треугольник-A с точкой (эхо логотипа) */
-.hero-geo {
+/* огромная полупрозрачная «А» с точкой — знак бренда на фоне (вместо тонких линий) */
+.hero-bigA {
   position: absolute;
   z-index: 1;
   top: 50%;
-  right: clamp(-5rem, 1vw, 3rem);
-  width: clamp(240px, 36vw, 540px);
+  left: 50%;
+  width: clamp(360px, 62vw, 920px);
   height: auto;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   pointer-events: none;
+  will-change: transform;
 }
-.hero-geo polygon,
-.hero-geo line {
-  fill: none;
-  stroke: rgba(244, 242, 238, 0.13);
-  stroke-width: 1;
+.hero-bigA path {
+  fill: rgba(244, 242, 238, 0.06);
 }
-.hero-geo circle {
-  fill: rgba(244, 242, 238, 0.42);
-  stroke: none;
+.hero-bigA circle {
+  fill: rgba(244, 242, 238, 0.11);
 }
 
-/* верхняя hairline-строка: марка + индекс вопроса */
+/* верхняя строка: логотип AUREA */
 .hero-top {
   grid-column: 1 / -1;
   grid-row: 1;
   position: relative;
   z-index: 3;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: center;
   gap: 1.2rem;
-  border-top: 1px solid rgba(244, 242, 238, 0.16);
-  padding-top: 0.85rem;
   pointer-events: none;
 }
-.hero-mark {
-  font-family: var(--font-geometric), system-ui, sans-serif;
-  font-weight: 600;
-  font-size: clamp(1.05rem, 2.2vw, 1.45rem);
-  letter-spacing: 0.06em;
-  color: var(--text-on-dark);
-}
-.hero-mark sup {
-  font-size: 0.5em;
-  vertical-align: super;
-  opacity: 0.55;
-}
-.hero-kicker {
-  max-width: 24ch;
-  text-align: right;
-  font-size: var(--text-xs);
-  letter-spacing: 0.13em;
-  line-height: 1.55;
-  text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.6);
-}
-.hero-kicker i {
-  font-style: normal;
-  color: var(--text-on-dark);
-  margin-right: 0.4em;
+.hero-logo {
+  height: clamp(26px, 3.2vw, 40px);
+  width: auto;
+  /* белый знак на чёрном квадрате → screen убирает фон на тёмном hero */
+  mix-blend-mode: screen;
+  user-select: none;
 }
 
 /* заголовок — ломаные строки по золотому сечению (кинетика хаос→система) */
@@ -613,20 +636,20 @@ html.lenis body {
   white-space: nowrap;
 }
 .hero-headline .hl-b {
-  margin-left: 6vw;
+  margin-left: 4vw;
 }
 .hero-headline .hl-c {
-  margin-left: 2.5vw;
+  margin-left: 1.5vw;
   color: rgba(244, 242, 238, 0.42);
 }
 .hero-headline .hl-d {
-  margin-left: 9.5vw;
+  margin-left: 6vw;
 }
 
 /* подзаголовок — прямо под заголовком, тем же мягким движением */
 .hero-sub {
-  max-width: 40ch;
-  margin: clamp(1.4rem, 3.5vh, 2.4rem) 0 0 clamp(0rem, 8vw, 9rem);
+  max-width: 44ch;
+  margin: clamp(1.4rem, 3.5vh, 2.4rem) 0 0 clamp(0rem, 4vw, 4.5rem);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--text-lg);
   line-height: 1.5;
@@ -655,28 +678,20 @@ html.lenis body {
   gap: var(--space-md);
   pointer-events: auto;
 }
-.hero-feats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(1.1rem, 3vw, 2.6rem);
+/* микрокопия одной строкой под кнопками */
+.hero-microcopy {
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.hero-feats li {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55em;
+  align-self: flex-end;
   font-size: var(--text-xs);
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.82);
+  color: rgba(244, 242, 238, 0.5);
+  white-space: nowrap;
 }
-.hero-feats li i {
+.hero-microcopy i {
   font-style: normal;
-  font-size: 0.72em;
-  color: rgba(244, 242, 238, 0.4);
-  font-variant-numeric: tabular-nums;
+  margin: 0 0.5em;
+  color: rgba(244, 242, 238, 0.3);
 }
 
 /* — HERO адаптив: вертикальный поток на телефоне, мягкие сдвиги вместо больших */
@@ -687,36 +702,27 @@ html.lenis body {
     row-gap: clamp(1.6rem, 5vh, 2.6rem);
     padding-bottom: 5.5rem;
   }
-  .hero-geo {
-    top: 38%;
-    right: -18%;
-    width: 78vw;
+  .hero-bigA {
+    top: 44%;
+    width: 96vw;
   }
   .hero-top {
     grid-column: 1;
-    flex-direction: column;
-    gap: 0.7rem;
-  }
-  .hero-kicker {
-    text-align: left;
-    max-width: 30ch;
+    align-items: flex-start;
   }
   .hero-mid {
     grid-column: 1;
     align-self: end;
   }
   .hero-headline {
-    font-size: clamp(2rem, 9.8vw, 3.1rem);
-    line-height: 1.02;
+    font-size: clamp(1.55rem, 7.8vw, 2.5rem);
+    line-height: 1.04;
   }
-  .hero-headline .hl-b {
-    margin-left: 1.4rem;
-  }
-  .hero-headline .hl-c {
-    margin-left: 0.5rem;
-  }
+  /* на телефоне — флёш-влево, без сдвигов (заголовок не уезжает вправо/за край) */
+  .hero-headline .hl-b,
+  .hero-headline .hl-c,
   .hero-headline .hl-d {
-    margin-left: 2.4rem;
+    margin-left: 0;
   }
   .hero-sub {
     max-width: 42ch;
@@ -727,7 +733,7 @@ html.lenis body {
     grid-column: 1;
     flex-direction: column;
     align-items: stretch;
-    gap: 1.3rem;
+    gap: 1.1rem;
     padding-right: 0;
   }
   .hero-cta-row .btn {
@@ -735,8 +741,10 @@ html.lenis body {
     text-align: center;
     justify-content: center;
   }
-  .hero-feats {
-    gap: 0.9rem 1.6rem;
+  .hero-microcopy {
+    white-space: normal;
+    align-self: flex-start;
+    line-height: 1.7;
   }
 }
 
