@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   ЧТО ПОЛУЧАЕТЕ — отвечает на «Что конкретно я получу за деньги?».
@@ -34,6 +34,7 @@ export default function Offer() {
       if (reduce) return;
 
       const rnd = gsap.utils.random;
+      const driftTweens: gsap.core.Tween[] = [];
 
       // заголовок всплывает невесомо
       gsap.fromTo(
@@ -73,19 +74,30 @@ export default function Offer() {
             delay: i * 0.05,
             scrollTrigger: { trigger: ".bento", start: "top 80%" },
             onComplete: () => {
-              // вечный невесомый дрейф
-              gsap.to(card, {
-                y: rnd(-14, 14),
-                x: rnd(-9, 9),
-                rotateZ: rnd(-1.6, 1.6),
-                duration: rnd(5, 8),
-                ease: "sine.inOut",
-                repeat: -1,
-                yoyo: true,
-              });
+              // вечный невесомый дрейф — ставится на паузу вне экрана (см. ниже)
+              driftTweens.push(
+                gsap.to(card, {
+                  y: rnd(-14, 14),
+                  x: rnd(-9, 9),
+                  rotateZ: rnd(-1.6, 1.6),
+                  duration: rnd(5, 8),
+                  ease: "sine.inOut",
+                  repeat: -1,
+                  yoyo: true,
+                })
+              );
             },
           }
         );
+      });
+
+      // дрейф карточек не тратит кадры, пока секция вне экрана
+      ScrollTrigger.create({
+        trigger: ".bento",
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          driftTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
       });
 
       // пятно света следует за курсором по сетке

@@ -45,6 +45,8 @@ export default function Reviews() {
       registerGsap();
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+      const driftTweens: gsap.core.Tween[] = [];
+
       // заголовок проявляется
       gsap.fromTo(
         ".reviews-head",
@@ -75,17 +77,28 @@ export default function Reviews() {
             delay: i * 0.08,
             onComplete: () => {
               // невесомый дрейф вокруг своего угла (rotation сохраняется)
-              gsap.to(card, {
-                y: gsap.utils.random(-13, 13),
-                x: gsap.utils.random(-7, 7),
-                duration: gsap.utils.random(4, 6),
-                ease: "sine.inOut",
-                repeat: -1,
-                yoyo: true,
-              });
+              driftTweens.push(
+                gsap.to(card, {
+                  y: gsap.utils.random(-13, 13),
+                  x: gsap.utils.random(-7, 7),
+                  duration: gsap.utils.random(4, 6),
+                  ease: "sine.inOut",
+                  repeat: -1,
+                  yoyo: true,
+                })
+              );
             },
           }
         );
+      });
+
+      // дрейф карточек не тратит кадры, пока секция вне экрана
+      ScrollTrigger.create({
+        trigger: ".rev-grid",
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          driftTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
       });
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());

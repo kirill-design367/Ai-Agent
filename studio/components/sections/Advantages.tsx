@@ -59,6 +59,9 @@ export default function Advantages() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
+      // бесконечные твины (дрейф ответов, пульс капли) — ставятся на паузу вне экрана
+      const idleTweens: gsap.core.Tween[] = [];
+
       // ПЕРЕХОД-ВХОД: тёмная волна-чернила поднимается из Процесса и затапливает блок
       const wave = root.current!.querySelector(".adv-wave");
       if (wave) {
@@ -99,29 +102,60 @@ export default function Advantages() {
         );
       });
 
-      // «?» стекает каплей в верх спинного ручья
-      const drip = root.current!.querySelector(".adv-drip");
-      const drop = root.current!.querySelector(".adv-drop");
-      if (drip && drop) {
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: ".adv-stage", start: "top 30%" },
+      // ВЕНОМ-БЛОБ: «?» стекает амёбой вниз сквозь ответы — ядро + хвост с лагом,
+      // гуи-фильтр (см. <filter id="adv-goo">) сплавляет кружки в одну каплю
+      const venomEl = root.current!.querySelector<HTMLElement>(".adv-venom");
+      const blobCore = root.current!.querySelector<HTMLElement>(".adv-blob-core");
+      const blobTail1 = root.current!.querySelector<HTMLElement>(".adv-blob-tail-1");
+      const blobTail2 = root.current!.querySelector<HTMLElement>(".adv-blob-tail-2");
+      const blobTail3 = root.current!.querySelector<HTMLElement>(".adv-blob-tail-3");
+      const blobGlow = root.current!.querySelector<HTMLElement>(".adv-blob-glow");
+      let onVenomRefresh: (() => void) | null = null;
+      if (venomEl && blobCore) {
+        // высоту трека кэшируем и пересчитываем только на ресайзе —
+        // движение капли идёт через transform: translateY (компоновка на GPU,
+        // без layout-reflow, в отличие от анимации top)
+        let trackH = venomEl.offsetHeight;
+        onVenomRefresh = () => {
+          trackH = venomEl.offsetHeight;
+        };
+        ScrollTrigger.addEventListener("refreshInit", onVenomRefresh);
+
+        const quickY = (el: HTMLElement | null) =>
+          el ? gsap.quickSetter(el, "y", "px") : () => {};
+        const setCore = quickY(blobCore);
+        const setTail1 = quickY(blobTail1);
+        const setTail2 = quickY(blobTail2);
+        const setTail3 = quickY(blobTail3);
+        const setGlow = quickY(blobGlow);
+
+        ScrollTrigger.create({
+          trigger: ".adv-list",
+          start: "top 72%",
+          end: "bottom 82%",
+          scrub: 0.6,
+          onUpdate: (self) => {
+            const p = self.progress;
+            setCore(p * trackH);
+            setTail1(Math.max(0, p - 0.025) * trackH);
+            setTail2(Math.max(0, p - 0.05) * trackH);
+            setTail3(Math.max(0, p - 0.078) * trackH);
+            setGlow(p * trackH);
+          },
         });
-        tl.fromTo(drip, { scaleY: 0 }, { scaleY: 1, duration: 0.9, ease: "power1.in" }).fromTo(
-          drop,
-          { y: 0, opacity: 1, scale: 1 },
-          { y: 120, opacity: 0, scale: 0.6, duration: 0.7, ease: "power1.in" },
-          "-=0.2"
+        // живое «дыхание» капли — лёгкая пульсация ядра
+        idleTweens.push(
+          gsap.to(blobCore, {
+            scale: 1.18,
+            duration: 0.9,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          })
         );
       }
 
-      // ВЕНОМ-ПОТОК: точка из вопроса перетекает вниз сквозь ответы (без статичной линии)
-      const trail = root.current!.querySelector(".adv-venom-trail");
-      const head = root.current!.querySelector(".adv-venom-head");
-      const venomST = { trigger: ".adv-list", start: "top 72%", end: "bottom 82%", scrub: 0.6 };
-      if (trail) gsap.fromTo(trail, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: venomST });
-      if (head) gsap.fromTo(head, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: venomST });
-
-      // ответы проявляются; номер загорается, когда ручей до него «дотекает»
+      // ответы проявляются; номер загорается и заголовок «дёргается» — блоб его захватил
       gsap.utils.toArray<HTMLElement>(".adv-item").forEach((item, i) => {
         gsap.fromTo(
           item,
@@ -135,24 +169,51 @@ export default function Advantages() {
           }
         );
         const num = item.querySelector(".adv-num");
-        if (num)
-          ScrollTrigger.create({
-            trigger: item,
-            start: "top 64%",
-            onEnter: () => num.classList.add("is-lit"),
-            onLeaveBack: () => num.classList.remove("is-lit"),
-          });
-        gsap.to(item, {
-          y: gsap.utils.random(-8, 8),
-          duration: gsap.utils.random(3.5, 5.5),
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-          delay: i * 0.2,
+        const heading = item.querySelector<HTMLElement>(".adv-t");
+        ScrollTrigger.create({
+          trigger: item,
+          start: "top 64%",
+          onEnter: () => {
+            num?.classList.add("is-lit");
+            if (heading)
+              gsap.fromTo(
+                heading,
+                { x: 0, skewX: 0 },
+                {
+                  keyframes: [
+                    { x: 7, skewX: -3.5, duration: 0.12, ease: "power2.out" },
+                    { x: -3, skewX: 1.5, duration: 0.12, ease: "power2.inOut" },
+                    { x: 0, skewX: 0, duration: 0.2, ease: "power3.out" },
+                  ],
+                }
+              );
+          },
+          onLeaveBack: () => num?.classList.remove("is-lit"),
         });
+        idleTweens.push(
+          gsap.to(item, {
+            y: gsap.utils.random(-8, 8),
+            duration: gsap.utils.random(3.5, 5.5),
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            delay: i * 0.2,
+          })
+        );
       });
 
-      return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+      ScrollTrigger.create({
+        trigger: ".adv-list",
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          idleTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
+      });
+
+      return () => {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+        if (onVenomRefresh) ScrollTrigger.removeEventListener("refreshInit", onVenomRefresh);
+      };
     },
     { scope: root }
   );
@@ -183,16 +244,28 @@ export default function Advantages() {
             </span>
           ))}
         </div>
-        <span className="adv-drip" aria-hidden>
-          <span className="adv-drop" />
-        </span>
       </div>
 
       <div className="adv-list">
-        {/* веном-поток: точка из вопроса перетекает вниз в ответы (без статичной линии) */}
+        {/* веном-блоб: «?» стекает амёбой вниз и захватывает каждый заголовок */}
+        <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
+          <filter id="adv-goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10"
+            />
+          </filter>
+        </svg>
         <span className="adv-venom" aria-hidden>
-          <span className="adv-venom-trail" />
-          <span className="adv-venom-head" />
+          <span className="adv-blob-glow" />
+          <span className="adv-blob-goo">
+            <span className="adv-blob-tail adv-blob-tail-3" />
+            <span className="adv-blob-tail adv-blob-tail-2" />
+            <span className="adv-blob-tail adv-blob-tail-1" />
+            <span className="adv-blob-core" />
+          </span>
         </span>
 
         {ADV.map((a, i) => (

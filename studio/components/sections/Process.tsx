@@ -124,25 +124,51 @@ export default function Process() {
             scrollTrigger: { trigger: ".proc-enter", start: "top 30%" },
           }
         );
+      const qFloatTweens: gsap.core.Tween[] = [];
       gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
-        gsap.to(q, {
-          y: gsap.utils.random(-26, 26),
-          x: gsap.utils.random(-18, 18),
-          rotation: gsap.utils.random(-4, 4),
-          duration: gsap.utils.random(2.4, 4.2),
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-          delay: gsap.utils.random(0, 1.5),
-        });
+        qFloatTweens.push(
+          gsap.to(q, {
+            y: gsap.utils.random(-26, 26),
+            x: gsap.utils.random(-18, 18),
+            rotation: gsap.utils.random(-4, 4),
+            duration: gsap.utils.random(2.4, 4.2),
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            delay: gsap.utils.random(0, 1.5),
+          })
+        );
+      });
+      // дрейф вопросов не тратит кадры, пока вход в секцию вне экрана
+      ScrollTrigger.create({
+        trigger: ".proc-enter",
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          qFloatTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
       });
 
       // линия + комета
+      const line = root.current!.querySelector<HTMLElement>(".proc-line");
       const fill = root.current!.querySelector(".proc-fill");
-      const comet = root.current!.querySelector(".proc-comet");
+      const comet = root.current!.querySelector<HTMLElement>(".proc-comet");
       const lineST = { trigger: ".proc-steps", start: "top 65%", end: "bottom 75%", scrub: 0.6 };
       if (fill) gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: lineST });
-      if (comet) gsap.fromTo(comet, { top: "0%" }, { top: "100%", ease: "none", scrollTrigger: lineST });
+      let onCometRefresh: (() => void) | null = null;
+      if (comet && line) {
+        // комета едет через transform: translateY (GPU), а не через top (layout-reflow)
+        gsap.set(comet, { xPercent: -50, yPercent: -50 });
+        let lineH = line.offsetHeight;
+        onCometRefresh = () => {
+          lineH = line.offsetHeight;
+        };
+        ScrollTrigger.addEventListener("refreshInit", onCometRefresh);
+        const setCometY = gsap.quickSetter(comet, "y", "px");
+        ScrollTrigger.create({
+          ...lineST,
+          onUpdate: (self) => setCometY(self.progress * lineH),
+        });
+      }
 
       // глаголы «въезжают и выпрямляются»
       gsap.utils.toArray<HTMLElement>(".proc-step").forEach((step) => {
@@ -173,7 +199,10 @@ export default function Process() {
           );
       });
 
-      return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+      return () => {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+        if (onCometRefresh) ScrollTrigger.removeEventListener("refreshInit", onCometRefresh);
+      };
     },
     { scope: root }
   );

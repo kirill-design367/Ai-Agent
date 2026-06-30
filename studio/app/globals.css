@@ -1060,7 +1060,8 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* волновая строка «А теперь — о наболевшем» (перетекание из кейсов) */
+/* кирпичики «А теперь — о наболевшем» (перетекание из кейсов): сваливаются
+   сверху, собираются в фразу, затем морф во «Вам сделали сайт…» */
 .pain-portal {
   position: relative;
   height: 100lvh;
@@ -1068,44 +1069,47 @@ html.lenis body {
   place-items: center;
   overflow: hidden;
 }
-.pain-portal {
-  /* строку «А теперь о наболевшем» размещаем чуть НИЖЕ центра */
-  align-items: end;
-  padding-bottom: 26vh;
-}
-.pain-wave {
+.pain-fall {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  white-space: nowrap;
-  will-change: transform, opacity;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.22em 0.55em;
+  margin: 0;
+  padding: 0 clamp(1.2rem, 6vw, 4rem);
+  text-align: center;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.4rem, 8vw, 7rem);
+  font-size: clamp(2.2rem, 8vw, 6.4rem);
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--text-on-dark);
 }
-/* chase-фраза — НИЖЕ центра портала; .pain-chase.pain-big повышает специфичность,
+.pain-brick {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+/* морф-фраза поверх кирпичиков; .pain-morph.pain-big повышает специфичность,
    чтобы перебить max-width:13ch и гигантский font-size от .pain-big (был баг-overflow) */
-.pain-chase.pain-big {
+.pain-morph.pain-big {
   position: absolute;
-  left: 50%;
-  top: 62%;
-  width: min(92vw, 1000px);
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
   max-width: min(92vw, 1000px);
-  margin: 0;
   text-align: center;
   font-size: clamp(2rem, 6.4vw, 5.4rem);
   line-height: 1.02;
   will-change: transform, opacity;
 }
-.pain-chase .l {
+.pain-morph .l {
   display: block;
-}
-.pain-wave-ch {
-  display: inline-block;
-  white-space: pre;
-  will-change: transform;
 }
 
 /* тоннель болей */
@@ -1337,7 +1341,7 @@ html.lenis body {
   height: 13px;
   border-radius: 50%;
   background: var(--text-primary);
-  transform: translate(-50%, -50%);
+  will-change: transform;
   box-shadow: 0 0 0 5px rgba(22, 22, 26, 0.12), 0 0 18px rgba(22, 22, 26, 0.35);
 }
 .proc-step {
@@ -1499,35 +1503,15 @@ html.lenis body {
 .adv-qw-2 { margin-left: 3vw; }
 .adv-qw-3 { margin-left: 14vw; }
 .adv-qw-4 { margin-left: 5vw; }
+/* «?» — из тех же точек, что и вопрос, но крупнее: это будущее ядро венома */
 .adv-qmark {
-  -webkit-text-fill-color: var(--text-on-dark);
-  color: var(--text-on-dark);
-  background: none;
-  font-size: 0.82em;
-}
-/* «вода» из «?» — стекает и наливает блок ответов */
-.adv-drip {
-  position: relative;
-  display: block;
-  width: 2px;
-  height: clamp(3rem, 9vh, 7rem);
-  margin-top: clamp(1rem, 3vh, 2rem);
-  background: linear-gradient(
-    to bottom,
-    rgba(244, 242, 238, 0.85),
-    rgba(244, 242, 238, 0)
+  display: inline-block;
+  font-size: 1.05em;
+  background-image: radial-gradient(
+    rgba(244, 242, 238, 0.96) 30%,
+    transparent 33%
   );
-  transform-origin: top center;
-}
-.adv-drop {
-  position: absolute;
-  left: 50%;
-  bottom: -4px;
-  width: 9px;
-  height: 11px;
-  margin-left: -4.5px;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: var(--text-on-dark);
+  background-size: 0.14em 0.14em;
 }
 
 /* 8 преимуществ — редакторская асимметрия (12 колонок) + веном-поток слева */
@@ -1543,40 +1527,70 @@ html.lenis body {
   column-gap: clamp(1.2rem, 3vw, 3rem);
   row-gap: clamp(2.4rem, 6vh, 5rem);
 }
-/* ВЕНОМ-поток — НЕТ статичной линии; виден только живой след, текущий вниз */
+/* ВЕНОМ-БЛОБ — «?» стекает амёбой вниз и захватывает каждый заголовок.
+   Гуи-эффект: несколько кружков под blur+contrast сливаются в одну каплю. */
 .adv-venom {
   position: absolute;
   left: clamp(0.6rem, 2.6vw, 2.4rem);
   top: clamp(2rem, 6vh, 5rem);
   bottom: clamp(6rem, 14vh, 12rem);
-  width: 3px;
+  width: clamp(3rem, 8vw, 5.5rem);
   pointer-events: none;
 }
-.adv-venom-trail {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(
-    to bottom,
-    rgba(244, 242, 238, 0) 0%,
-    rgba(244, 242, 238, 0.9) 12%,
-    rgba(244, 242, 238, 0.5)
-  );
-  box-shadow: 0 0 12px rgba(244, 242, 238, 0.35);
-  transform-origin: top center;
-}
-.adv-venom-head {
+.adv-blob-goo {
   position: absolute;
-  left: 50%;
+  inset: 0;
+  filter: url(#adv-goo);
+}
+.adv-blob-core {
+  position: absolute;
+  left: 0;
   top: 0;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  background: var(--text-on-dark);
+  will-change: transform;
+}
+.adv-blob-tail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: var(--text-on-dark);
+  will-change: transform;
+}
+.adv-blob-tail-1 {
   width: 16px;
   height: 16px;
+  margin: -8px 0 0 -8px;
+  opacity: 0.92;
+}
+.adv-blob-tail-2 {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  opacity: 0.82;
+}
+.adv-blob-tail-3 {
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  opacity: 0.7;
+}
+.adv-blob-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70px;
+  height: 70px;
+  margin: -35px 0 0 -35px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 30%, rgba(244, 242, 238, 0.7) 60%, transparent 72%);
-  transform: translate(-50%, -50%);
-  filter: blur(0.4px);
-  box-shadow: 0 0 22px rgba(244, 242, 238, 0.85), 0 0 8px #fff;
+  background: radial-gradient(circle, rgba(244, 242, 238, 0.5) 0%, transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
+  will-change: transform;
 }
 .adv-item {
   border-top: 1px solid rgba(244, 242, 238, 0.16);

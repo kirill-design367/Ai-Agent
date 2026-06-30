@@ -45,54 +45,38 @@ export default function Pain() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // волновая строка: выезжает справа → проходит по центру → уходит влево,
-      // при этом буквы непрерывно «огибаются» бегущей волной (traveling wave).
-      gsap.set(".pain-chase", { xPercent: -50, yPercent: -50, autoAlpha: 0 });
-      const waveChars = gsap.utils.toArray<HTMLElement>(".pain-wave-ch");
-      if (waveChars.length) {
-        // непрерывная бегущая волна по буквам
-        gsap.to(waveChars, {
-          y: -26,
-          ease: "sine.inOut",
-          duration: 1.2,
-          repeat: -1,
-          yoyo: true,
-          stagger: { each: 0.05, from: "start" },
-        });
-        // CHASE-ПЕРЕХОД: строка выезжает справа → центр → уходит влево с «хвостом»
-        // (skew/stretch), а экран будто догоняет хвостик — следом из-за правого
-        // края влетает фраза «Вам сделали сайт…», ловя движение.
+      // КИРПИЧИКИ: слова «А теперь — о наболевшем» сваливаются сверху и собираются
+      // воедино, затем плавно МОРФ в «Вам сделали сайт. Но заявок больше не стало».
+      const bricks = gsap.utils.toArray<HTMLElement>(".pain-brick");
+      if (bricks.length) {
+        gsap.set(".pain-morph", { autoAlpha: 0, y: 26 });
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".pain-portal",
             start: "top top",
-            end: "+=180%",
-            scrub: 0.6,
+            end: "+=150%",
+            scrub: 0.5,
             pin: true,
+            anticipatePin: 1,
           },
         });
-        tl.fromTo(
-          ".pain-wave",
-          { x: "64vw", autoAlpha: 0 },
-          { x: "0vw", autoAlpha: 1, ease: "sine.out", duration: 0.4 }
+        // падение кирпичиков с лёгким отскоком
+        tl.from(
+          bricks,
+          {
+            y: () => -gsap.utils.random(260, 460),
+            opacity: 0,
+            rotation: () => gsap.utils.random(-26, 26),
+            stagger: 0.07,
+            ease: "back.out(1.5)",
+          },
+          0
         )
-          .to({}, { duration: 0.18 }) // короткая задержка по центру
-          .to(".pain-wave", {
-            x: "-78vw",
-            skewX: -9,
-            scaleX: 1.12,
-            autoAlpha: 0,
-            ease: "power2.in",
-            duration: 0.42,
-          })
-          // экран догоняет хвостик — фраза влетает справа, чуть раньше ухода волны
-          .fromTo(
-            ".pain-chase",
-            { x: "86vw", autoAlpha: 0, skewX: -9 },
-            { x: "0vw", autoAlpha: 1, skewX: 0, ease: "power3.out", duration: 0.46 },
-            "-=0.16"
-          )
-          .to({}, { duration: 0.2 }); // пауза на фразе перед расфиксацией
+          .to({}, { duration: 0.28 }) // держим собранную фразу
+          // морф: первая фраза уходит вверх, вторая проявляется
+          .to(".pain-fall", { autoAlpha: 0, y: -36, ease: "power2.in", duration: 0.28 })
+          .to(".pain-morph", { autoAlpha: 1, y: 0, ease: "power3.out", duration: 0.4 }, "<0.08")
+          .to({}, { duration: 0.22 });
       }
 
       // тоннель-параллакс по болям (lead/turn исключены — у них своя режиссура)
@@ -126,21 +110,20 @@ export default function Pain() {
     { scope: root }
   );
 
-  const phrase = "А теперь — о наболевшем";
+  const fallWords = ["А", "теперь —", "о", "наболевшем"];
 
   return (
     <section id="pain" className="theme-dark pain" ref={root}>
-      {/* перетекание из кейсов — волновая строка, проезд справа налево */}
+      {/* перетекание из кейсов: слова сваливаются кирпичиками и собираются, затем морф */}
       <div className="pain-portal">
-        <div className="pain-wave" aria-label={phrase}>
-          {phrase.split("").map((ch, i) => (
-            <span className="pain-wave-ch" key={i} aria-hidden>
-              {ch === " " ? " " : ch}
+        <h2 className="pain-fall" aria-label="А теперь — о наболевшем">
+          {fallWords.map((w, i) => (
+            <span className="pain-brick" key={i}>
+              {w}
             </span>
           ))}
-        </div>
-        {/* фраза, которую «догоняет» экран */}
-        <h2 className="pain-chase pain-big">
+        </h2>
+        <h2 className="pain-morph pain-big">
           <span className="l">Вам сделали сайт.</span>
           <span className="l pain-dim">Но заявок больше не стало.</span>
         </h2>
