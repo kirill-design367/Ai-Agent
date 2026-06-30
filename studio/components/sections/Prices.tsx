@@ -59,21 +59,29 @@ export default function Prices() {
         return;
       }
 
-      // ПОРТАЛ ₽: пиксельное поле наезжает и растворяется, блок рождается изнутри
+      // ПОРТАЛ ₽ → СВЕТ-ТУННЕЛЬ: поле ₽ по экрану, премиальное свечение приближается
+      // и эстетично «пробивает» светом (конец туннеля), из света рождается блок цены.
+      // В конце — краткая ПАУЗА, чтобы прочитать заголовок.
       const portal = gsap.timeline({
         scrollTrigger: {
           trigger: ".prices-portal",
           start: "top top",
-          end: "+=150%",
+          end: "+=210%",
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
         },
       });
       portal
-        .fromTo(".rub-field", { scale: 1, opacity: 1 }, { scale: 3.6, opacity: 0, ease: "power2.in" }, 0)
-        .to(".rub-veil", { autoAlpha: 0, ease: "power1.in" }, 0.4)
-        .fromTo(".prices-reveal", { scale: 1.14, opacity: 0.4 }, { scale: 1, opacity: 1, ease: "power1.out" }, 0.05);
+        .fromTo(".rub-field", { scale: 1, opacity: 1 }, { scale: 3.8, opacity: 0.12, ease: "power2.in", duration: 0.6 }, 0)
+        // свет приближается из глубины
+        .fromTo(".rub-light", { scale: 0.15, opacity: 0 }, { scale: 1.1, opacity: 0.95, ease: "power2.in", duration: 0.5 }, 0.12)
+        // ПРОБИТИЕ светом — вспышка расширяется
+        .to(".rub-light", { scale: 7, opacity: 0, ease: "power2.in", duration: 0.4 }, 0.52)
+        .to(".rub-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.3 }, 0.5)
+        .fromTo(".prices-reveal", { scale: 1.16, opacity: 0.3 }, { scale: 1, opacity: 1, ease: "power1.out", duration: 0.4 }, 0.5)
+        // краткая пауза на заголовке
+        .to({}, { duration: 0.45 });
 
       // карточки появляются со stagger и слегка дышат
       gsap.utils.toArray<HTMLElement>(".price-card").forEach((card, i) => {
@@ -92,6 +100,22 @@ export default function Prices() {
         );
       });
 
+      // ЖИВЫЕ ЦИФРЫ — счётчик «накручивает» цену при появлении (одометр, как живой счёт)
+      gsap.utils.toArray<HTMLElement>(".price-num").forEach((el) => {
+        const target = parseInt(el.dataset.val || "0", 10);
+        const obj = { v: 0 };
+        el.textContent = "0";
+        gsap.to(obj, {
+          v: target,
+          duration: 1.6,
+          ease: "power2.out",
+          scrollTrigger: { trigger: el, start: "top 90%" },
+          onUpdate: () => {
+            el.textContent = Math.round(obj.v).toLocaleString("ru-RU");
+          },
+        });
+      });
+
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
     { scope: root }
@@ -103,7 +127,7 @@ export default function Prices() {
       <div className="prices-portal">
         <div className="prices-reveal">
           <header className="prices-head">
-            <span className="prices-kicker">(05) Цены</span>
+            <span className="prices-kicker">Цены</span>
             <h2 className="prices-title">
               Честно и&nbsp;по&nbsp;делу.
               <br />
@@ -124,6 +148,8 @@ export default function Prices() {
               </span>
             ))}
           </div>
+          {/* свет в конце туннеля — приближается и пробивает */}
+          <span className="rub-light" />
         </div>
       </div>
 
@@ -141,7 +167,9 @@ export default function Prices() {
               <span className="price-name">{t.name}</span>
               <span className="price-value">
                 <i className="price-pre">{t.pre}</i>
-                <b className="price-num">{t.num}</b>
+                <b className="price-num" data-val={t.num.replace(/\s/g, "")}>
+                  {t.num}
+                </b>
                 <i className="price-cur">{t.cur}</i>
               </span>
               <span className="price-time">срок · {t.time}</span>

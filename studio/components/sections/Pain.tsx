@@ -47,6 +47,7 @@ export default function Pain() {
 
       // волновая строка: выезжает справа → проходит по центру → уходит влево,
       // при этом буквы непрерывно «огибаются» бегущей волной (traveling wave).
+      gsap.set(".pain-chase", { xPercent: -50, yPercent: -50, autoAlpha: 0 });
       const waveChars = gsap.utils.toArray<HTMLElement>(".pain-wave-ch");
       if (waveChars.length) {
         // непрерывная бегущая волна по буквам
@@ -58,12 +59,14 @@ export default function Pain() {
           yoyo: true,
           stagger: { each: 0.05, from: "start" },
         });
-        // проезд справа налево, привязан к скроллу (пин — чтобы зритель задержался)
+        // CHASE-ПЕРЕХОД: строка выезжает справа → центр → уходит влево с «хвостом»
+        // (skew/stretch), а экран будто догоняет хвостик — следом из-за правого
+        // края влетает фраза «Вам сделали сайт…», ловя движение.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".pain-portal",
             start: "top top",
-            end: "+=130%",
+            end: "+=180%",
             scrub: 0.6,
             pin: true,
           },
@@ -71,13 +74,25 @@ export default function Pain() {
         tl.fromTo(
           ".pain-wave",
           { x: "64vw", autoAlpha: 0 },
-          { x: "0vw", autoAlpha: 1, ease: "sine.out", duration: 0.5 }
-        ).to(".pain-wave", {
-          x: "-64vw",
-          autoAlpha: 0,
-          ease: "sine.in",
-          duration: 0.5,
-        });
+          { x: "0vw", autoAlpha: 1, ease: "sine.out", duration: 0.4 }
+        )
+          .to({}, { duration: 0.18 }) // короткая задержка по центру
+          .to(".pain-wave", {
+            x: "-78vw",
+            skewX: -9,
+            scaleX: 1.12,
+            autoAlpha: 0,
+            ease: "power2.in",
+            duration: 0.42,
+          })
+          // экран догоняет хвостик — фраза влетает справа, чуть раньше ухода волны
+          .fromTo(
+            ".pain-chase",
+            { x: "86vw", autoAlpha: 0, skewX: -9 },
+            { x: "0vw", autoAlpha: 1, skewX: 0, ease: "power3.out", duration: 0.46 },
+            "-=0.16"
+          )
+          .to({}, { duration: 0.2 }); // пауза на фразе перед расфиксацией
       }
 
       // тоннель-параллакс по болям (lead/turn исключены — у них своя режиссура)
@@ -124,11 +139,8 @@ export default function Pain() {
             </span>
           ))}
         </div>
-      </div>
-
-      {/* интро-фраза */}
-      <div className="pain-item pain-item--lead" data-side="c">
-        <h2 className="pain-big">
+        {/* фраза, которую «догоняет» экран */}
+        <h2 className="pain-chase pain-big">
           <span className="l">Вам сделали сайт.</span>
           <span className="l pain-dim">Но заявок больше не стало.</span>
         </h2>

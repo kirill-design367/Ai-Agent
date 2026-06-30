@@ -960,10 +960,20 @@ html.lenis body {
   will-change: transform, opacity;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.2rem, 7vw, 6rem);
+  font-size: clamp(2.8rem, 9vw, 8rem);
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--text-on-dark);
+}
+/* chase-фраза — центр портала; GSAP анимирует x/skew (центрируем через xPercent) */
+.pain-chase {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92vw, 1100px);
+  margin: 0;
+  text-align: center;
+  will-change: transform, opacity;
 }
 .pain-wave-ch {
   display: inline-block;
@@ -1635,13 +1645,33 @@ html.lenis body {
 }
 .rub-veil {
   position: absolute;
-  inset: -2px 0;
+  inset: -8vh 0;
   z-index: 5;
   display: grid;
   place-items: center;
   background: #08080a;
   overflow: hidden;
   will-change: opacity;
+}
+/* свет в конце туннеля — премиальная вспышка, пробивающая сквозь ₽.
+   Центрируем через inset+margin (а не translate), чтобы GSAP свободно крутил scale. */
+.rub-light {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 60vmin;
+  height: 60vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.85) 22%,
+    rgba(201, 165, 91, 0.35) 45%,
+    transparent 70%
+  );
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 .rub-field {
   display: grid;
