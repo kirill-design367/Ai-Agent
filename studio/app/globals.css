@@ -265,47 +265,49 @@ html.lenis body {
   border-color: var(--accent);
   color: var(--accent);
 }
-/* — CUT-OUT кнопка: на ховере из фона «вырезается» панель, текст-нокаут проявляется.
-   Заливка поднимается снизу, текст через mix-blend-difference читается то белым,
-   то тёмным — как буквально вырезанный из света. */
+/* — CUT-OUT кнопка: архитектурный прямоугольник. По умолчанию (и на тач) —
+   чистый, читаемый вид. На ховере (только desktop) тёмная панель «вырезается»
+   из фона и текст инвертируется. На тач НЕ остаётся залипшего белого прямоугольника. */
 .btn--cut {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: transparent;
-  border: 1px solid rgba(244, 242, 238, 0.5);
-  padding: 0 clamp(1.6rem, 2.4vw, 2.2rem);
+  border-radius: 4px;
+  padding: 0 clamp(1.7rem, 2.6vw, 2.4rem);
+  /* первичная — сплошная светлая (ясный CTA на тач) */
+  background: #f4f2ee;
+  color: #0a0a0b;
+  border: 1px solid #f4f2ee;
 }
 .btn--cut-ghost {
-  border-color: rgba(244, 242, 238, 0.22);
+  background: transparent;
+  color: var(--text-on-dark);
+  border-color: rgba(244, 242, 238, 0.42);
 }
 .btn--cut > span {
   position: relative;
   z-index: 1;
-  color: #fff;
-  mix-blend-mode: difference;
   transition: letter-spacing 0.5s var(--ease-expo);
-}
-.btn--cut::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: #f4f2ee;
-  transform: translateY(101%);
-  transition: transform 0.55s var(--ease-expo);
-}
-.btn--cut:hover {
-  border-color: #f4f2ee;
-}
-.btn--cut:hover::before {
-  transform: translateY(0);
-}
-.btn--cut:hover > span {
-  letter-spacing: 0.04em;
 }
 .btn--cut:active {
   transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn--cut::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: #0a0a0b;
+    transform: translateY(101%);
+    transition: transform 0.5s var(--ease-expo);
+  }
+  .btn--cut:hover { color: #f4f2ee; border-color: #0a0a0b; }
+  .btn--cut:hover::before { transform: translateY(0); }
+  .btn--cut:hover > span { letter-spacing: 0.05em; }
+  /* вторичная (ghost): на ховере вырезается светлая панель */
+  .btn--cut-ghost::before { background: #f4f2ee; }
+  .btn--cut-ghost:hover { color: #0a0a0b; border-color: #f4f2ee; }
 }
 /* CTA «Отправить заявку» (контакт) — стрелка выезжает, по поверхности блик */
 .contact-submit .btn-cta-label,
@@ -364,19 +366,33 @@ html.lenis body {
   background: var(--bg-dark);
   padding: clamp(2.4rem, 6vh, 4rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
 }
+/* во всю ширину экрана (full-bleed) — строки исчезают ровно у краёв экрана.
+   Чуть повёрнуто = диагональ; шире вьюпорта, чтобы углы поворота не оголялись. */
 .works-banner {
   position: relative;
   overflow: hidden;
-  margin: 0 0 clamp(2.5rem, 7vh, 5rem);
-  padding: clamp(0.6rem, 2vh, 1.4rem) 0;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-bottom: clamp(2.5rem, 7vh, 5rem);
+  padding: clamp(1.2rem, 4vh, 2.6rem) 0;
+  transform: rotate(-2.4deg);
+  transform-origin: center;
 }
-/* compositor-only transform animation → не дёргается при скролле */
+.works-banner::before {
+  /* небольшой запас по бокам, чтобы поворот не оголял пустоту у краёв */
+  content: "";
+}
 .works-ticker {
   display: flex;
   width: max-content;
   will-change: transform;
-  transform: translate3d(0, 0, 0);
-  animation: worksticker 32s linear infinite;
+  animation: worksticker 34s linear infinite;
+}
+.works-ticker--b {
+  /* вторая строка — навстречу (вправо) */
+  animation-direction: reverse;
+  margin-top: clamp(-0.3rem, -0.4vh, -0.1rem);
+  opacity: 0.5;
 }
 .works-ticker-group {
   display: flex;
@@ -385,22 +401,26 @@ html.lenis body {
 .works-ticker span {
   display: inline-flex;
   align-items: center;
-  padding-right: clamp(3rem, 8vw, 7rem);
+  padding-right: clamp(2.4rem, 6vw, 5rem);
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.6rem, 8vw, 6.5rem);
-  line-height: 1;
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  line-height: 1.05;
   letter-spacing: -0.015em;
   text-transform: uppercase;
   color: var(--text-on-dark);
   white-space: nowrap;
+}
+.works-ticker--b span {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 242, 238, 0.5);
 }
 .works-ticker span i {
   display: inline-block;
   font-style: normal;
   color: rgba(244, 242, 238, 0.32);
   font-size: 0.5em;
-  margin-left: clamp(3rem, 8vw, 7rem);
+  margin-left: clamp(2.4rem, 6vw, 5rem);
   transform: translateY(-0.12em);
 }
 /* два идентичных трека → -50% сдвигает ровно на один трек, шов невидим */
@@ -423,6 +443,8 @@ html.lenis body {
   overflow: hidden;
   box-shadow: var(--shadow-xl);
   border: 1px solid rgba(244, 242, 238, 0.08);
+  /* тёмная подложка — никаких белых вспышек, пока грузится lazy-картинка */
+  background: #0c0c10;
   transform-origin: center top;
   will-change: transform;
   backface-visibility: hidden;
@@ -514,7 +536,7 @@ html.lenis body {
   top: clamp(1.2rem, 3vw, 2rem);
   left: clamp(1.5rem, 4vw, 3rem);
   z-index: 2;
-  font-family: var(--font-geometric), sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
@@ -526,11 +548,11 @@ html.lenis body {
     padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(6rem, 16vh, 10rem);
   }
   .works-ticker span {
-    font-size: clamp(2.4rem, 13vw, 4rem);
-    padding-right: clamp(2rem, 9vw, 3.5rem);
+    font-size: clamp(1.6rem, 8.5vw, 2.8rem);
+    padding-right: clamp(1.6rem, 7vw, 2.6rem);
   }
   .works-ticker span i {
-    margin-left: clamp(2rem, 9vw, 3.5rem);
+    margin-left: clamp(1.6rem, 7vw, 2.6rem);
   }
   .works-stack {
     gap: 1.4rem;
@@ -594,9 +616,10 @@ html.lenis body {
 .hero-bigA {
   position: absolute;
   z-index: 1;
-  top: 50%;
-  left: 50%;
-  width: clamp(360px, 62vw, 920px);
+  /* выше и правее (десктоп) */
+  top: 38%;
+  left: 64%;
+  width: clamp(360px, 58vw, 880px);
   height: auto;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -621,12 +644,31 @@ html.lenis body {
   gap: 1.2rem;
   pointer-events: none;
 }
+/* логотип AUREA — настоящий текст (без картинки/чёрного прямоугольника) */
 .hero-logo {
-  height: clamp(26px, 3.2vw, 40px);
-  width: auto;
-  /* белый знак на чёрном квадрате → screen убирает фон на тёмном hero */
-  mix-blend-mode: screen;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: var(--text-on-dark);
   user-select: none;
+  line-height: 1;
+}
+.hero-logo-a {
+  position: relative;
+}
+/* фирменная точка под «A» */
+.hero-logo-a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0.12em;
+  width: 0.13em;
+  height: 0.13em;
+  margin-left: -0.065em;
+  border-radius: 50%;
+  background: var(--gold);
 }
 
 /* заголовок — ломаные строки по золотому сечению (кинетика хаос→система) */
@@ -664,17 +706,21 @@ html.lenis body {
   margin-left: 6vw;
 }
 
-/* подзаголовок — прямо под заголовком, тем же мягким движением */
+/* подзаголовок — типографичнее: уже колонка, выразительный интерлиньяж */
 .hero-sub {
-  max-width: 44ch;
-  margin: clamp(1.4rem, 3.5vh, 2.4rem) 0 0 clamp(0rem, 4vw, 4.5rem);
+  max-width: 38ch;
+  margin: clamp(1.6rem, 4vh, 2.6rem) 0 0 clamp(0rem, 4vw, 4.5rem);
   font-family: var(--font-body), system-ui, sans-serif;
-  font-size: var(--text-lg);
-  line-height: 1.5;
-  color: rgba(244, 242, 238, 0.72);
+  font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+  line-height: 1.62;
+  letter-spacing: 0.002em;
+  color: rgba(244, 242, 238, 0.74);
+}
+.hero-sub .word {
+  display: inline-block;
 }
 
-/* нижняя hairline-строка: действие + нумерованные фишки */
+/* нижняя зона: действие + микрокопия (без hairline-линии) */
 .hero-foot {
   grid-column: 1 / -1;
   grid-row: 3;
@@ -684,10 +730,9 @@ html.lenis body {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: clamp(1rem, 3vw, 2.5rem);
-  border-top: 1px solid rgba(244, 242, 238, 0.16);
+  gap: clamp(0.8rem, 3vw, 2.5rem);
   padding-top: clamp(1rem, 2.5vh, 1.6rem);
-  /* правый отступ под плавающую кнопку «Написать», чтобы фишки её не задевали */
+  /* правый отступ под плавающую кнопку «Написать» */
   padding-right: clamp(0rem, 11vw, 9.5rem);
 }
 .hero-cta-row {
@@ -696,19 +741,19 @@ html.lenis body {
   gap: var(--space-md);
   pointer-events: auto;
 }
-/* микрокопия одной строкой под кнопками */
+/* микрокопия — одна строка, мелким */
 .hero-microcopy {
   margin: 0;
   align-self: flex-end;
-  font-size: var(--text-xs);
-  letter-spacing: 0.1em;
+  font-size: clamp(0.6rem, 1vw, 0.72rem);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(244, 242, 238, 0.5);
   white-space: nowrap;
 }
 .hero-microcopy i {
   font-style: normal;
-  margin: 0 0.5em;
+  margin: 0 0.45em;
   color: rgba(244, 242, 238, 0.3);
 }
 
@@ -720,10 +765,6 @@ html.lenis body {
     row-gap: clamp(1.6rem, 5vh, 2.6rem);
     padding-bottom: 5.5rem;
   }
-  .hero-bigA {
-    top: 44%;
-    width: 96vw;
-  }
   .hero-top {
     grid-column: 1;
     align-items: flex-start;
@@ -733,17 +774,27 @@ html.lenis body {
     align-self: end;
   }
   .hero-headline {
-    font-size: clamp(1.55rem, 7.8vw, 2.5rem);
+    font-size: clamp(1.6rem, 8vw, 2.6rem);
     line-height: 1.04;
   }
-  /* на телефоне — флёш-влево, без сдвигов (заголовок не уезжает вправо/за край) */
-  .hero-headline .hl-b,
-  .hero-headline .hl-c,
+  /* на телефоне — лёгкий «стильный хаос» (чуть левее, не флёш-в-край и не вправо) */
+  .hero-headline .hl-b {
+    margin-left: 0.9rem;
+  }
+  .hero-headline .hl-c {
+    margin-left: 0.35rem;
+  }
   .hero-headline .hl-d {
-    margin-left: 0;
+    margin-left: 1.7rem;
+  }
+  .hero-bigA {
+    /* мобайл — выше и правее */
+    top: 30%;
+    left: 70%;
+    width: 104vw;
   }
   .hero-sub {
-    max-width: 42ch;
+    max-width: 40ch;
     margin-left: 0;
     font-size: var(--text-base);
   }
@@ -751,7 +802,7 @@ html.lenis body {
     grid-column: 1;
     flex-direction: column;
     align-items: stretch;
-    gap: 1.1rem;
+    gap: 1rem;
     padding-right: 0;
   }
   .hero-cta-row .btn {
@@ -760,9 +811,12 @@ html.lenis body {
     justify-content: center;
   }
   .hero-microcopy {
-    white-space: normal;
     align-self: flex-start;
-    line-height: 1.7;
+    font-size: 0.58rem;
+    letter-spacing: 0.05em;
+  }
+  .hero-microcopy i {
+    margin: 0 0.3em;
   }
 }
 
@@ -948,10 +1002,15 @@ html.lenis body {
 /* волновая строка «А теперь — о наболевшем» (перетекание из кейсов) */
 .pain-portal {
   position: relative;
-  height: 100svh;
+  height: 100lvh;
   display: grid;
   place-items: center;
   overflow: hidden;
+}
+.pain-portal {
+  /* строку «А теперь о наболевшем» размещаем чуть НИЖЕ центра */
+  align-items: end;
+  padding-bottom: 26vh;
 }
 .pain-wave {
   display: flex;
@@ -960,20 +1019,27 @@ html.lenis body {
   will-change: transform, opacity;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.8rem, 9vw, 8rem);
+  font-size: clamp(2.4rem, 8vw, 7rem);
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--text-on-dark);
 }
-/* chase-фраза — центр портала; GSAP анимирует x/skew (центрируем через xPercent) */
-.pain-chase {
+/* chase-фраза — НИЖЕ центра портала; .pain-chase.pain-big повышает специфичность,
+   чтобы перебить max-width:13ch и гигантский font-size от .pain-big (был баг-overflow) */
+.pain-chase.pain-big {
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: min(92vw, 1100px);
+  top: 62%;
+  width: min(92vw, 1000px);
+  max-width: min(92vw, 1000px);
   margin: 0;
   text-align: center;
+  font-size: clamp(2rem, 6.4vw, 5.4rem);
+  line-height: 1.02;
   will-change: transform, opacity;
+}
+.pain-chase .l {
+  display: block;
 }
 .pain-wave-ch {
   display: inline-block;
@@ -1088,7 +1154,7 @@ html.lenis body {
 /* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок */
 .proc-enter {
   position: relative;
-  height: 100dvh;
+  height: 100lvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
@@ -1099,7 +1165,7 @@ html.lenis body {
   position: absolute;
   /* симметричный овэрскан сверху/снизу — тёмное гарантированно перекрывает любую
      белую полосу следующего блока (центр текста не смещается) */
-  inset: -8vh 0;
+  inset: 0;
   z-index: 5;
   display: grid;
   place-items: center;
@@ -1159,7 +1225,7 @@ html.lenis body {
 .proc-kicker {
   position: relative;
   z-index: 2;
-  font-family: var(--font-geometric), sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
   color: var(--text-tertiary);
@@ -1233,7 +1299,7 @@ html.lenis body {
 }
 .proc-idx {
   display: block;
-  font-family: var(--font-geometric), sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
@@ -1468,7 +1534,7 @@ html.lenis body {
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
-  font-family: var(--font-geometric), sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
@@ -1623,7 +1689,7 @@ html.lenis body {
 /* портал-вход: пиксельное табло ₽, наезжает и растворяется */
 .prices-portal {
   position: relative;
-  height: 100dvh;
+  height: 100lvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
@@ -1645,7 +1711,7 @@ html.lenis body {
 }
 .rub-veil {
   position: absolute;
-  inset: -8vh 0;
+  inset: 0;
   z-index: 5;
   display: grid;
   place-items: center;

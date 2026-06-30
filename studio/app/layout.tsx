@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Manrope, Montserrat, Unbounded } from "next/font/google";
+import { Playfair_Display, Manrope, Unbounded } from "next/font/google";
 import "./globals.css";
 
 /*
@@ -9,36 +9,28 @@ import "./globals.css";
   - Body/UI: Manrope (clean grotesk, excellent cyrillic) — clarity.
   Swap these for licensed type.today / CSTM faces when budget allows.
 */
+// Веса подрезаны под реальное использование — меньше блокирующих ресурсов.
 const display = Playfair_Display({
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700", "900"],
+  weight: ["400", "500", "600"],
   variable: "--font-display",
   display: "swap",
 });
 
 const body = Manrope({
   subsets: ["latin", "cyrillic"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-body",
-  display: "swap",
-});
-
-// Geometric sans for the AUREA wordmark (logo) — clean, triangular A.
-const geometric = Montserrat({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-geometric",
   display: "swap",
 });
 
 /*
   Headline face — Unbounded (Gogol's geometric display, ships full cyrillic).
-  Circular, characterful, distinctly "designed" — replaces the flat grotesk
-  the client found boring. Used only for the hero headline at large sizes.
+  Circular, characterful, distinctly "designed". Used для крупных заголовков.
 */
 const headline = Unbounded({
   subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["600", "700", "800"],
   variable: "--font-headline",
   display: "swap",
 });
@@ -65,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${display.variable} ${body.variable} ${geometric.variable} ${headline.variable}`}
+      className={`${display.variable} ${body.variable} ${headline.variable}`}
     >
       <body>{children}</body>
     </html>

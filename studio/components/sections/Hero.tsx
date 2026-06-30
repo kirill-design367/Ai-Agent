@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
-import { asset } from "@/lib/asset";
 
 const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
   ssr: false,
@@ -24,10 +23,15 @@ export default function Hero() {
   // бьёт по производительности и батарее.
   const [fluid, setFluid] = useState(false);
   useEffect(() => {
-    setFluid(
+    const ok =
       window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-        window.innerWidth > 900
-    );
+      window.innerWidth > 900;
+    if (!ok) return;
+    // отложить тяжёлую WebGL-инициализацию на простой → не раздувает TBT при загрузке
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
+      .requestIdleCallback;
+    const t = ric ? ric(() => setFluid(true)) : window.setTimeout(() => setFluid(true), 1200);
+    return () => clearTimeout(t as number);
   }, []);
 
   useGSAP(
@@ -43,13 +47,19 @@ export default function Hero() {
         return;
       }
 
+      // умеренный «стильный хаос» — как было раньше (не слишком разлетается)
       gsap.set(split.chars, {
-        x: () => gsap.utils.random(-48, 48),
-        y: () => gsap.utils.random(-54, 54),
-        rotation: () => gsap.utils.random(-28, 28),
+        x: () => gsap.utils.random(-22, 22),
+        y: () => gsap.utils.random(-24, 24),
+        rotation: () => gsap.utils.random(-12, 12),
         opacity: 0,
       });
-      gsap.set(subSplit.words, { y: 22, opacity: 0 });
+      // подзаголовок — похожая лёгкая сборка из хаоса по словам
+      gsap.set(subSplit.words, {
+        x: () => gsap.utils.random(-16, 16),
+        y: () => gsap.utils.random(-14, 18),
+        opacity: 0,
+      });
       gsap.set(fades, { opacity: 0, y: 24 });
 
       const play = () => {
@@ -65,7 +75,7 @@ export default function Hero() {
         })
           .to(
             subSplit.words,
-            { y: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.04 },
+            { x: 0, y: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.035 },
             "-=0.85"
           )
           .to(
@@ -100,16 +110,11 @@ export default function Hero() {
         <circle cx="100" cy="150" r="15" />
       </svg>
 
-      {/* верхняя строка: логотип AUREA */}
+      {/* верхняя строка: логотип AUREA — настоящий текст-вордмарк (без картинки) */}
       <header className="hero-top">
-        <img
-          className="hero-logo"
-          src={asset("/brand/logo-wordmark.jpg")}
-          alt="AUREA"
-          width={150}
-          height={36}
-          data-hero-fade
-        />
+        <span className="hero-logo" data-hero-fade aria-label="AUREA">
+          AURE<span className="hero-logo-a">A</span>
+        </span>
       </header>
 
       {/* заголовок + подзаголовок */}

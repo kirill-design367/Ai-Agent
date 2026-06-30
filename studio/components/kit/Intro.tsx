@@ -11,20 +11,21 @@ import { asset } from "@/lib/asset";
   Кадры — реальные изображения логотипа, GSAP кроссфейдит их одно за другим.
 */
 const FRAMES = [
-  { src: asset("/brand/intro/01-dot.jpg"),      key: "dot"      },
-  { src: asset("/brand/intro/02-line.jpg"),     key: "line"     },
-  { src: asset("/brand/intro/03-triangle.jpg"), key: "triangle" },
-  { src: asset("/brand/intro/04-mark.jpg"),     key: "mark"     },
-  { src: asset("/brand/intro/05-logo.jpg"),     key: "logo"     },
+  { src: asset("/brand/intro/01-dot.webp"),      key: "dot"      },
+  { src: asset("/brand/intro/02-line.webp"),     key: "line"     },
+  { src: asset("/brand/intro/03-triangle.webp"), key: "triangle" },
+  { src: asset("/brand/intro/04-mark.webp"),     key: "mark"     },
+  { src: asset("/brand/intro/05-logo.webp"),     key: "logo"     },
 ];
 
-// timings per frame: [fadeIn, hold, fadeOut] in seconds
+// timings per frame: [fadeIn, hold, fadeOut] in seconds.
+// Сжато ~вдвое — прелоадер был ~5.2с и держал LCP; теперь ~2.4с (быстрее, но кино).
 const TIMING = [
-  [0.30, 0.40, 0.22],  // dot
-  [0.28, 0.35, 0.22],  // line
-  [0.30, 0.40, 0.22],  // triangle
-  [0.35, 0.55, 0.25],  // mark — holds longer (climax)
-  [0.40, 1.00,    0],  // logo — no fade-out, lifts with curtain
+  [0.16, 0.14, 0.12],  // dot
+  [0.14, 0.10, 0.12],  // line
+  [0.16, 0.14, 0.12],  // triangle
+  [0.18, 0.24, 0.14],  // mark — кульминация
+  [0.24, 0.45,    0],  // logo — без затухания, уходит со шторкой
 ];
 
 export default function Intro() {
@@ -68,7 +69,7 @@ export default function Intro() {
           tl.to(stage.current, {
             width: targetW,
             height: targetH,
-            duration: 0.42,
+            duration: 0.3,
             ease: "power2.inOut",
           });
         }

@@ -13,12 +13,12 @@ import { asset } from "@/lib/asset";
   накрытый кейс уменьшается и притухает. Реальные клиентские кейсы.
 */
 const CASES = [
-  { img: "/work/case-1.jpg", title: "Volume — After Dark", meta: "Лендинг · 3 дня" },
-  { img: "/work/case-2.jpg", title: "Aristide", meta: "Портфолио · 4 дня" },
-  { img: "/work/case-3.jpg", title: "Анна Рыковская", meta: "Визитка · 2 дня" },
-  { img: "/work/case-4.jpg", title: "Garden Eight", meta: "Студия дизайна · 5 дней" },
-  { img: "/work/case-5.jpg", title: "Dream.doll", meta: "Интернет-магазин · 6 дней" },
-  { img: "/work/case-6.jpg", title: "Step into Web3", meta: "Лендинг · 3 дня" },
+  { img: "/work/case-1.webp", title: "Volume — After Dark", meta: "Лендинг · 3 дня" },
+  { img: "/work/case-2.webp", title: "Aristide", meta: "Портфолио · 4 дня" },
+  { img: "/work/case-3.webp", title: "Анна Рыковская", meta: "Визитка · 2 дня" },
+  { img: "/work/case-4.webp", title: "Garden Eight", meta: "Студия дизайна · 5 дней" },
+  { img: "/work/case-5.webp", title: "Dream.doll", meta: "Интернет-магазин · 6 дней" },
+  { img: "/work/case-6.webp", title: "Step into Web3", meta: "Лендинг · 3 дня" },
 ];
 
 export default function Works() {
@@ -53,12 +53,23 @@ export default function Works() {
 
   return (
     <section id="work" className="theme-dark works" ref={root}>
-      {/* бесконечная лента-баннер «Портфолио» — два идентичных трека для бесшовности */}
+      {/* лента «Портфолио» — две строки навстречу, по диагонали, во всю ширину экрана */}
       <div className="works-banner" aria-label="Портфолио">
-        <div className="works-ticker">
+        <div className="works-ticker works-ticker--a">
           {Array.from({ length: 2 }).map((_, g) => (
             <div className="works-ticker-group" key={g} aria-hidden={g === 1}>
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: 8 }).map((_, i) => (
+                <span key={i}>
+                  Портфолио<i>✦</i>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="works-ticker works-ticker--b">
+          {Array.from({ length: 2 }).map((_, g) => (
+            <div className="works-ticker-group" key={g} aria-hidden={g === 1}>
+              {Array.from({ length: 8 }).map((_, i) => (
                 <span key={i}>
                   Портфолио<i>✦</i>
                 </span>
