@@ -110,10 +110,18 @@ export default function Hero() {
         <circle cx="100" cy="150" r="15" />
       </svg>
 
-      {/* верхняя строка: логотип AUREA — настоящий текст-вордмарк (без картинки) */}
+      {/* логотип AUREA — стилизованные «A» (треугольник + точка), как в знаке бренда */}
       <header className="hero-top">
         <span className="hero-logo" data-hero-fade aria-label="AUREA">
-          AURE<span className="hero-logo-a">A</span>
+          <svg className="logo-a" viewBox="0 0 22 26" aria-hidden>
+            <path d="M11 2 L20 24 L16.3 24 L11 10 L5.7 24 L2 24 Z" fill="currentColor" />
+            <circle cx="11" cy="19.2" r="2" fill="currentColor" />
+          </svg>
+          <span className="logo-letters">URE</span>
+          <svg className="logo-a" viewBox="0 0 22 26" aria-hidden>
+            <path d="M11 2 L20 24 L16.3 24 L11 10 L5.7 24 L2 24 Z" fill="currentColor" />
+            <circle cx="11" cy="19.2" r="2" fill="currentColor" />
+          </svg>
         </span>
       </header>
 
@@ -136,10 +144,10 @@ export default function Hero() {
       {/* нижняя зона: действие + микрокопия одной строкой */}
       <div className="hero-foot">
         <div className="hero-cta-row" data-hero-fade>
-          <a href="#contact" className="btn btn--cut" data-magnetic>
+          <a href="#contact" className="btn btn--dissolve" data-magnetic>
             <span>Обсудить проект</span>
           </a>
-          <a href="#work" className="btn btn--cut btn--cut-ghost" data-magnetic>
+          <a href="#work" className="btn btn--dissolve btn--dissolve-2" data-magnetic>
             <span>Смотреть работы</span>
           </a>
         </div>
