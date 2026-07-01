@@ -20,29 +20,8 @@ function LenisGsapBridge() {
     (window as unknown as { __lenis?: unknown }).__lenis = lenis;
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
-
-    // Якорные ссылки (#contact / #work …) должны плавно ехать через Lenis,
-    // иначе браузер делает мгновенный «телепорт» на 26000px — экран дёргается.
-    const onClick = (e: MouseEvent) => {
-      const link = (e.target as HTMLElement)?.closest?.(
-        'a[href^="#"]'
-      ) as HTMLAnchorElement | null;
-      if (!link) return;
-      const href = link.getAttribute("href");
-      if (!href || href === "#") return;
-      const target = document.querySelector(href);
-      if (!target) return;
-      e.preventDefault();
-      (lenis as unknown as { scrollTo: (t: Element, o?: object) => void }).scrollTo(
-        target,
-        { offset: 0, duration: 1.3 }
-      );
-    };
-    document.addEventListener("click", onClick);
-
     return () => {
       lenis.off("scroll", ScrollTrigger.update);
-      document.removeEventListener("click", onClick);
     };
   }, [lenis]);
 
@@ -59,12 +38,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         smoothWheel: true,
         wheelMultiplier: 1,
-        // syncTouch: Lenis сам ведёт тач-скролл (preventDefault + программный
-        // скролл). Тогда iOS НЕ видит нативный жест скролла и НЕ прячет свою
-        // нижнюю панель — контент перестаёт «прыгать» при скролле на телефоне.
-        syncTouch: true,
-        syncTouchLerp: 0.1,
-        touchMultiplier: 1.6,
+        touchMultiplier: 1.4,
       }}
     >
       <LenisGsapBridge />

@@ -837,20 +837,11 @@ html.lenis body {
 
 /* — HERO адаптив: вертикальный поток на телефоне, мягкие сдвиги вместо больших */
 @media (max-width: 760px) {
-  /* Контент ПРИКРЕПЛЁН К ВЕРХУ и с фиксированными (не-vh) отступами. Раньше строка
-     1fr растягивала середину и раскидывала контент по высоте вьюпорта — а на iOS
-     панель Safari прячется/появляется при скролле, высота вьюпорта скачет и весь
-     Hero «прыгал». Теперь тулбар только открывает пустоту снизу, контент не двигается. */
   .hero {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    align-content: start;
-    row-gap: clamp(1.8rem, 6vw, 3rem);
-    padding-top: clamp(1.6rem, 5vw, 2.8rem);
-    padding-bottom: clamp(3.5rem, 12vw, 6rem);
-    /* высота = по контенту (НЕ по вьюпорту). Тогда прячущаяся панель Safari,
-       меняющая высоту экрана, ВООБЩЕ не влияет на раскладку — ничего не двигается. */
-    min-height: 0;
+    grid-template-rows: auto 1fr auto;
+    row-gap: clamp(1.6rem, 5vh, 2.6rem);
+    padding-bottom: 5.5rem;
   }
   .hero-top {
     grid-column: 1;
@@ -858,8 +849,7 @@ html.lenis body {
   }
   .hero-mid {
     grid-column: 1;
-    align-self: start;
-    margin-top: clamp(2rem, 12vw, 5rem);
+    align-self: end;
   }
   .hero-headline {
     font-size: clamp(1.9rem, 9vw, 3rem);
@@ -884,8 +874,7 @@ html.lenis body {
   }
   .hero-sub {
     max-width: 100%;
-    /* margin-top в vw (не vh из базы) — чтобы высота панели Safari не влияла */
-    margin: clamp(1.4rem, 5vw, 2.4rem) 0 0 0;
+    margin: clamp(1.4rem, 4vh, 2.4rem) 0 0 0;
     font-size: 0.92rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
@@ -904,8 +893,6 @@ html.lenis body {
     align-items: stretch;
     gap: 1rem;
     padding-right: 0;
-    /* убираем vh-паддинг из базы — расстояние держит row-gap сетки (стабильно) */
-    padding-top: 0;
   }
   .hero-cta-row .btn {
     flex: 1;

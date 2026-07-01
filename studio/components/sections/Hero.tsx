@@ -63,24 +63,7 @@ export default function Hero() {
       gsap.set(fades, { opacity: 0, y: 24 });
 
       const play = () => {
-        const tl = gsap.timeline({
-          // после входа СНИМАЕМ остаточные transform/will-change со ВСЕХ
-          // анимированных элементов (буквы заголовка, слова подзаголовка, лого,
-          // кнопки, микрокопия). Иначе каждый остаётся в отдельном GPU-слое и на
-          // iOS «уезжает вверх» при тач-скролле (рассинхрон слоёв со страницей).
-          onComplete: () => {
-            gsap.set(
-              [
-                ...split.chars,
-                ...subSplit.words,
-                ".hero-logo",
-                ".hero-cta-row",
-                ".hero-microcopy",
-              ],
-              { clearProps: "transform,willChange" }
-            );
-          },
-        });
+        const tl = gsap.timeline();
         tl.to(split.chars, {
           x: 0,
           y: 0,
