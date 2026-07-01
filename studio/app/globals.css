@@ -857,6 +857,8 @@ body {
     padding-right: 0;
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
+    /* опускаем кнопки и строку под ними ниже (vw — стабильно) */
+    margin-top: clamp(3.5rem, 22vw, 8rem);
   }
   .hero-cta-row .btn {
     flex: 1;
