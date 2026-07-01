@@ -128,6 +128,43 @@ export default function Hero() {
         </p>
       </div>
 
+      {/* креативные кнопки-«бриллианты маркиз», торчат из левого и правого краёв,
+          по золотому сечению (левый ниже, правый выше), с лёгким наклоном */}
+      <div className="hero-gems">
+        <a
+          href="#work"
+          className="gem gem--left"
+          data-magnetic
+          aria-label="Смотреть работы"
+        >
+          <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
+            <polygon points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82" />
+            <path className="gem-facets" d="M0,50 H240 M60,18 V82 M180,18 V82 M120,10 V90" />
+          </svg>
+          <span className="gem-label">
+            Смотреть
+            <br />
+            работы
+          </span>
+        </a>
+        <a
+          href="#contact"
+          className="gem gem--right"
+          data-magnetic
+          aria-label="Обсудить проект"
+        >
+          <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
+            <polygon points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82" />
+            <path className="gem-facets" d="M0,50 H240 M60,18 V82 M180,18 V82 M120,10 V90" />
+          </svg>
+          <span className="gem-label">
+            Обсудить
+            <br />
+            проект
+          </span>
+        </a>
+      </div>
+
       {/* нижняя зона: микрокопия одной строкой (кнопки убраны) */}
       <div className="hero-foot">
         <p className="hero-microcopy" data-hero-fade>
