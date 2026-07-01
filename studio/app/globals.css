@@ -197,10 +197,15 @@ html.lenis body {
   height: 56px;
 }
 
-/* — Magnetic targets (kit/MagneticTargets.tsx) read these CSS vars. */
-[data-magnetic] {
-  transform: translate3d(var(--mag-x, 0), var(--mag-y, 0), 0);
-  transition: transform 0.3s var(--ease-expo);
+/* — Magnetic targets (kit/MagneticTargets.tsx) read these CSS vars.
+   ТОЛЬКО на устройствах с мышью: на тач магнит отключён, а этот translate3d
+   всё равно поднимал кнопку в отдельный GPU-слой с transition — при инерционном
+   скролле слой рассинхронивался с контентом и «отскакивал» (баг тач-скролла). */
+@media (hover: hover) and (pointer: fine) {
+  [data-magnetic] {
+    transform: translate3d(var(--mag-x, 0), var(--mag-y, 0), 0);
+    transition: transform 0.3s var(--ease-expo);
+  }
 }
 
 /* — Grain overlay (kit/GrainOverlay.tsx). 3–8% premium analog texture (IV.10.2) */
@@ -240,6 +245,10 @@ html.lenis body {
   letter-spacing: 0.01em;
   text-decoration: none;
   cursor: pointer;
+  /* тач: обычный скролл-жест сквозь кнопку, без нативного drag ссылки и без вспышки */
+  touch-action: manipulation;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
   transition: transform var(--dur-micro) var(--ease-expo),
     box-shadow var(--dur-micro) var(--ease-expo),
     background var(--dur-micro) var(--ease-expo);
