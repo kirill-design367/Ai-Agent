@@ -304,11 +304,12 @@ html.lenis body {
     letter-spacing: 0.08em;
   }
 }
-/* тач/нажатие — тот же dissolve, что на десктопном ховере: контур растворяется */
+/* тач/нажатие — тот же dissolve, что на десктопном ховере: контур растворяется.
+   БЕЗ transform: на iOS translate поднимал кнопку в отдельный слой и она
+   «подпрыгивала» при тач-скролле. Растворяем только обводку. */
 .btn--dissolve:active {
   border-color: transparent;
   background: transparent;
-  transform: translateY(-2px);
 }
 .btn--dissolve:active > span {
   letter-spacing: 0.08em;
@@ -725,7 +726,8 @@ html.lenis body {
 .hero-logo .logo-letters {
   font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
-  font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+  /* крупнее — чтобы высота URE совпадала с высотой глифов «A» */
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
   letter-spacing: 0.32em;
   text-indent: 0.32em;
 }
