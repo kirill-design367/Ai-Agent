@@ -31,7 +31,7 @@ function LenisGsapBridge() {
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   return (
     <ReactLenis
-      root
+      className="app-scroll"
       options={{
         duration: 1.2,
         // Premium expo easing (matches reference portfolios).
