@@ -59,7 +59,12 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         smoothWheel: true,
         wheelMultiplier: 1,
-        touchMultiplier: 1.4,
+        // syncTouch: Lenis сам ведёт тач-скролл (preventDefault + программный
+        // скролл). Тогда iOS НЕ видит нативный жест скролла и НЕ прячет свою
+        // нижнюю панель — контент перестаёт «прыгать» при скролле на телефоне.
+        syncTouch: true,
+        syncTouchLerp: 0.1,
+        touchMultiplier: 1.6,
       }}
     >
       <LenisGsapBridge />
