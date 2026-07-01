@@ -13,6 +13,11 @@ let registered = false;
 export function registerGsap() {
   if (registered || typeof window === "undefined") return;
   gsap.registerPlugin(ScrollTrigger, SplitText);
+  // На мобиле панель браузера прячется/появляется при скролле и меняет ТОЛЬКО
+  // высоту вьюпорта. Без этого флага ScrollTrigger на каждый такой resize делает
+  // refresh() — пересчитывает все пины/позиции и ДЁРГАЕТ контент (заголовок,
+  // кнопки, фоновую «А») вверх. ignoreMobileResize отключает этот лишний refresh.
+  ScrollTrigger.config({ ignoreMobileResize: true });
   registered = true;
 }
 
