@@ -871,6 +871,8 @@ html.lenis body {
     top: 14%;
     left: 76%;
     width: 110vw;
+    /* без отдельного GPU-слоя: на iOS «дышащий» слой рассинхронивал тач-скролл */
+    will-change: auto;
   }
   .hero-sub {
     max-width: 100%;
