@@ -810,10 +810,31 @@ body {
   width: clamp(190px, 34vw, 300px);
   aspect-ratio: 2.5 / 1;
   text-decoration: none;
-  /* тень объёма + тихое постоянное сияние (анимируется gemGlow) */
+  /* СТАТИЧНАЯ тень объёма (тёмная, не анимируется → без repaint-следов при скролле) */
   filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.55));
-  transition: transform 0.55s var(--ease-expo), filter 0.55s var(--ease-expo);
-  will-change: transform, filter;
+  transition: transform 0.55s var(--ease-expo);
+  will-change: transform;
+}
+/* тихое постоянное сияние — отдельный слой-ореол ПОЗАДИ камня.
+   Анимируем ТОЛЬКО opacity (композитор, без repaint) — поэтому при скролле
+   больше нет светлого «следа»/проблесков. */
+.gem::before {
+  content: "";
+  position: absolute;
+  inset: -22% -6%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(228, 224, 214, 0.28),
+    rgba(228, 224, 214, 0) 68%
+  );
+  opacity: 0.4;
+  animation: gemGlow 6s ease-in-out infinite;
+  pointer-events: none;
+}
+.gem--left::before {
+  animation-delay: -3s;
 }
 .gem-cut {
   position: absolute;
@@ -821,11 +842,6 @@ body {
   width: 100%;
   height: 100%;
   overflow: visible;
-  /* мягкое свечение самого камня — совсем негромкое, дышит */
-  animation: gemGlow 6s ease-in-out infinite;
-}
-.gem--left .gem-cut {
-  animation-delay: -3s;
 }
 /* корпус камня — вертикальный градиент даёт объём (свет сверху → тень снизу) */
 .gem-cut .gem-body {
@@ -845,20 +861,20 @@ body {
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
-/* тихое постоянное сияние — «премиально и тихо», едва заметно пульсирует */
+/* тихое постоянное сияние — «премиально и тихо», едва заметно дышит (только opacity) */
 @keyframes gemGlow {
   0%,
   100% {
-    filter: drop-shadow(0 0 6px rgba(228, 224, 214, 0.14));
+    opacity: 0.3;
   }
   50% {
-    filter: drop-shadow(0 0 14px rgba(228, 224, 214, 0.3));
+    opacity: 0.62;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gem-cut {
+  .gem::before {
     animation: none;
-    filter: drop-shadow(0 0 8px rgba(228, 224, 214, 0.18));
+    opacity: 0.45;
   }
 }
 .gem-label {
@@ -965,7 +981,7 @@ body {
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
   .gem--right {
-    top: 36%;
+    top: 41%;
   }
   .gem--left {
     top: 72%;
@@ -975,21 +991,25 @@ body {
     /* подзаголовок опущен ниже — попадает в полосу МЕЖДУ кристаллами (правый ~51%,
        левый ~69%); лёгкий наклон + лесенка красных строк = «хаос по золотому сечению».
        margin-top в vw (не vh) — чтобы высота панели Safari не влияла на раскладку */
-    margin: clamp(4.5rem, 26vw, 8.5rem) 0 0 0;
-    font-size: 0.92rem;
+    /* чуть крупнее, лёгкий сдвиг вправо всей колонки + больший наклон = живее.
+       margin-top больше — подзаголовок садится НИЖЕ правого кристалла (41%),
+       в чистую полосу между кристаллами */
+    margin: clamp(7.4rem, 37vw, 11.5rem) 0 0 0.7rem;
+    font-size: 1rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    transform: rotate(-1.5deg);
+    transform: rotate(-2deg);
     transform-origin: left center;
   }
-  /* креатив — «красные строки» хаотичным лесенкой, как заголовок (не выделения) */
+  /* креатив — «красные строки» хаотичной лесенкой вправо (сильнее разброс) */
   .hero-sub .hs-line {
     display: block;
   }
-  .hero-sub .hs-l2 { margin-left: 1.8rem; }
-  .hero-sub .hs-l3 { margin-left: 0.6rem; }
-  .hero-sub .hs-l4 { margin-left: 1.3rem; }
-  .hero-sub .hs-l5 { margin-left: 2.6rem; }
+  .hero-sub .hs-l1 { margin-left: 0.9rem; }
+  .hero-sub .hs-l2 { margin-left: 2.9rem; }
+  .hero-sub .hs-l3 { margin-left: 1.2rem; }
+  .hero-sub .hs-l4 { margin-left: 3.4rem; }
+  .hero-sub .hs-l5 { margin-left: 2.1rem; }
   .hero-foot {
     grid-column: 1;
     flex-direction: column;
@@ -998,8 +1018,8 @@ body {
     padding-right: 0;
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
-    /* микрокопию подняли чуть выше (vw — стабильно) */
-    margin-top: clamp(7rem, 44vw, 12rem);
+    /* микрокопию подняли ещё выше (vw — стабильно) */
+    margin-top: clamp(5rem, 34vw, 9.5rem);
   }
   .hero-cta-row .btn {
     flex: 1;
