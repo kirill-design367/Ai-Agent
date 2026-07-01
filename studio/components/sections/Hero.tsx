@@ -129,8 +129,22 @@ export default function Hero() {
       </div>
 
       {/* креативные кнопки-«бриллианты маркиз», торчат из левого и правого краёв,
-          по золотому сечению (левый ниже, правый выше), с лёгким наклоном */}
+          по золотому сечению (левый ниже, правый выше), с лёгким наклоном,
+          объём (градиент+фасеты+блик) и тихое постоянное сияние */}
       <div className="hero-gems">
+        <svg className="gem-defs" width="0" height="0" aria-hidden>
+          <defs>
+            <linearGradient id="gem-grad" x1="0" y1="0" x2="0.32" y2="1">
+              <stop offset="0" stopColor="#43434f" />
+              <stop offset="0.5" stopColor="#17171d" />
+              <stop offset="1" stopColor="#08080c" />
+            </linearGradient>
+            <linearGradient id="gem-shine" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="rgba(255,255,255,0.24)" />
+              <stop offset="1" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+          </defs>
+        </svg>
         <a
           href="#work"
           className="gem gem--left"
@@ -138,8 +152,15 @@ export default function Hero() {
           aria-label="Смотреть работы"
         >
           <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
-            <polygon points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82" />
-            <path className="gem-facets" d="M0,50 H240 M60,18 V82 M180,18 V82 M120,10 V90" />
+            <polygon
+              className="gem-body"
+              points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
+            />
+            <polygon className="gem-shine" points="0,50 60,18 120,10 180,18 240,50 120,50" />
+            <path
+              className="gem-facets"
+              d="M0,50 H240 M60,18 L120,50 L60,82 M180,18 L120,50 L180,82 M120,10 L120,90"
+            />
           </svg>
           <span className="gem-label">
             Смотреть
@@ -154,8 +175,15 @@ export default function Hero() {
           aria-label="Обсудить проект"
         >
           <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
-            <polygon points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82" />
-            <path className="gem-facets" d="M0,50 H240 M60,18 V82 M180,18 V82 M120,10 V90" />
+            <polygon
+              className="gem-body"
+              points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
+            />
+            <polygon className="gem-shine" points="0,50 60,18 120,10 180,18 240,50 120,50" />
+            <path
+              className="gem-facets"
+              d="M0,50 H240 M60,18 L120,50 L60,82 M180,18 L120,50 L180,82 M120,10 L120,90"
+            />
           </svg>
           <span className="gem-label">
             Обсудить
