@@ -83,15 +83,6 @@ export default function Hero() {
             { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
             "-=0.7"
           );
-        // мягкое «дыхание» фоновой А
-        gsap.to(".hero-bigA", {
-          scale: 1.04,
-          duration: 6,
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-          transformOrigin: "50% 50%",
-        });
       };
 
       if (document.documentElement.classList.contains("intro-done")) play();
@@ -103,12 +94,6 @@ export default function Hero() {
   return (
     <section id="hero" className="theme-dark hero" ref={root}>
       <div className="hero-fluid">{fluid && <SplashCursor />}</div>
-
-      {/* огромная полупрозрачная «А» с точкой — знак бренда на фоне */}
-      <svg className="hero-bigA" viewBox="0 0 200 200" aria-hidden data-hero-fade>
-        <path d="M100 16 L178 184 L150 184 L100 70 L50 184 L22 184 Z" />
-        <circle cx="100" cy="150" r="15" />
-      </svg>
 
       {/* логотип AUREA — стилизованные «A» (треугольник + точка), как в знаке бренда */}
       <header className="hero-top">

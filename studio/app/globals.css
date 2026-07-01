@@ -654,25 +654,6 @@ body {
   opacity: 0.9;
 }
 
-/* огромная полупрозрачная «А» с точкой — знак бренда на фоне (вместо тонких линий) */
-.hero-bigA {
-  position: absolute;
-  z-index: 1;
-  /* гораздо выше и правее, еле заметная (десктоп) */
-  top: 16%;
-  left: 82%;
-  width: clamp(340px, 52vw, 820px);
-  height: auto;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  will-change: transform;
-}
-.hero-bigA path {
-  fill: rgba(244, 242, 238, 0.025);
-}
-.hero-bigA circle {
-  fill: rgba(244, 242, 238, 0.045);
-}
 
 /* верхняя строка: логотип AUREA */
 .hero-top {
@@ -814,10 +795,11 @@ body {
 
 /* — HERO адаптив: вертикальный поток на телефоне, мягкие сдвиги вместо больших */
 @media (max-width: 760px) {
-  /* ВАЖНО: контент НЕ зависит от высоты вьюпорта. Раньше строка 1fr + min-height:100svh
-     растягивали середину по высоте экрана — а когда панель Safari прячется/появляется,
-     высота меняется и весь контент (заголовок/подзаголовок/кнопки/фон-А) РАЗЪЕЗЖАЛСЯ.
-     Теперь высота = по контенту, отступы в vw/rem (не vh) → ничего не двигается. */
+  /* Hero на ПОЛНЫЙ экран (100dvh — динамическая высота, всегда = видимой области,
+     поэтому снизу НЕ появляется пустое место и не выглядывает следующая секция).
+     Контент прижат к ВЕРХУ (align-content:start) — при смене высоты панели браузера
+     двигается только невидимая пустота снизу, а сам контент стоит на месте.
+     Отступы в vw/rem (не vh). */
   .hero {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
@@ -825,7 +807,7 @@ body {
     row-gap: clamp(1.8rem, 6vw, 3rem);
     padding-top: clamp(1.6rem, 5vw, 2.8rem);
     padding-bottom: clamp(3.5rem, 12vw, 6rem);
-    min-height: 0;
+    min-height: 100dvh;
   }
   .hero-top {
     grid-column: 1;
@@ -834,7 +816,7 @@ body {
   .hero-mid {
     grid-column: 1;
     align-self: start;
-    margin-top: clamp(2rem, 12vw, 5rem);
+    margin-top: clamp(2.5rem, 16vw, 6rem);
   }
   .hero-headline {
     font-size: clamp(1.9rem, 9vw, 3rem);
@@ -850,12 +832,6 @@ body {
   }
   .hero-headline .hl-d {
     margin-left: 0.9rem;
-  }
-  .hero-bigA {
-    /* мобайл — гораздо выше и правее, едва заметная */
-    top: 14%;
-    left: 76%;
-    width: 110vw;
   }
   .hero-sub {
     max-width: 100%;
