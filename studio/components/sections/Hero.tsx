@@ -38,39 +38,12 @@ export default function Hero() {
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
       const fades = gsap.utils.toArray<HTMLElement>("[data-hero-fade]");
       const split = new SplitText(headline.current!, { type: "words,chars" });
       const subSplit = new SplitText(sub.current!, { type: "words" });
 
       if (reduce) {
         gsap.set([split.chars, subSplit.words, fades], { clearProps: "all" });
-        return;
-      }
-
-      // ── ТАЧ (моб): НИКАКИХ transform-слоёв. На iOS любой остаточный или вечно
-      // анимируемый transform (буквы-хаос, «дыхание» фоновой А, will-change)
-      // рассинхронивается с тач-скроллом — контент «уезжает вверх». Поэтому на
-      // телефоне — простое проявление по opacity, и после него ВСЁ статично.
-      if (isTouch) {
-        // возвращаем исходную разметку заголовка/подзаголовка (без char-спанов),
-        // чтобы не было per-char transform-слоёв — просто плавное проявление
-        split.revert();
-        subSplit.revert();
-        const els = [headline.current, sub.current, ...fades];
-        gsap.set(els, { opacity: 0, willChange: "auto" });
-        const playM = () => {
-          gsap.to(els, {
-            opacity: 1,
-            duration: 0.8,
-            ease: "power2.out",
-            stagger: 0.08,
-            onComplete: () =>
-              gsap.set(els, { clearProps: "opacity,transform,willChange" }),
-          });
-        };
-        if (document.documentElement.classList.contains("intro-done")) playM();
-        else window.addEventListener("aurea:revealed", playM, { once: true });
         return;
       }
 

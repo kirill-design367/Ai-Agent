@@ -847,7 +847,10 @@ html.lenis body {
     align-content: start;
     row-gap: clamp(1.8rem, 6vw, 3rem);
     padding-top: clamp(1.6rem, 5vw, 2.8rem);
-    padding-bottom: 3rem;
+    padding-bottom: clamp(3.5rem, 12vw, 6rem);
+    /* высота = по контенту (НЕ по вьюпорту). Тогда прячущаяся панель Safari,
+       меняющая высоту экрана, ВООБЩЕ не влияет на раскладку — ничего не двигается. */
+    min-height: 0;
   }
   .hero-top {
     grid-column: 1;
@@ -878,12 +881,11 @@ html.lenis body {
     top: 14%;
     left: 76%;
     width: 110vw;
-    /* без отдельного GPU-слоя: на iOS «дышащий» слой рассинхронивал тач-скролл */
-    will-change: auto;
   }
   .hero-sub {
     max-width: 100%;
-    margin-left: 0;
+    /* margin-top в vw (не vh из базы) — чтобы высота панели Safari не влияла */
+    margin: clamp(1.4rem, 5vw, 2.4rem) 0 0 0;
     font-size: 0.92rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
@@ -902,6 +904,8 @@ html.lenis body {
     align-items: stretch;
     gap: 1rem;
     padding-right: 0;
+    /* убираем vh-паддинг из базы — расстояние держит row-gap сетки (стабильно) */
+    padding-top: 0;
   }
   .hero-cta-row .btn {
     flex: 1;
