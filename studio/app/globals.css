@@ -862,21 +862,20 @@ html.lenis body {
     width: 110vw;
   }
   .hero-sub {
-    max-width: 40ch;
+    max-width: 100%;
     margin-left: 0;
-    font-size: 0.86rem;
-    line-height: 1.75;
+    font-size: 0.92rem;
+    line-height: 1.5;
     letter-spacing: 0.01em;
   }
-  /* ключевые слова — Playfair курсивом, крупнее и ярче: подзаголовок «цепляет» */
-  .hero-sub .hs-key {
-    font-family: var(--font-display), Georgia, serif;
-    font-style: italic;
-    font-size: 1.28em;
-    font-weight: 500;
-    color: rgba(244, 242, 238, 0.98);
-    letter-spacing: -0.01em;
+  /* креатив — «красные строки» хаотичным лесенкой, как заголовок (не выделения) */
+  .hero-sub .hs-line {
+    display: block;
   }
+  .hero-sub .hs-l2 { margin-left: 1.8rem; }
+  .hero-sub .hs-l3 { margin-left: 0.6rem; }
+  .hero-sub .hs-l4 { margin-left: 1.3rem; }
+  .hero-sub .hs-l5 { margin-left: 2.6rem; }
   .hero-foot {
     grid-column: 1;
     flex-direction: column;

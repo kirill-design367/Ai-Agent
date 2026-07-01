@@ -135,11 +135,11 @@ export default function Hero() {
         </h1>
 
         <p className="hero-sub" ref={sub}>
-          Мы&nbsp;проектируем каждый пиксель так, чтобы он&nbsp;усиливал{" "}
-          <span className="hs-key">доверие</span> к&nbsp;вашему бизнесу, помогал
-          получать <span className="hs-key">больше&nbsp;обращений</span>{" "}
-          и&nbsp;делал компанию <span className="hs-key">сильнее</span>{" "}
-          в&nbsp;глазах клиентов.
+          <span className="hs-line hs-l1">Мы&nbsp;проектируем каждый пиксель так,</span>{" "}
+          <span className="hs-line hs-l2">чтобы он&nbsp;усиливал доверие</span>{" "}
+          <span className="hs-line hs-l3">к&nbsp;вашему бизнесу, помогал получать</span>{" "}
+          <span className="hs-line hs-l4">больше обращений и&nbsp;делал компанию</span>{" "}
+          <span className="hs-line hs-l5">сильнее в&nbsp;глазах клиентов.</span>
         </p>
       </div>
 
