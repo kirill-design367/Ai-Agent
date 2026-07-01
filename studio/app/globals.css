@@ -131,6 +131,8 @@ html {
   /* clip любой горизонтальный вылет: на мобиле сайт больше нельзя «утащить» вбок */
   overflow-x: clip;
   width: 100%;
+  /* без «резинки» overscroll на краях — на тач меньше дёрганья */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -415,43 +417,28 @@ html.lenis body {
   background: var(--bg-dark);
   padding: clamp(2.4rem, 6vh, 4rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
 }
-/* две залитые диагональные БАНДЫ навстречу, перекрещиваются (референс TrucknRoll).
-   Текст — сплошная заливка (без text-stroke: он переростеривается и лагал). */
+/* одна горизонтальная лента-строка «ПОРТФОЛИО / ПРИМЕРЫ РАБОТ», бесконечный цикл.
+   Светлая полоса на тёмной секции, ровно по горизонтали. */
 .works-banner {
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-bottom: clamp(2.5rem, 7vh, 5rem);
-  padding: clamp(2rem, 6vh, 4rem) 0;
   overflow: hidden;
+  /* фиксированный светлый (не токен — он инвертируется в .theme-dark) */
+  background: #f4f3f0;
+  padding: clamp(0.7rem, 1.8vh, 1.2rem) 0;
 }
 .works-band {
   position: relative;
-  width: 116%;
-  margin-left: -8%;
   overflow: hidden;
-  background: var(--bg-base);
-  padding: clamp(0.35rem, 1vh, 0.7rem) 0;
-}
-.works-band--a {
-  transform: rotate(-3.4deg);
-  z-index: 2;
-}
-.works-band--b {
-  transform: rotate(2.6deg);
-  margin-top: clamp(-1.6rem, -4vh, -2.6rem);
-  background: #16161a;
-  z-index: 1;
 }
 /* compositor-only marquee: translate3d, без layout/paint каждый кадр */
 .works-ticker {
   display: flex;
   width: max-content;
   will-change: transform;
-  animation: worksticker 30s linear infinite;
-}
-.works-ticker--rev {
-  animation-direction: reverse;
+  animation: worksticker 32s linear infinite;
 }
 .works-ticker-group {
   display: flex;
@@ -467,25 +454,18 @@ html.lenis body {
 .wb-big {
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 800;
-  font-size: clamp(1.5rem, 4.4vw, 3.4rem);
+  font-size: clamp(1.3rem, 4vw, 3rem);
   line-height: 1;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: #0a0a0b;
 }
-.works-band--b .wb-big {
-  color: var(--bg-base);
-}
 .wb-mark {
   font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
-  font-size: clamp(0.62rem, 1.1vw, 0.85rem);
+  font-size: clamp(0.7rem, 1.4vw, 1rem);
   letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(10, 10, 11, 0.55);
-}
-.works-band--b .wb-mark {
-  color: rgba(244, 242, 238, 0.55);
+  color: rgba(10, 10, 11, 0.45);
 }
 /* два идентичных трека → -50% сдвигает ровно на один трек, шов невидим */
 @keyframes worksticker {
@@ -611,13 +591,7 @@ html.lenis body {
     padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(6rem, 16vh, 10rem);
   }
   .wb-big {
-    font-size: clamp(1.3rem, 6.5vw, 2rem);
-  }
-  .works-band {
-    padding: clamp(0.3rem, 0.8vh, 0.5rem) 0;
-  }
-  .works-band--b {
-    margin-top: clamp(-1.1rem, -3vh, -1.8rem);
+    font-size: clamp(1.2rem, 6vw, 1.9rem);
   }
   .works-stack {
     gap: 1.4rem;

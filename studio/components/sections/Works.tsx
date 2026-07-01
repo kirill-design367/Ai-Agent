@@ -53,34 +53,18 @@ export default function Works() {
 
   return (
     <section id="work" className="theme-dark works" ref={root}>
-      {/* лента — две залитые диагональные банды навстречу (референс TrucknRoll) */}
-      <div className="works-banner" aria-label="Портфолио">
-        <div className="works-band works-band--a">
+      {/* лента — одна горизонтальная строка, бесконечный цикл */}
+      <div className="works-banner" aria-label="Портфолио — примеры работ">
+        <div className="works-band">
           <div className="works-ticker">
             {Array.from({ length: 2 }).map((_, g) => (
               <div className="works-ticker-group" key={g} aria-hidden={g === 1}>
-                {Array.from({ length: 5 }).map((_, i) => (
+                {Array.from({ length: 6 }).map((_, i) => (
                   <span className="wb-row" key={i}>
                     <span className="wb-big">Портфолио</span>
-                    <span className="wb-mark">AUREA®</span>
-                    <span className="wb-big">Избранные работы</span>
-                    <span className="wb-mark">2021—2025</span>
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="works-band works-band--b">
-          <div className="works-ticker works-ticker--rev">
-            {Array.from({ length: 2 }).map((_, g) => (
-              <div className="works-ticker-group" key={g} aria-hidden={g === 1}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span className="wb-row" key={i}>
-                    <span className="wb-big">Сделано на чистом коде</span>
-                    <span className="wb-mark">★</span>
-                    <span className="wb-big">Портфолио</span>
-                    <span className="wb-mark">★</span>
+                    <span className="wb-mark">/</span>
+                    <span className="wb-big">Примеры работ</span>
+                    <span className="wb-mark">/</span>
                   </span>
                 ))}
               </div>
