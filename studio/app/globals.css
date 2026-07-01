@@ -837,11 +837,17 @@ html.lenis body {
 
 /* — HERO адаптив: вертикальный поток на телефоне, мягкие сдвиги вместо больших */
 @media (max-width: 760px) {
+  /* Контент ПРИКРЕПЛЁН К ВЕРХУ и с фиксированными (не-vh) отступами. Раньше строка
+     1fr растягивала середину и раскидывала контент по высоте вьюпорта — а на iOS
+     панель Safari прячется/появляется при скролле, высота вьюпорта скачет и весь
+     Hero «прыгал». Теперь тулбар только открывает пустоту снизу, контент не двигается. */
   .hero {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    row-gap: clamp(1.6rem, 5vh, 2.6rem);
-    padding-bottom: 5.5rem;
+    grid-template-rows: auto auto auto;
+    align-content: start;
+    row-gap: clamp(1.8rem, 6vw, 3rem);
+    padding-top: clamp(1.6rem, 5vw, 2.8rem);
+    padding-bottom: 3rem;
   }
   .hero-top {
     grid-column: 1;
@@ -849,7 +855,8 @@ html.lenis body {
   }
   .hero-mid {
     grid-column: 1;
-    align-self: end;
+    align-self: start;
+    margin-top: clamp(2rem, 12vw, 5rem);
   }
   .hero-headline {
     font-size: clamp(1.9rem, 9vw, 3rem);
