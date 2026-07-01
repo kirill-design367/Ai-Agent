@@ -128,17 +128,8 @@ export default function Hero() {
         </p>
       </div>
 
-      {/* нижняя зона: действие + микрокопия одной строкой */}
+      {/* нижняя зона: микрокопия одной строкой (кнопки убраны) */}
       <div className="hero-foot">
-        <div className="hero-cta-row" data-hero-fade>
-          <a href="#contact" className="btn btn--dissolve" data-magnetic>
-            <span>Обсудить проект</span>
-          </a>
-          <a href="#work" className="btn btn--dissolve btn--dissolve-2" data-magnetic>
-            <span>Смотреть работы</span>
-          </a>
-        </div>
-
         <p className="hero-microcopy" data-hero-fade>
           Индивидуальный дизайн <i>•</i> Пожизненная гарантия <i>•</i> Запуск
           от&nbsp;5&nbsp;дней
