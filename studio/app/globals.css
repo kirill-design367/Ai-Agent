@@ -222,6 +222,14 @@ body {
   opacity: 0.05;
   mix-blend-mode: soft-light;
 }
+/* На тач-устройствах фиксированный blend-слой поверх инерционного скролла
+   даёт светлый «след»/смазывание (repaint фикс-слоя против движущегося фона).
+   Зерно — чисто декоративная текстура 5%, на мобиле отключаем — след исчезает. */
+@media (pointer: coarse) {
+  .grain {
+    display: none;
+  }
+}
 
 /* — HERO mixed typography (serif display, dramatic scale) */
 .hero-title {
@@ -846,22 +854,44 @@ body {
 /* корпус камня — вертикальный градиент даёт объём (свет сверху → тень снизу) */
 .gem-cut .gem-body {
   fill: url(#gem-grad);
-  stroke: rgba(244, 242, 238, 0.66);
+  stroke: rgba(244, 242, 238, 0.72);
   stroke-width: 1.3;
   vector-effect: non-scaling-stroke;
 }
-/* верхняя площадка-блик (table facet) — ловит свет */
-.gem-cut .gem-shine {
+/* площадка-table — ловит свет (яркий блик по центру огранки) */
+.gem-cut .gem-table {
   fill: url(#gem-shine);
+  opacity: 0.55;
   pointer-events: none;
 }
+/* фасетная сетка — тонкие рёбра граней */
 .gem-cut .gem-facets {
   fill: none;
-  stroke: rgba(244, 242, 238, 0.28);
+  stroke: rgba(244, 242, 238, 0.3);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
-/* тихое постоянное сияние — «премиально и тихо», едва заметно дышит (только opacity) */
+/* переливающийся свет (дисперсия) — тихо дышит по opacity (композитор, без repaint) */
+.gem-cut .gem-iri {
+  fill: url(#gem-iri);
+  opacity: 0.08;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: gemIri 7.5s ease-in-out infinite;
+}
+.gem--left .gem-cut .gem-iri {
+  animation-delay: -3.6s;
+}
+@keyframes gemIri {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+/* тихое постоянное сияние-ореол — «премиально и тихо», едва заметно дышит (только opacity) */
 @keyframes gemGlow {
   0%,
   100% {
@@ -875,6 +905,10 @@ body {
   .gem::before {
     animation: none;
     opacity: 0.45;
+  }
+  .gem-cut .gem-iri {
+    animation: none;
+    opacity: 0.12;
   }
 }
 .gem-label {
@@ -1019,7 +1053,7 @@ body {
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
     /* микрокопию подняли ещё выше (vw — стабильно) */
-    margin-top: clamp(5rem, 34vw, 9.5rem);
+    margin-top: clamp(3rem, 22vw, 6.5rem);
   }
   .hero-cta-row .btn {
     flex: 1;

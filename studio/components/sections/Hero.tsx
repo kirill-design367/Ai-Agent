@@ -134,57 +134,35 @@ export default function Hero() {
       <div className="hero-gems">
         <svg className="gem-defs" width="0" height="0" aria-hidden>
           <defs>
+            {/* корпус камня — глубокий объём, свет сверху-слева → тень снизу */}
             <linearGradient id="gem-grad" x1="0" y1="0" x2="0.32" y2="1">
-              <stop offset="0" stopColor="#43434f" />
-              <stop offset="0.5" stopColor="#17171d" />
-              <stop offset="1" stopColor="#08080c" />
+              <stop offset="0" stopColor="#4d4d5c" />
+              <stop offset="0.44" stopColor="#191921" />
+              <stop offset="1" stopColor="#050509" />
             </linearGradient>
+            {/* table-facet блик (верхняя площадка ловит свет) */}
             <linearGradient id="gem-shine" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="rgba(255,255,255,0.24)" />
+              <stop offset="0" stopColor="rgba(255,255,255,0.5)" />
               <stop offset="1" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+            {/* переливающийся свет (дисперсия): холодный→сиреневый→тёплый */}
+            <linearGradient id="gem-iri" x1="0" y1="0.1" x2="1" y2="0.9">
+              <stop offset="0" stopColor="#8fdcff" />
+              <stop offset="0.5" stopColor="#c9b6ff" />
+              <stop offset="1" stopColor="#ffd7a6" />
             </linearGradient>
           </defs>
         </svg>
-        <a
-          href="#work"
-          className="gem gem--left"
-          data-magnetic
-          aria-label="Смотреть работы"
-        >
-          <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
-            <polygon
-              className="gem-body"
-              points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
-            />
-            <polygon className="gem-shine" points="0,50 60,18 120,10 180,18 240,50 120,50" />
-            <path
-              className="gem-facets"
-              d="M0,50 H240 M60,18 L120,50 L60,82 M180,18 L120,50 L180,82 M120,10 L120,90"
-            />
-          </svg>
+        <a href="#work" className="gem gem--left" data-magnetic aria-label="Смотреть работы">
+          <MarquiseGem />
           <span className="gem-label">
             Смотреть
             <br />
             работы
           </span>
         </a>
-        <a
-          href="#contact"
-          className="gem gem--right"
-          data-magnetic
-          aria-label="Обсудить проект"
-        >
-          <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
-            <polygon
-              className="gem-body"
-              points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
-            />
-            <polygon className="gem-shine" points="0,50 60,18 120,10 180,18 240,50 120,50" />
-            <path
-              className="gem-facets"
-              d="M0,50 H240 M60,18 L120,50 L60,82 M180,18 L120,50 L180,82 M120,10 L120,90"
-            />
-          </svg>
+        <a href="#contact" className="gem gem--right" data-magnetic aria-label="Обсудить проект">
+          <MarquiseGem />
           <span className="gem-label">
             Обсудить
             <br />
@@ -201,5 +179,41 @@ export default function Hero() {
         </p>
       </div>
     </section>
+  );
+}
+
+/*
+  Огранка «маркиз» (marquise brilliant): заострённый овал (girdle), в центре —
+  ромбовидная площадка-table, от неё фасеты-лучи к рундисту и остриям + осевой
+  «киль». Сверху — тихо переливающийся слой света (дисперсия). Всё в одном
+  viewBox 240×100, растягивается под ссылку.
+*/
+function MarquiseGem() {
+  return (
+    <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
+      {/* рундист (контур камня) */}
+      <polygon
+        className="gem-body"
+        points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
+      />
+      {/* площадка-table — ловит свет */}
+      <polygon className="gem-table" points="44,50 120,30 196,50 120,70" />
+      {/* фасетная сетка бриллиантовой огранки */}
+      <path
+        className="gem-facets"
+        d="M0,50 H240
+           M44,50 L120,30 L196,50 L120,70 Z
+           M120,30 L120,10 M120,70 L120,90
+           M120,30 L60,18 M120,30 L180,18
+           M120,70 L60,82 M120,70 L180,82
+           M44,50 L60,18 M44,50 L60,82
+           M196,50 L180,18 M196,50 L180,82"
+      />
+      {/* переливающийся свет поверх — тихо дышит (opacity, без repaint) */}
+      <polygon
+        className="gem-iri"
+        points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
+      />
+    </svg>
   );
 }
