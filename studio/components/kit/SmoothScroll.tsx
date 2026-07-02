@@ -3,7 +3,7 @@
 import { ReactLenis, useLenis } from "lenis/react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   Inertial smooth-scroll (Lenis) — the "expensive" weighted feel (Bible II.6).
@@ -20,6 +20,15 @@ function LenisGsapBridge() {
     (window as unknown as { __lenis?: unknown }).__lenis = lenis;
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
+
+    // ГЛАДКОСТЬ (фикс дрожания пиннингов): Lenis по умолчанию крутит собственный
+    // RAF, отдельный от тикера GSAP — из-за этого обновление скролла и scrub/pin
+    // ScrollTrigger попадают в РАЗНЫЕ кадры, и закреплённый текст «дрожит».
+    // Гоним Lenis из gsap.ticker → всё считается в одном кадре, дёрганья нет.
+    lenis.options.autoRaf = false;
+    const raf = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
 
     // Всегда стартуем с Hero. history.scrollRestoration управляет ТОЛЬКО скроллом
     // документа, а у нас app-shell — скроллится div .app-scroll, чью позицию
@@ -38,19 +47,19 @@ function LenisGsapBridge() {
     // восстановление позиции браузером (иначе сайт открывался из середины).
     // Останавливаемся при первом действии пользователя, чтобы не мешать скроллу.
     let frames = 0;
-    let raf = 0;
+    let resetRaf = 0;
     const tick = () => {
       toTop();
-      if (++frames < 90) raf = requestAnimationFrame(tick); // ~1.5с
+      if (++frames < 90) resetRaf = requestAnimationFrame(tick); // ~1.5с
     };
-    raf = requestAnimationFrame(tick);
+    resetRaf = requestAnimationFrame(tick);
     const timers = [120, 400, 900, 1600].map((d) => window.setTimeout(toTop, d));
     window.addEventListener("load", toTop);
     window.addEventListener("pageshow", toTop);
 
     const userTook = ["wheel", "touchstart", "keydown", "pointerdown"];
     const stopForcing = () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(resetRaf);
       timers.forEach(clearTimeout);
       window.removeEventListener("load", toTop);
       window.removeEventListener("pageshow", toTop);
@@ -62,6 +71,7 @@ function LenisGsapBridge() {
 
     return () => {
       lenis.off("scroll", ScrollTrigger.update);
+      gsap.ticker.remove(raf);
       stopForcing();
     };
   }, [lenis]);

@@ -85,11 +85,13 @@ export default function Works() {
             scrub: 0.6,
           },
         });
+        // остальные кейсы плавно растворяются вместе с уходом (не резко/рано) —
+        // быстрый, но мягкий фейд, чтобы позапрошлый не «мигал» из-за последнего
         if (others.length)
-          tl.to(others, { autoAlpha: 0, ease: "power1.in", duration: 0.12 }, 0);
-        tl.to(last, { scale: 0.4, yPercent: -2, ease: "power1.in", duration: 1 }, 0)
+          tl.to(others, { autoAlpha: 0, ease: "power2.out", duration: 0.45 }, 0);
+        tl.to(last, { scale: 0.4, yPercent: -2, ease: "power1.inOut", duration: 1 }, 0)
           .to(shade, { opacity: 0.92, ease: "none", duration: 1 }, 0)
-          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.4 }, 0.62);
+          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.42 }, 0.6);
       }
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());

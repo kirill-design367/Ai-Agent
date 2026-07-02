@@ -19,20 +19,27 @@ export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const headline = useRef<HTMLHeadingElement>(null);
   const sub = useRef<HTMLParagraphElement>(null);
-  // WebGL флюид — только на десктопе с мышью: на мобиле непрерывный GPU-цикл
-  // бьёт по производительности и батарее.
+  // WebGL флюид-курсор: на десктопе — полное качество (мышь), на тач-устройствах —
+  // реагирует на касание, но в СНИЖЕННОМ разрешении (щадим GPU/батарею).
   const [fluid, setFluid] = useState(false);
+  const [touchFluid, setTouchFluid] = useState(false);
   useEffect(() => {
-    const ok =
+    const fine =
       window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
       window.innerWidth > 900;
-    if (!ok) return;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (!fine && !coarse) return;
+    setTouchFluid(!fine && coarse);
     // отложить тяжёлую WebGL-инициализацию на простой → не раздувает TBT при загрузке
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
       .requestIdleCallback;
     const t = ric ? ric(() => setFluid(true)) : window.setTimeout(() => setFluid(true), 1200);
     return () => clearTimeout(t as number);
   }, []);
+  // облегчённые параметры для мобилы: меньше разрешение симуляции/краски
+  const fluidProps = touchFluid
+    ? { SIM_RESOLUTION: 64, DYE_RESOLUTION: 512, CAPTURE_RESOLUTION: 256, PRESSURE_ITERATIONS: 12 }
+    : {};
 
   useGSAP(
     () => {
@@ -93,7 +100,7 @@ export default function Hero() {
 
   return (
     <section id="hero" className="theme-dark hero" ref={root}>
-      <div className="hero-fluid">{fluid && <SplashCursor />}</div>
+      <div className="hero-fluid">{fluid && <SplashCursor {...fluidProps} />}</div>
 
       {/* логотип AUREA — стилизованные «A» (треугольник + точка), как в знаке бренда */}
       <header className="hero-top">

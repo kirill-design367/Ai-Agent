@@ -438,8 +438,8 @@ body {
   overflow: hidden;
   /* фиксированный светлый (не токен — он инвертируется в .theme-dark) */
   background: #f4f3f0;
-  /* лента выше; текст-растяжка центрируется */
-  min-height: clamp(70px, 14vh, 140px);
+  /* высота ленты под крупный шрифт, текст центрируется */
+  min-height: clamp(62px, 11vh, 112px);
   display: flex;
   align-items: center;
 }
@@ -487,15 +487,13 @@ body {
   white-space: nowrap;
 }
 .wb-big {
-  /* креативная растяжка по вертикали — буквы вытянуты, узкие, «журнальные» */
+  /* тот же шрифт и трекинг, что у заголовка Hero (Unbounded 700) — без растяжки */
   display: inline-block;
-  transform: scaleY(1.62);
-  transform-origin: center;
   font-family: var(--font-headline), system-ui, sans-serif;
-  font-weight: 800;
-  font-size: clamp(1.15rem, 3.4vw, 2.5rem);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 4.6vw, 3.4rem);
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.022em;
   text-transform: uppercase;
   color: #0a0a0b;
 }
@@ -516,7 +514,7 @@ body {
 /* прокрутка-«хвост»: даёт залипшему последнему кейсу дистанцию, чтобы уйти
    вдаль и раствориться; оставшаяся высота = короткий чёрный «вдох» */
 .works-tail {
-  height: 80vh;
+  height: 45vh;
   pointer-events: none;
 }
 .work-card {
@@ -794,6 +792,10 @@ body {
     text-align: right;
     transform: rotate(-1.4deg);
     transform-origin: right center;
+  }
+  /* микрокопию приподнять от нижнего края */
+  .hero-microcopy {
+    transform: translateY(clamp(-4rem, -7vh, -1.5rem));
   }
 }
 
@@ -1173,7 +1175,7 @@ body {
     top: 39%;
   }
   .gem--left {
-    top: 76%;
+    top: 74%;
   }
   .hero-sub {
     max-width: 100%;
@@ -1208,8 +1210,8 @@ body {
     padding-right: 0;
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
-    /* микрокопия ПОД нижним кристаллом, не залезая на него (vw — стабильно) */
-    margin-top: clamp(3.5rem, 22vw, 7rem);
+    /* микрокопия чуть выше, но всё ещё под нижним кристаллом (vw — стабильно) */
+    margin-top: clamp(2.5rem, 18vw, 5.5rem);
   }
   .hero-cta-row .btn {
     flex: 1;
