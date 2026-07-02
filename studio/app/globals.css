@@ -496,177 +496,168 @@ body {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
 }
-/* РЕДАКТОРСКИЕ СТРОКИ-КЕЙСЫ (референс-уровень) */
-.works-list {
+/* СТОПКА-КИНО КЕЙСОВ (как в референс-видео): каждый кейс липнет, следующий
+   наезжает сверху; накрытый уходит ВГЛУБЬ (уменьшается, темнеет, растворяется).
+   Внизу — sticky-описание кейса, сменяется кроссфейдом с каждым новым. */
+.works-stack {
   max-width: 1200px;
   margin: 0 auto;
-  /* глубина для «ухода вглубь» последнего кейса */
-  perspective: 1600px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 6vh, 5rem);
+  /* глубина для «ухода вдаль» кейсов */
+  perspective: 1400px;
 }
-/* прокрутка-«хвост»: дистанция для ухода последнего кейса вглубь + короткая пауза */
+/* прокрутка-«хвост»: дистанция для ухода последнего кейса + короткая чёрная пауза */
 .works-tail {
   height: 55vh;
   pointer-events: none;
 }
-.work-row {
-  position: relative;
-  --glow: 0;
-  padding-block: clamp(2.6rem, 7vh, 6rem);
+/* sticky-подпись внизу экрана: по одному описанию на кейс, кроссфейд при смене */
+.works-desc {
+  position: sticky;
+  top: 83vh;
+  z-index: 10;
+  height: 0;
+  pointer-events: none;
 }
-/* тонкая светящаяся линия-разделитель сверху строки */
-.wr-line {
+.wd-item {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  transform-origin: left center;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(210, 238, 233, 0.5) 18%,
-    rgba(150, 214, 214, 0.85) 50%,
-    rgba(210, 238, 233, 0.5) 82%,
-    transparent
-  );
-  box-shadow: 0 0 12px rgba(150, 214, 214, 0.35);
-}
-.wr-head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: start;
-  gap: clamp(1rem, 3vw, 2.6rem);
-}
-.wr-num {
-  font-family: var(--font-headline), system-ui, sans-serif;
-  font-weight: 300;
-  font-size: clamp(2.4rem, 6vw, 5rem);
-  line-height: 0.9;
-  letter-spacing: -0.03em;
-  color: var(--text-on-dark);
-}
-.wr-titles {
-  align-self: center;
-}
-.wr-title {
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 640px);
   margin: 0;
-  font-family: var(--font-headline), system-ui, sans-serif;
-  font-weight: 700;
-  font-size: clamp(1.25rem, 2.6vw, 2.2rem);
-  line-height: 1.02;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-  color: var(--text-on-dark);
-}
-.wr-tags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.7rem;
-  margin-top: clamp(0.4rem, 1vw, 0.7rem);
-}
-.wr-tags span {
+  text-align: center;
   font-family: var(--font-body), system-ui, sans-serif;
-  font-size: var(--text-sm);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-.wr-tags span:not(:last-child)::after {
-  content: "/";
-  margin-left: 0.7rem;
-  color: rgba(244, 242, 238, 0.22);
-}
-.wr-cta {
-  justify-self: end;
-  align-self: start;
-  padding: 0.6rem 1.2rem;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-size: var(--text-sm);
-  letter-spacing: 0.02em;
-  color: var(--text-on-dark);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background 0.4s var(--ease-expo), color 0.4s var(--ease-expo),
-    border-color 0.4s var(--ease-expo);
-}
-@media (hover: hover) and (pointer: fine) {
-  .wr-cta:hover {
-    background: var(--text-on-dark);
-    color: #0a0a0b;
-    border-color: var(--text-on-dark);
-  }
-}
-.wr-body {
-  margin-top: clamp(1.4rem, 4vh, 2.6rem);
-  display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  gap: clamp(1.4rem, 4vw, 3.5rem);
-  align-items: center;
-}
-/* мокап устройства — «браузерная» рамка со скриншотом */
-.wr-mockup {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  aspect-ratio: 16 / 10.5;
-  border-radius: clamp(10px, 1.1vw, 16px);
-  overflow: hidden;
-  border: 1px solid rgba(244, 242, 238, 0.1);
-  background: #0c0c10;
-  transform-origin: center;
-  transform-style: preserve-3d;
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  line-height: 1.55;
+  color: rgba(244, 242, 238, 0.8);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85);
+  opacity: 0;
   will-change: transform, opacity;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
 }
-.wr-chrome {
-  flex: 0 0 auto;
-  height: clamp(20px, 2vw, 28px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-left: 12px;
-  background: rgba(12, 12, 16, 0.92);
-  border-bottom: 1px solid rgba(244, 242, 238, 0.06);
-}
-.wr-chrome i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(244, 242, 238, 0.28);
-}
-.wr-mockup img {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  object-fit: cover;
-  object-position: top center;
+.work-card {
+  position: sticky;
+  top: 12vh;
+  height: min(62vh, 600px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(244, 242, 238, 0.08);
+  /* тёмная подложка — никаких белых вспышек, пока грузится lazy-картинка */
+  background: #0c0c10;
+  transform-origin: center top;
   will-change: transform;
+  backface-visibility: hidden;
+  --glow: 0;
+  --acc: 120, 140, 200;
+  transition: box-shadow 0.6s var(--ease-expo);
 }
-/* светящаяся градиентная рамка — проявляется при уходе последнего кейса вглубь */
-.wr-mockup::after {
+/* у каждого кейса — свой характер (акцент-свечение на ховере) */
+.work-card:nth-of-type(1) { --acc: 90, 120, 210; }   /* Volume — ночной синий */
+.work-card:nth-of-type(2) { --acc: 200, 160, 110; }  /* Aristide — тёплый */
+.work-card:nth-of-type(3) { --acc: 210, 130, 150; }  /* Анна — розовый */
+.work-card:nth-of-type(4) { --acc: 110, 190, 150; }  /* Garden Eight — зелёный */
+.work-card:nth-of-type(5) { --acc: 190, 130, 210; }  /* Dream.doll — лиловый */
+.work-card:nth-of-type(6) { --acc: 110, 190, 210; }  /* Web3 — циан */
+.work-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #070708;
+  opacity: 0;
+  pointer-events: none;
+}
+.work-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* без filter — он переростеривал большую картинку каждый кадр и лагал на скролле */
+  transition: transform 0.9s var(--ease-expo);
+}
+/* атмосфера: лёгкое акцентное свечение снизу на ховере */
+.work-card::before {
   content: "";
   position: absolute;
-  inset: -1.5px;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    120% 80% at 50% 120%,
+    rgba(var(--acc), 0.22),
+    transparent 58%
+  );
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-expo);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .work-card:hover img { transform: scale(1.035); }
+  .work-card:hover { box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4); }
+  .work-card:hover::before { opacity: 1; }
+  .work-card:hover .work-cap h3 { transform: translateY(-3px); }
+}
+.work-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(8, 8, 9, 0.82) 100%);
+  pointer-events: none;
+}
+/* светящаяся градиентная рамка — проявляется при уходе последнего кейса вглубь */
+.work-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
   border-radius: inherit;
-  padding: 2.5px;
+  padding: 2px;
   background: linear-gradient(125deg, #8fdcff, #c9b6ff, #ffd7a6, #8fdcff);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: var(--glow, 0);
-  box-shadow: 0 0 calc(var(--glow, 0) * 34px) rgba(150, 200, 230, 0.55);
+  box-shadow: 0 0 calc(var(--glow, 0) * 36px) rgba(150, 200, 230, 0.5);
   pointer-events: none;
 }
-.wr-desc {
+.work-cap {
+  position: absolute;
+  left: clamp(1.5rem, 4vw, 3rem);
+  right: clamp(1.5rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 4vw, 2.5rem);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem 1.5rem;
+  color: var(--text-on-dark);
+}
+.work-cap h3 {
   margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  letter-spacing: -0.01em;
+  transition: transform 0.6s var(--ease-expo);
+}
+.work-cap .meta {
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 238, 0.7);
+}
+.work-num {
+  position: absolute;
+  top: clamp(1.2rem, 3vw, 2rem);
+  left: clamp(1.5rem, 4vw, 3rem);
+  z-index: 2;
   font-family: var(--font-body), system-ui, sans-serif;
-  font-size: clamp(0.95rem, 1.15vw, 1.15rem);
-  line-height: 1.62;
-  color: rgba(244, 242, 238, 0.72);
-  max-width: 44ch;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: rgba(244, 242, 238, 0.85);
+  mix-blend-mode: difference;
 }
 @media (max-width: 760px) {
   .works {
@@ -675,21 +666,34 @@ body {
   .wb-big {
     font-size: clamp(1.2rem, 6vw, 1.9rem);
   }
-  .wr-head {
-    grid-template-columns: auto 1fr;
-    gap: 0.8rem 1rem;
+  .works-stack {
+    gap: 1.4rem;
   }
-  .wr-cta {
-    grid-column: 1 / -1;
-    justify-self: start;
-    margin-top: 0.4rem;
-  }
-  .wr-body {
-    grid-template-columns: 1fr;
-    gap: 1.1rem;
-  }
-  .wr-desc {
+  .work-card {
+    height: auto;
+    aspect-ratio: 16 / 11;
+    width: 100%;
     max-width: 100%;
+    margin: 0;
+    top: 9vh;
+    border-radius: var(--radius-md);
+  }
+  .work-card img {
+    object-position: center;
+    /* на тач-устройствах нет ховера — показываем кадр живым сразу */
+    filter: saturate(1) brightness(0.92);
+  }
+  .work-cap {
+    left: 1.1rem;
+    right: 1.1rem;
+    bottom: 1.1rem;
+  }
+  .works-desc {
+    top: 62vh;
+  }
+  .wd-item {
+    font-size: 0.88rem;
+    width: 92vw;
   }
 }
 
@@ -1153,12 +1157,12 @@ body {
   .gem {
     width: clamp(196px, 18vw, 264px);
   }
-  /* обе «кнопки» опущены на одинаковое расстояние (+3%) — финальная посадка */
+  /* обе «кнопки» опущены ЗАМЕТНО и на одинаковое расстояние (+6% от исходных) */
   .gem--left {
-    top: 73%;
+    top: 76%;
   }
   .gem--right {
-    top: 82%;
+    top: 85%;
     /* крупнее левого — главный акцент */
     width: clamp(231px, 21vw, 313px);
   }
@@ -1206,11 +1210,12 @@ body {
   }
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
+  /* обе кнопки опущены на одинаковое расстояние (+2%) */
   .gem--right {
-    top: 36.5%;
+    top: 38.5%;
   }
   .gem--left {
-    top: 71%;
+    top: 73%;
   }
   .hero-sub {
     max-width: 100%;
@@ -1220,7 +1225,7 @@ body {
     /* чуть крупнее, лёгкий сдвиг вправо всей колонки + больший наклон = живее.
        margin-top больше — подзаголовок садится НИЖЕ правого кристалла (41%),
        в чистую полосу между кристаллами */
-    margin: clamp(6rem, 32vw, 10rem) 0 0 0.7rem;
+    margin: clamp(7rem, 38vw, 11.5rem) 0 0 0.7rem;
     font-size: 1.02rem;
     /* просторнее интерлиньяж — читается легче, не теряется */
     line-height: 1.68;
@@ -1480,11 +1485,13 @@ body {
 }
 .pain-portal {
   position: sticky;
-  top: 0;
-  height: 100vh;
+  /* края перекрыты на 1px — против субпиксельных щелей sticky при скролле */
+  top: -1px;
+  height: calc(100vh + 2px);
   display: grid;
   place-items: center;
   overflow: hidden;
+  background: #070708;
 }
 /* фраза, выходящая из тумана и наводящаяся в резкость.
    Две наложенные копии: размытая (статичный blur, растеризуется 1 раз) и резкая —
@@ -1647,19 +1654,24 @@ body {
   color: var(--text-primary);
   padding: 0 clamp(1.4rem, 6vw, 7rem) clamp(6rem, 14vh, 12rem);
 }
-/* трек задаёт длину прокрутки портала; сам портал внутри липнет (sticky) */
+/* трек задаёт длину прокрутки портала; сам портал внутри липнет (sticky).
+   КРИТИЧНО: у трека ТЁМНЫЙ фон — секция .process светлая, и без фона при
+   субпиксельном позиционировании sticky на кромках проглядывала светлая полоса
+   (та самая «тонкая белая линия», мерцающая при скролле = «дрожание»). */
 .proc-enter-track {
   position: relative;
   height: 320vh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  background: #070708;
 }
 /* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок.
-   sticky-пин (не ScrollTrigger pin) → без дрожания и белого следа сверху. */
+   sticky-пин (не ScrollTrigger pin); края перекрыты на 1px (top:-1px + 2px
+   высоты) — субпиксельные щели сверху/снизу гарантированно закрашены. */
 .proc-enter {
   position: sticky;
-  top: 0;
-  height: 100vh;
+  top: -1px;
+  height: calc(100vh + 2px);
   width: 100%;
   overflow: hidden;
   /* фон-страховка: тёмный, чтобы под завесой никогда не светилась белая полоса */
