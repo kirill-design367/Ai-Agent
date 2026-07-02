@@ -1,7 +1,6 @@
 import SmoothScroll from "@/components/kit/SmoothScroll";
 import MagneticTargets from "@/components/kit/MagneticTargets";
 import GrainOverlay from "@/components/kit/GrainOverlay";
-import ScrollProgress from "@/components/kit/ScrollProgress";
 import Intro from "@/components/kit/Intro";
 import MessengerFab from "@/components/kit/MessengerFab";
 import Hero from "@/components/sections/Hero";
@@ -27,7 +26,6 @@ export default function Home() {
   return (
     <SmoothScroll>
       <Intro />
-      <ScrollProgress />
       <MagneticTargets />
       <GrainOverlay />
       <MessengerFab />

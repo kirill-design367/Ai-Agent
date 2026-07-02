@@ -82,7 +82,7 @@ export default function Process() {
         },
       });
       enter
-        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 7, opacity: 0, ease: "power2.in", duration: 0.4 }, 0)
+        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 5, opacity: 0, ease: "power2.in", duration: 0.4 }, 0)
         .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
         .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out", duration: 0.45 }, 0.1)
         // лёгкий дрейф роя во время раскрытия

@@ -3,7 +3,7 @@
 import { ReactLenis, useLenis } from "lenis/react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   Inertial smooth-scroll (Lenis) — the "expensive" weighted feel (Bible II.6).
@@ -21,14 +21,11 @@ function LenisGsapBridge() {
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
 
-    // ГЛАДКОСТЬ (фикс дрожания пиннингов): Lenis крутит собственный RAF, отдельный
-    // от тикера GSAP — из-за этого обновление скролла и scrub ScrollTrigger попадают
-    // в РАЗНЫЕ кадры. autoRaf:false задан в options ниже (в конструкторе — иначе
-    // цикл уже запущен и получается ДВОЙНОЙ RAF → дрожание только усиливалось).
-    // Здесь гоним Lenis из gsap.ticker → всё в одном кадре.
-    const raf = (time: number) => lenis.raf(time * 1000);
-    gsap.ticker.add(raf);
-    gsap.ticker.lagSmoothing(0);
+    // ГЛАДКОСТЬ: держим ПРОСТУЮ связку — Lenis крутит свой RAF (autoRaf по умолч.),
+    // а ScrollTrigger обновляется на каждом событии скролла Lenis (выше). Драйв
+    // Lenis из gsap.ticker + lagSmoothing(0) убрали: под тяжёлой сценой «Процесса»
+    // (рой вопросов + комета) он снимал защиту от просадок кадров и добавлял лаги.
+    // Дрожание пиннингов уже устранено переводом порталов на CSS position:sticky.
 
     // Всегда стартуем с Hero. history.scrollRestoration управляет ТОЛЬКО скроллом
     // документа, а у нас app-shell — скроллится div .app-scroll, чью позицию
@@ -71,7 +68,6 @@ function LenisGsapBridge() {
 
     return () => {
       lenis.off("scroll", ScrollTrigger.update);
-      gsap.ticker.remove(raf);
       stopForcing();
     };
   }, [lenis]);
@@ -90,9 +86,6 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
         smoothWheel: true,
         wheelMultiplier: 1,
         touchMultiplier: 1.4,
-        // не запускать собственный RAF — Lenis гоним из gsap.ticker (см. bridge),
-        // иначе двойной цикл и дрожание scrub/pin-сцен
-        autoRaf: false,
       }}
     >
       <LenisGsapBridge />
