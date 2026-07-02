@@ -68,6 +68,11 @@ export default function Process() {
         gsap.set(".proc-veil", { autoAlpha: 0 });
         return;
       }
+      // МОБИЛЬНЫЙ GPU не вывозит полную сцену (зум огромного текста ×5 + зум всей
+      // сцены + 21 параллакс-вопрос) → кадры проседают, текст «дрожит и троит».
+      // На мобиле облегчаем: зум меньше, без зума сцены и без пер-вопросного
+      // параллакса/дрейфа. На десктопе — всё в полном объёме.
+      const mobile = window.matchMedia("(max-width: 760px)").matches;
 
       // ПОРТАЛ-ВХОД: надпись приближается и растворяется, блок проявляется изнутри.
       // Пин — через CSS position:sticky (трек .proc-enter-track), а не через pin
@@ -82,32 +87,46 @@ export default function Process() {
         },
       });
       enter
-        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 5, opacity: 0, ease: "power2.in", duration: 0.4 }, 0)
-        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
-        .fromTo(".proc-intro", { scale: 1.14 }, { scale: 1, ease: "power1.out", duration: 0.45 }, 0.1)
+        .fromTo(
+          ".proc-turn",
+          { scale: 1, opacity: 1 },
+          { scale: mobile ? 2.6 : 5, opacity: 0, ease: "power2.in", duration: 0.4 },
+          0
+        )
+        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32);
+      if (!mobile)
+        enter.fromTo(
+          ".proc-intro",
+          { scale: 1.14 },
+          { scale: 1, ease: "power1.out", duration: 0.45 },
+          0.1
+        );
+      enter
         // лёгкий дрейф роя во время раскрытия
         .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
         // ПАУЗА: сцена замирает — можно рассмотреть вопросы (≈40% прокрутки пина)
         .to({}, { duration: 0.6 });
 
-      // у каждого вопроса своя глубина параллакса (плавно на скролле)
-      gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
-        const depth = parseFloat(q.dataset.depth || "1");
-        gsap.fromTo(
-          q,
-          { yPercent: 22 * depth },
-          {
-            yPercent: -22 * depth,
-            ease: "none",
-            scrollTrigger: {
-              trigger: ".proc-enter-track",
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 1,
-            },
-          }
-        );
-      });
+      // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
+      // 21 скраб-триггер съедал кадры)
+      if (!mobile)
+        gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
+          const depth = parseFloat(q.dataset.depth || "1");
+          gsap.fromTo(
+            q,
+            { yPercent: 22 * depth },
+            {
+              yPercent: -22 * depth,
+              ease: "none",
+              scrollTrigger: {
+                trigger: ".proc-enter-track",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+              },
+            }
+          );
+        });
 
       // заголовок + лёгкое «дыхание» роя (внутренний float на обёртке-флоут)
       const title = root.current!.querySelector(".proc-bigtitle");
@@ -123,29 +142,32 @@ export default function Process() {
             scrollTrigger: { trigger: ".proc-enter", start: "top 30%" },
           }
         );
-      const qFloatTweens: gsap.core.Tween[] = [];
-      gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
-        qFloatTweens.push(
-          gsap.to(q, {
-            y: gsap.utils.random(-26, 26),
-            x: gsap.utils.random(-18, 18),
-            rotation: gsap.utils.random(-4, 4),
-            duration: gsap.utils.random(2.4, 4.2),
-            ease: "sine.inOut",
-            repeat: -1,
-            yoyo: true,
-            delay: gsap.utils.random(0, 1.5),
-          })
-        );
-      });
-      // дрейф вопросов не тратит кадры, пока вход в секцию вне экрана
-      ScrollTrigger.create({
-        trigger: ".proc-enter-track",
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) =>
-          qFloatTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
-      });
+      // дрейф вопросов — только десктоп (на мобиле 21 бесконечный твин ел кадры)
+      if (!mobile) {
+        const qFloatTweens: gsap.core.Tween[] = [];
+        gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
+          qFloatTweens.push(
+            gsap.to(q, {
+              y: gsap.utils.random(-26, 26),
+              x: gsap.utils.random(-18, 18),
+              rotation: gsap.utils.random(-4, 4),
+              duration: gsap.utils.random(2.4, 4.2),
+              ease: "sine.inOut",
+              repeat: -1,
+              yoyo: true,
+              delay: gsap.utils.random(0, 1.5),
+            })
+          );
+        });
+        // дрейф вопросов не тратит кадры, пока вход в секцию вне экрана
+        ScrollTrigger.create({
+          trigger: ".proc-enter-track",
+          start: "top bottom",
+          end: "bottom top",
+          onToggle: (self) =>
+            qFloatTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
+        });
+      }
 
       // линия + комета
       const line = root.current!.querySelector<HTMLElement>(".proc-line");

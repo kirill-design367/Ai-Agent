@@ -429,7 +429,8 @@ body {
   position: relative;
   /* тот же люкс-чёрный, что и у «Боли» — без стыка на пустом экране */
   background: var(--bg-base);
-  padding: clamp(2.4rem, 6vh, 4rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
+  /* нижний паддинг короткий — после ухода последнего кейса сразу «вдох» и фраза */
+  padding: clamp(2.4rem, 6vh, 4rem) clamp(1.5rem, 6vw, 6rem) clamp(3rem, 7vh, 6rem);
 }
 /* одна горизонтальная лента-строка «ПОРТФОЛИО / ПРИМЕРЫ РАБОТ», бесконечный цикл.
    Светлая полоса на тёмной секции, ровно по горизонтали. */
@@ -439,23 +440,31 @@ body {
   margin-left: calc(50% - 50vw);
   margin-bottom: clamp(2.5rem, 7vh, 5rem);
   overflow: hidden;
-  /* лента выше — есть место для длинного вертикального градиента */
-  min-height: clamp(150px, 28vh, 260px);
+  /* компактная, дорогая: никакой белой полосы — только тусклая световая линия */
+  min-height: clamp(58px, 9vh, 88px);
   display: flex;
   align-items: center;
-  /* ВЕРТИКАЛЬНЫЙ градиент: тёмный (край) → около-белый ТОНКИМ слоем ровно по
-     центру → тёмный (другой край). Плавно от 0 до середины и от середины к краю —
-     никакого резкого чёрно-белого стыка, лента «светится» тонкой полосой. */
+  background: transparent;
+}
+/* тусклая линия света, по которой «едут» слова (awwwards-строй: тихо и дорого) */
+.works-banner::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
   background: linear-gradient(
-    to bottom,
-    #070708 0%,
-    #2b2b28 20%,
-    #cbc9c3 39%,
-    #f4f3f0 50%,
-    #cbc9c3 61%,
-    #2b2b28 80%,
-    #070708 100%
+    90deg,
+    transparent,
+    rgba(228, 224, 214, 0.22) 16%,
+    rgba(228, 224, 214, 0.5) 50%,
+    rgba(228, 224, 214, 0.22) 84%,
+    transparent
   );
+  box-shadow: 0 0 14px rgba(228, 224, 214, 0.25), 0 0 42px rgba(228, 224, 214, 0.1);
+  pointer-events: none;
 }
 .works-band {
   position: relative;
@@ -481,15 +490,18 @@ body {
   white-space: nowrap;
 }
 .wb-big {
-  /* тот же шрифт и трекинг, что у заголовка Hero (Unbounded 700) — без растяжки */
+  /* светлые слова, «едущие» по линии света — компактно, с воздухом в трекинге */
+  position: relative;
+  z-index: 1;
   display: inline-block;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(1.7rem, 4.6vw, 3.4rem);
+  font-size: clamp(0.95rem, 1.9vw, 1.5rem);
   line-height: 1;
-  letter-spacing: -0.022em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0a0a0b;
+  color: rgba(244, 242, 238, 0.82);
+  text-shadow: 0 0 22px rgba(228, 224, 214, 0.22);
 }
 /* два идентичных трека → -50% сдвигает ровно на один трек, шов невидим */
 @keyframes worksticker {
@@ -510,7 +522,7 @@ body {
 }
 /* прокрутка-«хвост»: дистанция для ухода последнего кейса + короткая чёрная пауза */
 .works-tail {
-  height: 55vh;
+  height: 42vh;
   pointer-events: none;
 }
 /* sticky-подпись внизу экрана: по одному описанию на кейс, кроссфейд при смене */
@@ -605,7 +617,9 @@ body {
   background: linear-gradient(180deg, transparent 45%, rgba(8, 8, 9, 0.82) 100%);
   pointer-events: none;
 }
-/* светящаяся градиентная рамка — проявляется при уходе последнего кейса вглубь */
+/* светящаяся градиентная рамка — проявляется при уходе последнего кейса вглубь.
+   Тень СТАТИЧНАЯ, анимируется только opacity элемента (композитор, без
+   пересчёта размытия каждый кадр — иначе дрожало). */
 .work-glow {
   position: absolute;
   inset: 0;
@@ -616,8 +630,9 @@ body {
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: var(--glow, 0);
-  box-shadow: 0 0 calc(var(--glow, 0) * 36px) rgba(150, 200, 230, 0.5);
+  opacity: 0;
+  box-shadow: 0 0 36px rgba(150, 200, 230, 0.5);
+  will-change: opacity;
   pointer-events: none;
 }
 .work-cap {
@@ -661,10 +676,10 @@ body {
 }
 @media (max-width: 760px) {
   .works {
-    padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(6rem, 16vh, 10rem);
+    padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(2.5rem, 7vh, 5rem);
   }
   .wb-big {
-    font-size: clamp(1.2rem, 6vw, 1.9rem);
+    font-size: clamp(0.82rem, 3.6vw, 1.05rem);
   }
   .works-stack {
     gap: 1.4rem;
@@ -1157,12 +1172,12 @@ body {
   .gem {
     width: clamp(196px, 18vw, 264px);
   }
-  /* обе «кнопки» опущены ЗАМЕТНО и на одинаковое расстояние (+6% от исходных) */
+  /* левый ниже; правый («Обсудить проект») — чуть выше */
   .gem--left {
     top: 76%;
   }
   .gem--right {
-    top: 85%;
+    top: 82%;
     /* крупнее левого — главный акцент */
     width: clamp(231px, 21vw, 313px);
   }
@@ -1210,12 +1225,12 @@ body {
   }
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
-  /* обе кнопки опущены на одинаковое расстояние (+2%) */
+  /* правый над подзаголовком; левый («Смотреть работы») — чуть ниже */
   .gem--right {
     top: 38.5%;
   }
   .gem--left {
-    top: 73%;
+    top: 75%;
   }
   .hero-sub {
     max-width: 100%;
@@ -1251,7 +1266,7 @@ body {
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
     /* микрокопия выше (кластер сдвинут вверх), но всё ещё под нижним кристаллом */
-    margin-top: clamp(2.5rem, 20vw, 5.5rem);
+    margin-top: clamp(3rem, 23.5vw, 6rem);
   }
   .hero-cta-row .btn {
     flex: 1;

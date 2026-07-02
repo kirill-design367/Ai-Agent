@@ -97,15 +97,21 @@ export default function Works() {
           },
         });
         tl.to(card, { scale: 0.62, yPercent: -3, ease: "power1.in", duration: 1 }, 0)
-          .to(shade, { opacity: 0.85, ease: "none", duration: 1 }, 0)
+          // тень до полного чёрного — накрытый кейс не «призрачит» за следующим
+          .to(shade, { opacity: 1, ease: "none", duration: 1 }, 0)
           .to(card, { autoAlpha: 0, ease: "power1.in", duration: 0.4 }, 0.6);
       });
 
       // ФИНАЛ (как в референс-видео): последний кейс уходит в глубину со
-      // светящейся градиентной рамкой, растворяется → чёрная пауза → «Боль».
+      // светящейся градиентной рамкой (анимируем ТОЛЬКО opacity рамки — тень
+      // статичная, без пересчёта каждый кадр → плавно), описание внизу уезжает
+      // вдогонку. Затем чёрная пауза → «Боль».
       const last = cards[cards.length - 1];
+      const descs = gsap.utils.toArray<HTMLElement>(".wd-item");
       if (last) {
         const shade = last.querySelector(".work-shade");
+        const glow = last.querySelector(".work-glow");
+        const lastDesc = descs[descs.length - 1];
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".works-tail",
@@ -114,30 +120,42 @@ export default function Works() {
             scrub: 0.6,
           },
         });
-        tl.to(last, { "--glow": 1, ease: "power1.in", duration: 0.45 } as gsap.TweenVars, 0)
+        tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.45 }, 0)
           .to(last, { scale: 0.42, yPercent: -3, ease: "power1.inOut", duration: 1 }, 0)
           .to(shade, { opacity: 0.9, ease: "none", duration: 1 }, 0)
-          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.45 }, 0.6);
+          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.4 }, 0.66);
+        // описание уезжает вдогонку за кейсом — вверх, уменьшаясь и растворяясь
+        if (lastDesc)
+          tl.to(
+            lastDesc,
+            { autoAlpha: 0, y: -46, scale: 0.86, ease: "power1.in", duration: 0.5 },
+            0.12
+          );
       }
 
       // ОПИСАНИЯ ВНИЗУ: sticky-подпись; при смене кейса старая растворяется,
       // новая плавно проявляется (кроссфейд, только opacity/transform).
-      const descs = gsap.utils.toArray<HTMLElement>(".wd-item");
+      // Для ПОСЛЕДНЕЙ подписи выход делает скраб-таймлайн выше («вдогонку» за
+      // кейсом), поэтому её toggle не гасит — только показывает.
       if (descs.length === cards.length) {
         gsap.set(descs, { autoAlpha: 0, y: 14 });
         cards.forEach((card, i) => {
+          const isLast = i === cards.length - 1;
           ScrollTrigger.create({
             trigger: card,
             start: "top 72%",
-            endTrigger: i < cards.length - 1 ? cards[i + 1] : ".works-tail",
-            end: i < cards.length - 1 ? "top 72%" : "top 55%",
+            endTrigger: isLast ? ".works-tail" : cards[i + 1],
+            end: isLast ? "bottom top" : "top 72%",
             onToggle: (self) => {
+              // выход последней подписи ВПЕРЁД (в хвост) делает скраб-таймлайн
+              if (isLast && !self.isActive && self.progress === 1) return;
               gsap.to(descs[i], {
                 autoAlpha: self.isActive ? 1 : 0,
                 y: self.isActive ? 0 : 14,
                 duration: 0.5,
                 ease: "power2.out",
-                overwrite: true,
+                // не убивать скраб-твин «вдогонку» у последней подписи
+                overwrite: isLast ? false : true,
               });
             },
           });
