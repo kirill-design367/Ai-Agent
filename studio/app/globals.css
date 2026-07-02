@@ -1923,26 +1923,42 @@ body {
   padding: clamp(4rem, 10vh, 8rem) clamp(1.4rem, 6vw, 7rem) 0;
   overflow: hidden;
 }
-/* вопрос ИЗ ЧАСТИЦ — канвас, где тысячи частиц дрейфуют и собираются в буквы */
-.adv-quest-wrap {
-  position: relative;
-  width: min(100%, 1180px);
-  height: clamp(260px, 54vh, 540px);
+/* вопрос-титр: 3D-кинетика — буквы «встают» из глубины сцены (перспектива).
+   Хаос строк по золотому сечению, приглушение средней строки — как в Hero. */
+.adv-quest3d {
+  width: min(100%, 1100px);
+  perspective: 900px;
 }
-.adv-quest-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.adv-sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+.aq-title {
   margin: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.5rem, 7.8vw, 6.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--text-on-dark);
+  text-align: left;
+  transform-style: preserve-3d;
+}
+.aq-l {
+  display: block;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.aq-l2 {
+  margin-left: 12vw;
+  color: rgba(244, 242, 238, 0.45);
+}
+.aq-l3 {
+  margin-left: 5vw;
+}
+/* обёртки SplitText (слова/буквы) должны жить в 3D и без изнанки;
+   nowrap — чтобы буквы одного слова не переносились по одной */
+.aq-title div {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
   white-space: nowrap;
 }
 .adv-quest {
@@ -2174,14 +2190,41 @@ body {
     font-size: 64vw;
   }
 
+  /* МОБИЛЬНАЯ ПЕРЕСБОРКА ПОРТАЛА С НУЛЯ: никакого sticky и скраба — обычный
+     поток из двух экранов. Сначала тёмный экран «Мы строим работу иначе»,
+     затем светлый «Как мы работаем» с живым роем. Нечему дрожать: ни одного
+     scroll-привязанного пересчёта, только одноразовые входные анимации. */
+  .proc-enter-track {
+    height: auto;
+  }
+  .proc-enter {
+    position: relative;
+    top: 0;
+    height: auto;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+  .proc-veil {
+    position: relative;
+    inset: auto;
+    order: -1;
+    min-height: 92svh;
+    will-change: auto;
+  }
+  .proc-intro {
+    position: relative;
+    inset: auto;
+    min-height: 94svh;
+    padding-top: clamp(3rem, 10vh, 5rem);
+    padding-bottom: clamp(3rem, 10vh, 5rem);
+    will-change: auto;
+  }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
   }
   .proc-q {
     font-size: 0.78em !important;
-  }
-  .proc-intro {
-    min-height: 42vh;
   }
   .proc-note,
   .proc-step[data-i="1"] .proc-note,
@@ -2196,11 +2239,12 @@ body {
     padding-left: 1.7rem;
   }
 
-  .adv-qw {
-    font-size: clamp(1.5rem, 10.5vw, 2.8rem);
+  .aq-title {
+    font-size: clamp(1.6rem, 8.8vw, 2.3rem);
   }
-  .adv-qw-1 { margin-left: 8vw; }
-  .adv-qw-3 { margin-left: 12vw; }
+  .aq-l2 {
+    margin-left: 10vw;
+  }
   .adv-list {
     grid-template-columns: 1fr;
   }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
 
 /*
   ПРЕИМУЩЕСТВА — отвечает на «Почему вы, а не агентство/фрилансер?».
@@ -79,7 +79,51 @@ export default function Advantages() {
         );
       }
 
-      // вопрос собирается ИЗ ЧАСТИЦ на канвасе — см. <QuestParticles /> ниже
+      // ВОПРОС-ТИТР (3D-кинетика, awwwards): буквы «встают» из глубины сцены —
+      // rotateX −95°→0 от базовой линии, каскадом, в перспективе. Как титры в
+      // кино. Только transform/opacity → композитор, плавно и на мобиле.
+      const aq = root.current!.querySelector<HTMLElement>(".aq-title");
+      if (aq) {
+        const split = new SplitText(aq, { type: "words,chars" });
+        gsap.set(split.chars, {
+          rotateX: -95,
+          yPercent: 65,
+          z: -60,
+          opacity: 0,
+          transformOrigin: "50% 100%",
+        });
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: ".adv-quest3d",
+              start: "top 66%",
+              toggleActions: "play none none reverse",
+            },
+          })
+          .to(split.chars, {
+            rotateX: 0,
+            yPercent: 0,
+            z: 0,
+            opacity: 1,
+            duration: 1.25,
+            ease: "expo.out",
+            stagger: { each: 0.03, from: "start" },
+          });
+        // вечная жизнь: строки едва заметно дышат в глубине (никогда не замирают)
+        gsap.utils.toArray<HTMLElement>(".aq-l").forEach((line, i) => {
+          idleTweens.push(
+            gsap.to(line, {
+              y: [6, -7, 5][i % 3],
+              rotateX: 1.6,
+              duration: 4.6 + i * 0.7,
+              ease: "sine.inOut",
+              repeat: -1,
+              yoyo: true,
+              delay: i * 0.5,
+            })
+          );
+        });
+      }
 
       // ВЕНОМ-БЛОБ: «?» стекает амёбой вниз сквозь ответы — ядро + хвост с лагом,
       // гуи-фильтр (см. <filter id="adv-goo">) сплавляет кружки в одну каплю
@@ -182,7 +226,8 @@ export default function Advantages() {
       });
 
       ScrollTrigger.create({
-        trigger: ".adv-list",
+        // вся секция (не только список) — дыхание титра живёт, пока блок на экране
+        trigger: ".adv",
         start: "top bottom",
         end: "bottom top",
         onToggle: (self) =>
@@ -215,7 +260,13 @@ export default function Advantages() {
       </div>
 
       <div className="adv-stage">
-        <QuestParticles />
+        <div className="adv-quest3d">
+          <h2 className="aq-title">
+            <span className="aq-l">Почему выбирают</span>
+            <span className="aq-l aq-l2">меня,</span>
+            <span className="aq-l aq-l3">а&nbsp;не&nbsp;агентство?</span>
+          </h2>
+        </div>
       </div>
 
       <div className="adv-list">
@@ -252,215 +303,5 @@ export default function Advantages() {
         </a>
       </div>
     </section>
-  );
-}
-
-/*
-  ВОПРОС ИЗ ЧАСТИЦ (кинематографично): канвас заполнен тысячами мелких частиц,
-  которые постоянно плавно дрейфуют — живая энергия, никогда не замирают.
-  Когда блок доходит до зрителя, частицы притягиваются и СОБИРАЮТСЯ в буквы
-  фразы «Почему выбирают меня, а не агентство?» (не буквы появляются — частицы
-  формируют их). Даже собранные, частицы едва заметно дышат. При скролле назад —
-  рассыпаются обратно в свободный дрейф. Всё на одном canvas (один слой GPU).
-*/
-function QuestParticles() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    const canvas = canvasRef.current;
-    if (!wrap || !canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobile = window.matchMedia("(max-width: 760px)").matches;
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.4 : 1.6);
-    const family =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue("--font-headline")
-        .trim() || "system-ui";
-
-    type P = {
-      x: number; y: number; vx: number; vy: number;
-      tx: number; ty: number; ph: number; sp: number; a: number;
-    };
-    let parts: P[] = [];
-    let mode: "float" | "assemble" = "float";
-    let raf = 0;
-    let running = false;
-    let W = 0;
-    let H = 0;
-    let t = 0;
-    const size = mobile ? 1.7 : 2;
-
-    const build = () => {
-      W = wrap.clientWidth;
-      H = wrap.clientHeight;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      // рендерим фразу на offscreen-канвас и сэмплируем точки букв
-      const off = document.createElement("canvas");
-      off.width = W;
-      off.height = H;
-      const octx = off.getContext("2d")!;
-      const lines = mobile
-        ? ["ПОЧЕМУ", "ВЫБИРАЮТ", "МЕНЯ, А НЕ", "АГЕНТСТВО?"]
-        : ["ПОЧЕМУ ВЫБИРАЮТ", "МЕНЯ, А НЕ АГЕНТСТВО?"];
-      let fs = mobile ? W * 0.19 : W * 0.085;
-      octx.textAlign = "center";
-      octx.textBaseline = "middle";
-      octx.font = `700 ${fs}px ${family}`;
-      const maxW = Math.max(...lines.map((l) => octx.measureText(l).width));
-      const totH = lines.length * fs * 1.12;
-      const k = Math.min((W * 0.97) / maxW, (H * 0.92) / totH, 1);
-      fs *= k;
-      octx.font = `700 ${fs}px ${family}`;
-      const lh = fs * 1.14;
-      const y0 = H / 2 - ((lines.length - 1) * lh) / 2;
-      octx.fillStyle = "#fff";
-      lines.forEach((l, i) => octx.fillText(l, W / 2, y0 + i * lh));
-
-      const stepPx = 3;
-      const img = octx.getImageData(0, 0, W, H).data;
-      let targets: { x: number; y: number }[] = [];
-      for (let y = 0; y < H; y += stepPx)
-        for (let x = 0; x < W; x += stepPx)
-          if (img[(y * W + x) * 4 + 3] > 140) targets.push({ x, y });
-      const cap = mobile ? 1600 : 3800;
-      if (targets.length > cap) {
-        const keep = cap / targets.length;
-        targets = targets.filter(() => Math.random() < keep);
-      }
-
-      const old = parts;
-      parts = targets.map((tg, i) => {
-        const o = old[i];
-        return {
-          x: o ? o.x : Math.random() * W,
-          y: o ? o.y : Math.random() * H,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          tx: tg.x,
-          ty: tg.y,
-          ph: Math.random() * Math.PI * 2,
-          sp: 0.5 + Math.random() * 0.9,
-          a: 0.5 + Math.random() * 0.5,
-        };
-      });
-    };
-
-    const tick = () => {
-      t += 0.016;
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#f2f0ea";
-      for (const p of parts) {
-        if (mode === "assemble") {
-          // частицы ПРИТЯГИВАЮТСЯ к буквам; лёгкое вечное дыхание вокруг цели
-          p.x += (p.tx - p.x) * 0.08;
-          p.y += (p.ty - p.y) * 0.08;
-          ctx.globalAlpha = p.a * (0.86 + 0.14 * Math.sin(t * 2 * p.sp + p.ph));
-          ctx.fillRect(
-            p.x + Math.sin(t * p.sp + p.ph) * 0.45,
-            p.y + Math.cos(t * p.sp * 0.9 + p.ph) * 0.45,
-            size,
-            size
-          );
-        } else {
-          // свободный дрейф — живая энергия, никогда не замирает
-          p.vx += Math.sin(t * 0.7 + p.ph) * 0.004;
-          p.vy += Math.cos(t * 0.6 + p.ph) * 0.004;
-          p.vx *= 0.995;
-          p.vy *= 0.995;
-          p.x += p.vx;
-          p.y += p.vy;
-          if (p.x < -4) p.x = W + 4;
-          else if (p.x > W + 4) p.x = -4;
-          if (p.y < -4) p.y = H + 4;
-          else if (p.y > H + 4) p.y = -4;
-          ctx.globalAlpha = p.a * 0.55;
-          ctx.fillRect(p.x, p.y, size, size);
-        }
-      }
-      ctx.globalAlpha = 1;
-      raf = requestAnimationFrame(tick);
-    };
-    const start = () => {
-      if (!running) {
-        running = true;
-        raf = requestAnimationFrame(tick);
-      }
-    };
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(raf);
-    };
-
-    const triggers: ScrollTrigger[] = [];
-    let disposed = false;
-    const init = async () => {
-      try {
-        await document.fonts.ready;
-      } catch {}
-      if (disposed) return;
-      build();
-      if (reduce) {
-        // без движения: сразу собранная фраза, один кадр
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#f2f0ea";
-        parts.forEach((p) => {
-          ctx.globalAlpha = p.a;
-          ctx.fillRect(p.tx, p.ty, size, size);
-        });
-        return;
-      }
-      registerGsap();
-      triggers.push(
-        // канвас живёт только на экране — вне экрана rAF остановлен
-        ScrollTrigger.create({
-          trigger: wrap,
-          start: "top bottom",
-          end: "bottom top",
-          onToggle: (self) => (self.isActive ? start() : stop()),
-        }),
-        // дошли до блока → частицы собираются в буквы; назад — рассыпаются
-        ScrollTrigger.create({
-          trigger: wrap,
-          start: "top 66%",
-          onEnter: () => {
-            mode = "assemble";
-          },
-          onLeaveBack: () => {
-            mode = "float";
-            parts.forEach((p) => {
-              p.vx = (Math.random() - 0.5) * 0.7;
-              p.vy = (Math.random() - 0.5) * 0.7;
-            });
-          },
-        })
-      );
-    };
-    init();
-
-    const onResize = () => {
-      if (!reduce) build();
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      disposed = true;
-      stop();
-      triggers.forEach((tr) => tr.kill());
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
-  return (
-    <div className="adv-quest-wrap" ref={wrapRef}>
-      <h2 className="adv-sr">Почему выбирают меня, а не агентство?</h2>
-      <canvas className="adv-quest-canvas" ref={canvasRef} aria-hidden />
-    </div>
   );
 }
