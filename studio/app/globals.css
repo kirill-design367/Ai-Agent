@@ -508,7 +508,7 @@ body {
 /* прокрутка-«хвост»: даёт залипшему последнему кейсу дистанцию, чтобы уйти
    вдаль и раствориться; оставшаяся высота = короткий чёрный «вдох» */
 .works-tail {
-  height: 28vh;
+  height: 18vh;
   pointer-events: none;
 }
 .work-card {
@@ -780,16 +780,17 @@ body {
   .hero-sub {
     position: absolute;
     right: clamp(0rem, 3vw, 4rem);
-    bottom: -4%;
+    /* выше (было -4%) */
+    bottom: 5%;
     max-width: 32ch;
     margin: 0;
     text-align: right;
     transform: rotate(-1.4deg);
     transform-origin: right center;
   }
-  /* микрокопию заметно приподнять от нижнего края */
+  /* микрокопию ещё заметнее приподнять от нижнего края */
   .hero-microcopy {
-    transform: translateY(clamp(-8rem, -13vh, -3.5rem));
+    transform: translateY(clamp(-11rem, -17vh, -5rem));
   }
 }
 
@@ -1166,10 +1167,10 @@ body {
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
   .gem--right {
-    top: 39%;
+    top: 36.5%;
   }
   .gem--left {
-    top: 74%;
+    top: 71%;
   }
   .hero-sub {
     max-width: 100%;
@@ -1179,7 +1180,7 @@ body {
     /* чуть крупнее, лёгкий сдвиг вправо всей колонки + больший наклон = живее.
        margin-top больше — подзаголовок садится НИЖЕ правого кристалла (41%),
        в чистую полосу между кристаллами */
-    margin: clamp(8rem, 41vw, 12.5rem) 0 0 0.7rem;
+    margin: clamp(6rem, 32vw, 10rem) 0 0 0.7rem;
     font-size: 1.02rem;
     /* просторнее интерлиньяж — читается легче, не теряется */
     line-height: 1.68;
@@ -1204,8 +1205,8 @@ body {
     padding-right: 0;
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
-    /* микрокопия чуть выше, но всё ещё под нижним кристаллом (vw — стабильно) */
-    margin-top: clamp(2rem, 16.5vw, 5rem);
+    /* микрокопия выше (кластер сдвинут вверх), но всё ещё под нижним кристаллом */
+    margin-top: clamp(2.5rem, 20vw, 5.5rem);
   }
   .hero-cta-row .btn {
     flex: 1;
@@ -1606,12 +1607,20 @@ body {
   color: var(--text-primary);
   padding: 0 clamp(1.4rem, 6vw, 7rem) clamp(6rem, 14vh, 12rem);
 }
-/* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок */
-.proc-enter {
+/* трек задаёт длину прокрутки портала; сам портал внутри липнет (sticky) */
+.proc-enter-track {
   position: relative;
-  height: 100lvh;
+  height: 320vh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
+}
+/* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок.
+   sticky-пин (не ScrollTrigger pin) → без дрожания и белого следа сверху. */
+.proc-enter {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
   overflow: hidden;
   /* фон-страховка: тёмный, чтобы под завесой никогда не светилась белая полоса */
   background: #070708;

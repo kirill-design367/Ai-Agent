@@ -70,16 +70,15 @@ export default function Process() {
       }
 
       // ПОРТАЛ-ВХОД: надпись приближается и растворяется, блок проявляется изнутри.
-      // Пин удлинён (+260%) с ПАУЗОЙ после раскрытия — зритель успевает рассмотреть
-      // вопросы вокруг, прежде чем скролл продолжится.
+      // Пин — через CSS position:sticky (трек .proc-enter-track), а не через pin
+      // ScrollTrigger: нативный GPU-пин без per-frame transform → нет дрожания и
+      // белого следа сверху (артефакт pin-spacer). Скролл трека скрабит анимацию.
       const enter = gsap.timeline({
         scrollTrigger: {
-          trigger: ".proc-enter",
+          trigger: ".proc-enter-track",
           start: "top top",
-          end: "+=260%",
+          end: "bottom bottom",
           scrub: 0.8,
-          pin: true,
-          anticipatePin: 1,
         },
       });
       enter
@@ -101,9 +100,9 @@ export default function Process() {
             yPercent: -22 * depth,
             ease: "none",
             scrollTrigger: {
-              trigger: ".proc-enter",
+              trigger: ".proc-enter-track",
               start: "top top",
-              end: "+=260%",
+              end: "bottom bottom",
               scrub: 1,
             },
           }
@@ -141,7 +140,7 @@ export default function Process() {
       });
       // дрейф вопросов не тратит кадры, пока вход в секцию вне экрана
       ScrollTrigger.create({
-        trigger: ".proc-enter",
+        trigger: ".proc-enter-track",
         start: "top bottom",
         end: "bottom top",
         onToggle: (self) =>
@@ -209,7 +208,9 @@ export default function Process() {
 
   return (
     <section id="process" className="process" ref={root}>
-      {/* портал-вход: следующий блок проявляется изнутри надписи */}
+      {/* портал-вход: следующий блок проявляется изнутри надписи.
+          Трек задаёт длину прокрутки, .proc-enter внутри липнет (sticky). */}
+      <div className="proc-enter-track">
       <div className="proc-enter">
         <div className="proc-intro">
           <div className="proc-questions" aria-hidden>
@@ -234,6 +235,7 @@ export default function Process() {
             <span>работу иначе</span>
           </h2>
         </div>
+      </div>
       </div>
 
       <div className="proc-steps">

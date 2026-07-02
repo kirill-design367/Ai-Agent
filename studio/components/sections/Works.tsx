@@ -36,15 +36,17 @@ export default function Works() {
       if (ticker) {
         gsap.fromTo(
           ticker,
-          { xPercent: 4 },
+          { xPercent: 2 },
           {
-            xPercent: -34,
+            xPercent: -22,
             ease: "none",
             scrollTrigger: {
               trigger: ".works-banner",
               start: "top bottom",
               end: "bottom top",
-              scrub: 0.5,
+              // выше scrub → сильнее сглаживание инерции: слова едут плавнее,
+              // без рывков, мягко догоняя скорость прокрутки
+              scrub: 1.4,
             },
           }
         );

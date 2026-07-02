@@ -71,13 +71,13 @@ export default function Pain() {
             scrub: 0.5,
           },
         });
-        tl.to({}, { duration: 0.08 }) // короткий чёрный «вдох»
-          // выходит из тумана — размытая копия проявляется
-          .to(".pf--blur", { autoAlpha: 1, ease: "power1.out", duration: 0.16 })
-          // наводка резкости: резкая копия проявляется и сжимается к норме,
-          // размытая — гаснет (кроссфейд по opacity/scale, без пересчёта блюра)
-          .to(".pf--sharp", { autoAlpha: 1, scale: 1, ease: "power2.out", duration: 0.44 })
-          .to(".pf--blur", { autoAlpha: 0, scale: 1.06, ease: "power2.out", duration: 0.34 }, "<")
+        tl.to({}, { duration: 0.04 }) // совсем короткий чёрный «вдох» (быстрее к фразе)
+          // выходит из тумана — размытая копия мягко проявляется
+          .to(".pf--blur", { autoAlpha: 1, ease: "power1.out", duration: 0.2 })
+          // наводка резкости МЕДЛЕННЕЕ и плавнее: резкая копия проявляется и сжимается
+          // к норме, размытая — плавно гаснет (кроссфейд по opacity/scale, без блюра)
+          .to(".pf--sharp", { autoAlpha: 1, scale: 1, ease: "power1.inOut", duration: 0.72 })
+          .to(".pf--blur", { autoAlpha: 0, scale: 1.05, ease: "power1.inOut", duration: 0.6 }, "<")
           .to({}, { duration: 0.2 }) // держим в фокусе
           // фраза уплывает вверх и растворяется (transform+opacity, без блюра)
           .to(".pain-focus", { autoAlpha: 0, y: -180, ease: "power2.in", duration: 0.34 })
