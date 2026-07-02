@@ -817,7 +817,7 @@ body {
   pointer-events: auto;
   display: grid;
   place-items: center;
-  width: clamp(190px, 34vw, 300px);
+  width: clamp(162px, 29vw, 255px);
   aspect-ratio: 2.5 / 1;
   text-decoration: none;
   /* СТАТИЧНАЯ тень объёма (тёмная, не анимируется → без repaint-следов при скролле) */
@@ -1024,8 +1024,9 @@ body {
   color: var(--text-on-dark);
   font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
-  font-size: clamp(0.74rem, 1.5vw, 0.95rem);
-  line-height: 1.05;
+  /* текст в кристалле чуть крупнее (сами кристаллы уменьшены) */
+  font-size: clamp(0.82rem, 1.7vw, 1.06rem);
+  line-height: 1.08;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;
@@ -1036,8 +1037,8 @@ body {
   top: 51%;
   right: clamp(-84px, -9vw, -44px);
   transform: rotate(-9deg);
-  /* «Обсудить проект» — главный из двух, ~18% крупнее (не теряется у типографики) */
-  width: clamp(224px, 40vw, 354px);
+  /* «Обсудить проект» — главный из двух, крупнее левого (после общего −15%) */
+  width: clamp(190px, 34vw, 301px);
 }
 .gem--left {
   top: 69%;
@@ -1085,7 +1086,7 @@ body {
    свободную полосу (правый ниже левого — золотое сечение по вертикали) */
 @media (min-width: 761px) {
   .gem {
-    width: clamp(230px, 21vw, 310px);
+    width: clamp(196px, 18vw, 264px);
   }
   .gem--left {
     top: 70%;
@@ -1093,7 +1094,7 @@ body {
   .gem--right {
     top: 79%;
     /* крупнее левого — главный акцент */
-    width: clamp(272px, 25vw, 368px);
+    width: clamp(231px, 21vw, 313px);
   }
 }
 
@@ -1140,7 +1141,7 @@ body {
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
   .gem--right {
-    top: 41%;
+    top: 37%;
   }
   .gem--left {
     top: 72%;
@@ -1153,7 +1154,7 @@ body {
     /* чуть крупнее, лёгкий сдвиг вправо всей колонки + больший наклон = живее.
        margin-top больше — подзаголовок садится НИЖЕ правого кристалла (41%),
        в чистую полосу между кристаллами */
-    margin: clamp(7.4rem, 37vw, 11.5rem) 0 0 0.7rem;
+    margin: clamp(6.4rem, 32vw, 10rem) 0 0 0.7rem;
     font-size: 1.02rem;
     /* просторнее интерлиньяж — читается легче, не теряется */
     line-height: 1.68;
@@ -1179,7 +1180,7 @@ body {
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
     /* микрокопию подняли ещё выше (vw — стабильно) */
-    margin-top: clamp(3rem, 22vw, 6.5rem);
+    margin-top: clamp(2rem, 17vw, 5rem);
   }
   .hero-cta-row .btn {
     flex: 1;
@@ -1189,6 +1190,8 @@ body {
   .hero-microcopy {
     align-self: flex-start;
     text-align: left;
+    /* каплю левее */
+    margin-left: -0.35rem;
     font-size: 0.58rem;
     letter-spacing: 0.05em;
   }

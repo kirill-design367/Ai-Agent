@@ -20,8 +20,23 @@ function LenisGsapBridge() {
     (window as unknown as { __lenis?: unknown }).__lenis = lenis;
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
+
+    // Всегда стартуем с Hero: браузер по умолчанию восстанавливает позицию
+    // скролла при перезагрузке, и из-за app-shell (.app-scroll) сайт мог
+    // открыться из середины. Отключаем восстановление и жёстко ставим верх.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    const toTop = () => {
+      lenis.scrollTo(0, { immediate: true, force: true });
+      const sc = document.querySelector<HTMLElement>(".app-scroll");
+      if (sc) sc.scrollTop = 0;
+    };
+    toTop();
+    // некоторые браузеры восстанавливают позицию уже после load — сбросим ещё раз
+    window.addEventListener("load", toTop);
+
     return () => {
       lenis.off("scroll", ScrollTrigger.update);
+      window.removeEventListener("load", toTop);
     };
   }, [lenis]);
 
