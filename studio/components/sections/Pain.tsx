@@ -72,8 +72,8 @@ export default function Pain() {
           },
         });
         tl.to({}, { duration: 0.04 }) // совсем короткий чёрный «вдох» (быстрее к фразе)
-          // выходит из тумана — размытая копия мягко проявляется
-          .to(".pf--blur", { autoAlpha: 1, ease: "power1.out", duration: 0.2 })
+          // выходит из тумана — размытая копия проявляется ДОЛГО и мягко
+          .to(".pf--blur", { autoAlpha: 1, ease: "power1.inOut", duration: 0.5 })
           // наводка резкости МЕДЛЕННЕЕ и плавнее: резкая копия проявляется и сжимается
           // к норме, размытая — плавно гаснет (кроссфейд по opacity/scale, без блюра)
           .to(".pf--sharp", { autoAlpha: 1, scale: 1, ease: "power1.inOut", duration: 0.72 })

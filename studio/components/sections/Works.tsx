@@ -93,7 +93,8 @@ export default function Works() {
             trigger: cards[i + 1],
             start: "top bottom",
             end: "top top",
-            scrub: 0.6,
+            // выше scrub → сильнее сглаживание шагов скролла: уход маслянистый
+            scrub: 0.9,
           },
         });
         tl.to(card, { scale: 0.62, yPercent: -3, ease: "power1.in", duration: 1 }, 0)
@@ -117,7 +118,7 @@ export default function Works() {
             trigger: ".works-tail",
             start: "top bottom",
             end: "bottom bottom",
-            scrub: 0.6,
+            scrub: 0.9,
           },
         });
         tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.45 }, 0)
@@ -147,8 +148,11 @@ export default function Works() {
             endTrigger: isLast ? ".works-tail" : cards[i + 1],
             end: isLast ? "bottom top" : "top 72%",
             onToggle: (self) => {
-              // выход последней подписи ВПЕРЁД (в хвост) делает скраб-таймлайн
+              // выход последней подписи ВПЕРЁД (в хвост) делает скраб-таймлайн;
+              // и ВОЗВРАТ снизу — тоже он (подпись приходит вместе с кейсом,
+              // а не мгновенно при пересечении границы)
               if (isLast && !self.isActive && self.progress === 1) return;
+              if (isLast && self.isActive && self.direction === -1) return;
               gsap.to(descs[i], {
                 autoAlpha: self.isActive ? 1 : 0,
                 y: self.isActive ? 0 : 14,

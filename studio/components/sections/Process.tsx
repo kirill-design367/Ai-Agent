@@ -90,7 +90,9 @@ export default function Process() {
         .fromTo(
           ".proc-turn",
           { scale: 1, opacity: 1 },
-          { scale: mobile ? 2.6 : 5, opacity: 0, ease: "power2.in", duration: 0.4 },
+          // мобайл: почти без зума (1.12) — масштабирование огромного текста
+          // пере-растеризовывало его каждый кадр и дрожало; фраза мягко тает
+          { scale: mobile ? 1.12 : 5, opacity: 0, ease: "power2.in", duration: 0.4 },
           0
         )
         .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32);
@@ -142,32 +144,31 @@ export default function Process() {
             scrollTrigger: { trigger: ".proc-enter", start: "top 30%" },
           }
         );
-      // дрейф вопросов — только десктоп (на мобиле 21 бесконечный твин ел кадры)
-      if (!mobile) {
-        const qFloatTweens: gsap.core.Tween[] = [];
-        gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
-          qFloatTweens.push(
-            gsap.to(q, {
-              y: gsap.utils.random(-26, 26),
-              x: gsap.utils.random(-18, 18),
-              rotation: gsap.utils.random(-4, 4),
-              duration: gsap.utils.random(2.4, 4.2),
-              ease: "sine.inOut",
-              repeat: -1,
-              yoyo: true,
-              delay: gsap.utils.random(0, 1.5),
-            })
-          );
-        });
-        // дрейф вопросов не тратит кадры, пока вход в секцию вне экрана
-        ScrollTrigger.create({
-          trigger: ".proc-enter-track",
-          start: "top bottom",
-          end: "bottom top",
-          onToggle: (self) =>
-            qFloatTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
-        });
-      }
+      // дрейф вопросов — ЖИВОЙ ВЕЗДЕ (и на мобиле): хаотично и эстетично,
+      // transform-only твины на собственных GPU-слоях (will-change) — дёшево
+      const qFloatTweens: gsap.core.Tween[] = [];
+      gsap.utils.toArray<HTMLElement>(".proc-q .proc-q-float").forEach((q) => {
+        qFloatTweens.push(
+          gsap.to(q, {
+            y: gsap.utils.random(-26, 26),
+            x: gsap.utils.random(-18, 18),
+            rotation: gsap.utils.random(-4, 4),
+            duration: gsap.utils.random(2.4, 4.2),
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            delay: gsap.utils.random(0, 1.5),
+          })
+        );
+      });
+      // дрейф вопросов не тратит кадры, пока вход в секцию вне экрана
+      ScrollTrigger.create({
+        trigger: ".proc-enter-track",
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          qFloatTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
+      });
 
       // линия + комета
       const line = root.current!.querySelector<HTMLElement>(".proc-line");
@@ -247,7 +248,6 @@ export default function Process() {
               </span>
             ))}
           </div>
-          <span className="proc-kicker">(03)</span>
           <h2 className="proc-bigtitle">Как&nbsp;мы работаем</h2>
         </div>
 

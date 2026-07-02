@@ -158,6 +158,10 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
+  /* КРИТИЧНО: выключаем scroll anchoring — на мобильном Chrome он «подправлял»
+     scrollTop при изменениях в sticky-сценах с трансформациями (порталы «Боли»
+     и «Процесса») → скролл прерывался короткими скачками */
+  overflow-anchor: none;
 }
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
@@ -440,31 +444,11 @@ body {
   margin-left: calc(50% - 50vw);
   margin-bottom: clamp(2.5rem, 7vh, 5rem);
   overflow: hidden;
-  /* компактная, дорогая: никакой белой полосы — только тусклая световая линия */
-  min-height: clamp(58px, 9vh, 88px);
+  /* компактная и чистая: только светлые слова на тёмном, без линий и подсветок */
+  min-height: clamp(72px, 11vh, 112px);
   display: flex;
   align-items: center;
   background: transparent;
-}
-/* тусклая линия света, по которой «едут» слова (awwwards-строй: тихо и дорого) */
-.works-banner::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  transform: translateY(-50%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(228, 224, 214, 0.22) 16%,
-    rgba(228, 224, 214, 0.5) 50%,
-    rgba(228, 224, 214, 0.22) 84%,
-    transparent
-  );
-  box-shadow: 0 0 14px rgba(228, 224, 214, 0.25), 0 0 42px rgba(228, 224, 214, 0.1);
-  pointer-events: none;
 }
 .works-band {
   position: relative;
@@ -490,18 +474,17 @@ body {
   white-space: nowrap;
 }
 .wb-big {
-  /* светлые слова, «едущие» по линии света — компактно, с воздухом в трекинге */
+  /* светлые слова на тёмном — крупнее, с воздухом в трекинге */
   position: relative;
   z-index: 1;
   display: inline-block;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(0.95rem, 1.9vw, 1.5rem);
+  font-size: clamp(1.5rem, 3.2vw, 2.6rem);
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.82);
-  text-shadow: 0 0 22px rgba(228, 224, 214, 0.22);
+  color: rgba(244, 242, 238, 0.88);
 }
 /* два идентичных трека → -50% сдвигает ровно на один трек, шов невидим */
 @keyframes worksticker {
@@ -517,8 +500,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(2rem, 6vh, 5rem);
-  /* глубина для «ухода вдаль» кейсов */
-  perspective: 1400px;
+  /* БЕЗ perspective: 3D-контекст заставлял пере-растеризовывать карточки при
+     каждом шаге scale → дрожание; чистый 2D-scale идёт на композиторе плавно */
 }
 /* прокрутка-«хвост»: дистанция для ухода последнего кейса + короткая чёрная пауза */
 .works-tail {
@@ -679,7 +662,7 @@ body {
     padding: clamp(2rem, 5vh, 3.5rem) 1.1rem clamp(2.5rem, 7vh, 5rem);
   }
   .wb-big {
-    font-size: clamp(0.82rem, 3.6vw, 1.05rem);
+    font-size: clamp(1.15rem, 5.2vw, 1.5rem);
   }
   .works-stack {
     gap: 1.4rem;
@@ -695,8 +678,8 @@ body {
   }
   .work-card img {
     object-position: center;
-    /* на тач-устройствах нет ховера — показываем кадр живым сразу */
-    filter: saturate(1) brightness(0.92);
+    /* БЕЗ filter: статичный фильтр заставлял пере-растеризовывать картинку при
+       каждом шаге scale ухода вглубь → дрожание на мобильном GPU */
   }
   .work-cap {
     left: 1.1rem;
@@ -1266,7 +1249,7 @@ body {
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
     /* микрокопия выше (кластер сдвинут вверх), но всё ещё под нижним кристаллом */
-    margin-top: clamp(3rem, 23.5vw, 6rem);
+    margin-top: clamp(2.2rem, 17vw, 4.6rem);
   }
   .hero-cta-row .btn {
     flex: 1;
@@ -1940,7 +1923,28 @@ body {
   padding: clamp(4rem, 10vh, 8rem) clamp(1.4rem, 6vw, 7rem) 0;
   overflow: hidden;
 }
-/* вопрос крупными буквами ИЗ ТОЧЕК, столбик чуть хаотично по золотому сечению */
+/* вопрос ИЗ ЧАСТИЦ — канвас, где тысячи частиц дрейфуют и собираются в буквы */
+.adv-quest-wrap {
+  position: relative;
+  width: min(100%, 1180px);
+  height: clamp(260px, 54vh, 540px);
+}
+.adv-quest-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.adv-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 .adv-quest {
   display: flex;
   flex-direction: column;
