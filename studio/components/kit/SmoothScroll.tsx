@@ -21,22 +21,48 @@ function LenisGsapBridge() {
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
 
-    // Всегда стартуем с Hero: браузер по умолчанию восстанавливает позицию
-    // скролла при перезагрузке, и из-за app-shell (.app-scroll) сайт мог
-    // открыться из середины. Отключаем восстановление и жёстко ставим верх.
+    // Всегда стартуем с Hero. history.scrollRestoration управляет ТОЛЬКО скроллом
+    // документа, а у нас app-shell — скроллится div .app-scroll, чью позицию
+    // браузер восстанавливает отдельно и ПОЗЖЕ (после layout/load, из bfcache).
+    // Поэтому сбрасываем и window, и .app-scroll, и Lenis — многократно, пока идёт
+    // прелоадер, перекрывая момент восстановления браузером.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     const toTop = () => {
-      lenis.scrollTo(0, { immediate: true, force: true });
       const sc = document.querySelector<HTMLElement>(".app-scroll");
       if (sc) sc.scrollTop = 0;
+      window.scrollTo(0, 0);
+      lenis.scrollTo(0, { immediate: true, force: true });
     };
     toTop();
-    // некоторые браузеры восстанавливают позицию уже после load — сбросим ещё раз
+    // серия сбросов на первых кадрах + после load/pageshow — перекрываем позднее
+    // восстановление позиции браузером (иначе сайт открывался из середины).
+    // Останавливаемся при первом действии пользователя, чтобы не мешать скроллу.
+    let frames = 0;
+    let raf = 0;
+    const tick = () => {
+      toTop();
+      if (++frames < 90) raf = requestAnimationFrame(tick); // ~1.5с
+    };
+    raf = requestAnimationFrame(tick);
+    const timers = [120, 400, 900, 1600].map((d) => window.setTimeout(toTop, d));
     window.addEventListener("load", toTop);
+    window.addEventListener("pageshow", toTop);
+
+    const userTook = ["wheel", "touchstart", "keydown", "pointerdown"];
+    const stopForcing = () => {
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      window.removeEventListener("load", toTop);
+      window.removeEventListener("pageshow", toTop);
+      userTook.forEach((e) => window.removeEventListener(e, stopForcing));
+    };
+    userTook.forEach((e) =>
+      window.addEventListener(e, stopForcing, { passive: true, once: true })
+    );
 
     return () => {
       lenis.off("scroll", ScrollTrigger.update);
-      window.removeEventListener("load", toTop);
+      stopForcing();
     };
   }, [lenis]);
 

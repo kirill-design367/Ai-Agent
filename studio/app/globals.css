@@ -1141,10 +1141,10 @@ body {
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
   .gem--right {
-    top: 37%;
+    top: 39%;
   }
   .gem--left {
-    top: 72%;
+    top: 76%;
   }
   .hero-sub {
     max-width: 100%;
@@ -1154,7 +1154,7 @@ body {
     /* чуть крупнее, лёгкий сдвиг вправо всей колонки + больший наклон = живее.
        margin-top больше — подзаголовок садится НИЖЕ правого кристалла (41%),
        в чистую полосу между кристаллами */
-    margin: clamp(6.4rem, 32vw, 10rem) 0 0 0.7rem;
+    margin: clamp(8rem, 41vw, 12.5rem) 0 0 0.7rem;
     font-size: 1.02rem;
     /* просторнее интерлиньяж — читается легче, не теряется */
     line-height: 1.68;
@@ -1179,8 +1179,8 @@ body {
     padding-right: 0;
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
-    /* микрокопию подняли ещё выше (vw — стабильно) */
-    margin-top: clamp(2rem, 17vw, 5rem);
+    /* микрокопия ПОД нижним кристаллом, не залезая на него (vw — стабильно) */
+    margin-top: clamp(3.5rem, 22vw, 7rem);
   }
   .hero-cta-row .btn {
     flex: 1;
@@ -1200,7 +1200,7 @@ body {
   }
 }
 
-/* ── INTRO — видео-прелоадер по центру, затем шторка вверх */
+/* ── INTRO — видео-прелоадер по центру, затем премиальное РАСТВОРЕНИЕ (Awwwards) */
 .intro {
   position: fixed;
   inset: 0;
@@ -1209,13 +1209,29 @@ body {
   display: grid;
   place-items: center;
   overflow: hidden;
-  /* explicit start state so clip-path transition interpolates smoothly */
-  clip-path: inset(0 0 0% 0);
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+  will-change: opacity, transform, filter;
 }
+/* не шторка вверх, а мягкое растворение: логотип и чёрный фон истаивают,
+   слегка приближаясь и размываясь → под ними уже стоит Hero */
 .intro[data-lift="true"] {
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 1.1s var(--ease-expo);
+  opacity: 0;
+  transform: scale(1.06);
+  filter: blur(9px);
+  transition: opacity 1.05s var(--ease-expo), transform 1.2s var(--ease-expo),
+    filter 1.05s var(--ease-expo);
   pointer-events: none;
+}
+/* видео истаивает чуть раньше фона — «сначала растворяется знак» */
+.intro[data-lift="true"] .intro-video {
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 0.8s var(--ease-expo), transform 1s var(--ease-expo);
+}
+.intro-video {
+  transition: opacity 0.6s var(--ease-expo);
 }
 /* десктоп — компактное видео по центру (не во весь экран) */
 .intro-video {
