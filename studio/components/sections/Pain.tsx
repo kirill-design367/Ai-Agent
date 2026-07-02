@@ -45,38 +45,43 @@ export default function Pain() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // КИРПИЧИКИ: слова «А теперь — о наболевшем» сваливаются сверху и собираются
-      // воедино, затем плавно МОРФ в «Вам сделали сайт. Но заявок больше не стало».
-      const bricks = gsap.utils.toArray<HTMLElement>(".pain-brick");
-      if (bricks.length) {
-        gsap.set(".pain-morph", { autoAlpha: 0, y: 26 });
+      // ФОКУСИРОВКА: после чёрного «вдоха» фраза «Мы знаем, через что вы прошли»
+      // выходит из тумана — сначала размытая и крупнее, затем на скролле резко
+      // наводится в резкость (глаз навёл фокус). После — уплывает вверх, растворяясь,
+      // и снизу выезжает первый аргумент «Вам сделали сайт. Но заявок больше не стало».
+      const focus = document.querySelector(".pain-focus");
+      if (focus) {
+        gsap.set(".pain-focus", { autoAlpha: 0, filter: "blur(20px)", scale: 1.24 });
+        gsap.set(".pain-morph", { autoAlpha: 0, y: 95, filter: "blur(0px)" });
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".pain-portal",
             start: "top top",
-            end: "+=150%",
+            end: "+=210%",
             scrub: 0.5,
             pin: true,
             anticipatePin: 1,
           },
         });
-        // падение кирпичиков с лёгким отскоком
-        tl.from(
-          bricks,
-          {
-            y: () => -gsap.utils.random(260, 460),
-            opacity: 0,
-            rotation: () => gsap.utils.random(-26, 26),
-            stagger: 0.07,
-            ease: "back.out(1.5)",
-          },
-          0
-        )
-          .to({}, { duration: 0.28 }) // держим собранную фразу
-          // морф: первая фраза уходит вверх, вторая проявляется
-          .to(".pain-fall", { autoAlpha: 0, y: -36, ease: "power2.in", duration: 0.28 })
-          .to(".pain-morph", { autoAlpha: 1, y: 0, ease: "power3.out", duration: 0.4 }, "<0.08")
-          .to({}, { duration: 0.22 });
+        tl.to({}, { duration: 0.06 }) // короткий чёрный «вдох»
+          // проявление из тумана + наводка резкости
+          .to(
+            ".pain-focus",
+            { autoAlpha: 1, filter: "blur(0px)", scale: 1, ease: "power2.out", duration: 0.5 }
+          )
+          .to({}, { duration: 0.22 }) // держим в фокусе
+          // фраза уплывает вверх и растворяется (уходит полностью — без каши)
+          .to(
+            ".pain-focus",
+            { autoAlpha: 0, y: -180, filter: "blur(12px)", ease: "power2.in", duration: 0.34 }
+          )
+          // первый аргумент выезжает снизу ПОСЛЕ ухода фразы (лёгкое касание -0.05)
+          .to(
+            ".pain-morph",
+            { autoAlpha: 1, y: 0, ease: "power3.out", duration: 0.44 },
+            ">-0.05"
+          )
+          .to({}, { duration: 0.18 });
       }
 
       // тоннель-параллакс по болям (lead/turn исключены — у них своя режиссура)
@@ -110,18 +115,14 @@ export default function Pain() {
     { scope: root }
   );
 
-  const fallWords = ["А", "теперь —", "о", "наболевшем"];
-
   return (
     <section id="pain" className="theme-dark pain" ref={root}>
-      {/* перетекание из кейсов: слова сваливаются кирпичиками и собираются, затем морф */}
+      {/* перетекание из кейсов: фраза выходит из тумана и наводится в резкость,
+          затем уплывает вверх, открывая первый аргумент */}
       <div className="pain-portal">
-        <h2 className="pain-fall" aria-label="А теперь — о наболевшем">
-          {fallWords.map((w, i) => (
-            <span className="pain-brick" key={i}>
-              {w}
-            </span>
-          ))}
+        <h2 className="pain-focus" aria-label="Мы знаем, через что вы прошли">
+          <span className="l">Мы&nbsp;знаем,</span>
+          <span className="l">через что вы&nbsp;прошли</span>
         </h2>
         <h2 className="pain-morph pain-big">
           <span className="l">Вам сделали сайт.</span>

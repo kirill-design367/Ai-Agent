@@ -46,6 +46,25 @@ export default function Works() {
           0
         );
       });
+
+      // ПОСЛЕДНИЙ кейс уходит НЕ вверх, а ВДАЛЬ, в глубину: уменьшается, темнеет
+      // и растворяется. Дальше короткая пустота (чёрный «вдох») перед блоком боли.
+      const last = cards[cards.length - 1];
+      if (last) {
+        const shade = last.querySelector(".work-shade");
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".works-tail",
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: 0.6,
+          },
+        });
+        tl.to(last, { scale: 0.5, yPercent: -3, ease: "none", duration: 1 }, 0)
+          .to(shade, { opacity: 0.85, ease: "none", duration: 1 }, 0)
+          .to(".works-stack", { autoAlpha: 0, ease: "power1.in", duration: 0.82 }, 0);
+      }
+
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
     { scope: root }
@@ -62,9 +81,7 @@ export default function Works() {
                 {Array.from({ length: 6 }).map((_, i) => (
                   <span className="wb-row" key={i}>
                     <span className="wb-big">Портфолио</span>
-                    <span className="wb-mark">/</span>
-                    <span className="wb-big">Примеры работ</span>
-                    <span className="wb-mark">/</span>
+                    <span className="wb-big">Примеры&nbsp;работ</span>
                   </span>
                 ))}
               </div>
@@ -88,6 +105,8 @@ export default function Works() {
             </div>
           </article>
         ))}
+        {/* прокрутка-«хвост»: последний кейс залипает и уходит вдаль, затем чёрный вдох */}
+        <div className="works-tail" aria-hidden />
       </div>
     </section>
   );

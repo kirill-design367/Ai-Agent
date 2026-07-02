@@ -438,11 +438,35 @@ body {
   overflow: hidden;
   /* фиксированный светлый (не токен — он инвертируется в .theme-dark) */
   background: #f4f3f0;
-  padding: clamp(0.7rem, 1.8vh, 1.2rem) 0;
+  /* лента выше; текст-растяжка центрируется */
+  min-height: clamp(70px, 14vh, 140px);
+  display: flex;
+  align-items: center;
+}
+/* мягкие края: короткий градиент чёрный→прозрачный сверху и снизу — убирает
+   резкий чёрно-белый стык ленты с тёмными секциями */
+.works-banner::before,
+.works-banner::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: clamp(12px, 2.4vh, 26px);
+  z-index: 3;
+  pointer-events: none;
+}
+.works-banner::before {
+  top: 0;
+  background: linear-gradient(#0a0a0b, rgba(10, 10, 11, 0));
+}
+.works-banner::after {
+  bottom: 0;
+  background: linear-gradient(rgba(10, 10, 11, 0), #0a0a0b);
 }
 .works-band {
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 /* compositor-only marquee: translate3d, без layout/paint каждый кадр */
 .works-ticker {
@@ -463,20 +487,17 @@ body {
   white-space: nowrap;
 }
 .wb-big {
+  /* креативная растяжка по вертикали — буквы вытянуты, узкие, «журнальные» */
+  display: inline-block;
+  transform: scaleY(1.62);
+  transform-origin: center;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 800;
-  font-size: clamp(1.3rem, 4vw, 3rem);
+  font-size: clamp(1.15rem, 3.4vw, 2.5rem);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
   color: #0a0a0b;
-}
-.wb-mark {
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-weight: 600;
-  font-size: clamp(0.7rem, 1.4vw, 1rem);
-  letter-spacing: 0.16em;
-  color: rgba(10, 10, 11, 0.45);
 }
 /* два идентичных трека → -50% сдвигает ровно на один трек, шов невидим */
 @keyframes worksticker {
@@ -489,6 +510,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(2rem, 6vh, 5rem);
+  /* глубина для «ухода вдаль» последнего кейса */
+  perspective: 1400px;
+}
+/* прокрутка-«хвост»: даёт залипшему последнему кейсу дистанцию, чтобы уйти
+   вдаль и раствориться; оставшаяся высота = короткий чёрный «вдох» */
+.works-tail {
+  height: 80vh;
+  pointer-events: none;
 }
 .work-card {
   position: sticky;
@@ -1412,27 +1441,30 @@ body {
   place-items: center;
   overflow: hidden;
 }
-.pain-fall {
+/* фраза, выходящая из тумана и наводящаяся в резкость */
+.pain-focus {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.22em 0.55em;
+  gap: 0.06em;
   margin: 0;
   padding: 0 clamp(1.2rem, 6vw, 4rem);
   text-align: center;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.2rem, 8vw, 6.4rem);
-  letter-spacing: 0.01em;
+  font-size: clamp(2.1rem, 7.4vw, 6rem);
+  line-height: 1.02;
+  letter-spacing: 0.005em;
   text-transform: uppercase;
   color: var(--text-on-dark);
+  will-change: transform, opacity, filter;
 }
-.pain-brick {
-  display: inline-block;
-  will-change: transform, opacity;
+.pain-focus .l {
+  display: block;
 }
 /* морф-фраза поверх кирпичиков; .pain-morph.pain-big повышает специфичность,
    чтобы перебить max-width:13ch и гигантский font-size от .pain-big (был баг-overflow) */
