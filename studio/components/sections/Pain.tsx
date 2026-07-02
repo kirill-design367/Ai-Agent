@@ -60,14 +60,15 @@ export default function Pain() {
         gsap.set(".pf--sharp", { autoAlpha: 0, scale: 1.24 });
         gsap.set(".pain-focus", { autoAlpha: 1, y: 0 });
         gsap.set(".pain-morph", { autoAlpha: 0, y: 95 });
+        // ПИН через CSS position:sticky (а не pin ScrollTrigger). Sticky держит
+        // портал на месте нативно и на GPU — без пересчёта transform каждый кадр,
+        // поэтому текст НЕ дрожит. Скролл трека просто скрабит анимацию.
         const tl = gsap.timeline({
           scrollTrigger: {
-            trigger: ".pain-portal",
+            trigger: ".pain-portal-track",
             start: "top top",
-            end: "+=210%",
+            end: "bottom bottom",
             scrub: 0.5,
-            pin: true,
-            anticipatePin: 1,
           },
         });
         tl.to({}, { duration: 0.08 }) // короткий чёрный «вдох»
@@ -119,22 +120,25 @@ export default function Pain() {
   return (
     <section id="pain" className="theme-dark pain" ref={root}>
       {/* перетекание из кейсов: фраза выходит из тумана и наводится в резкость,
-          затем уплывает вверх, открывая первый аргумент */}
-      <div className="pain-portal">
-        <h2 className="pain-focus" aria-label="Мы знаем, через что вы прошли">
-          <span className="pf pf--blur" aria-hidden>
-            <span className="l">Мы&nbsp;знаем,</span>
-            <span className="l">через что вы&nbsp;прошли</span>
-          </span>
-          <span className="pf pf--sharp" aria-hidden>
-            <span className="l">Мы&nbsp;знаем,</span>
-            <span className="l">через что вы&nbsp;прошли</span>
-          </span>
-        </h2>
-        <h2 className="pain-morph pain-big">
-          <span className="l">Вам сделали сайт.</span>
-          <span className="l pain-dim">Но заявок больше не стало.</span>
-        </h2>
+          затем уплывает вверх, открывая первый аргумент.
+          Трек задаёт длину прокрутки, портал внутри липнет (sticky) — плавно. */}
+      <div className="pain-portal-track">
+        <div className="pain-portal">
+          <h2 className="pain-focus" aria-label="Мы знаем, через что вы прошли">
+            <span className="pf pf--blur" aria-hidden>
+              <span className="l">Мы&nbsp;знаем,</span>
+              <span className="l">через что вы&nbsp;прошли</span>
+            </span>
+            <span className="pf pf--sharp" aria-hidden>
+              <span className="l">Мы&nbsp;знаем,</span>
+              <span className="l">через что вы&nbsp;прошли</span>
+            </span>
+          </h2>
+          <h2 className="pain-morph pain-big">
+            <span className="l">Вам сделали сайт.</span>
+            <span className="l pain-dim">Но заявок больше не стало.</span>
+          </h2>
+        </div>
       </div>
 
       {/* боли по золотому сечению */}

@@ -21,11 +21,11 @@ function LenisGsapBridge() {
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
 
-    // ГЛАДКОСТЬ (фикс дрожания пиннингов): Lenis по умолчанию крутит собственный
-    // RAF, отдельный от тикера GSAP — из-за этого обновление скролла и scrub/pin
-    // ScrollTrigger попадают в РАЗНЫЕ кадры, и закреплённый текст «дрожит».
-    // Гоним Lenis из gsap.ticker → всё считается в одном кадре, дёрганья нет.
-    lenis.options.autoRaf = false;
+    // ГЛАДКОСТЬ (фикс дрожания пиннингов): Lenis крутит собственный RAF, отдельный
+    // от тикера GSAP — из-за этого обновление скролла и scrub ScrollTrigger попадают
+    // в РАЗНЫЕ кадры. autoRaf:false задан в options ниже (в конструкторе — иначе
+    // цикл уже запущен и получается ДВОЙНОЙ RAF → дрожание только усиливалось).
+    // Здесь гоним Lenis из gsap.ticker → всё в одном кадре.
     const raf = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
@@ -90,6 +90,9 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
         smoothWheel: true,
         wheelMultiplier: 1,
         touchMultiplier: 1.4,
+        // не запускать собственный RAF — Lenis гоним из gsap.ticker (см. bridge),
+        // иначе двойной цикл и дрожание scrub/pin-сцен
+        autoRaf: false,
       }}
     >
       <LenisGsapBridge />

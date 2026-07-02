@@ -51,6 +51,10 @@ export default function Works() {
       }
 
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
+      // КАЖДЫЙ кейс уходит ВДАЛЬ ПОСЛЕДОВАТЕЛЬНО: когда наезжает следующий, текущий
+      // уменьшается (в глубину) и в конце растворяется. Никаких преждевременных
+      // «массовых» исчезновений — предыдущие тают ровно тогда, когда их накрывает
+      // следующий (то есть по мере прокрутки), плавно и по очереди.
       cards.forEach((card, i) => {
         if (i === cards.length - 1) return;
         const shade = card.querySelector(".work-shade");
@@ -62,19 +66,16 @@ export default function Works() {
             scrub: 0.6,
           },
         });
-        tl.to(card, { scale: 0.94, ease: "none" }, 0).to(
-          shade,
-          { opacity: 0.55, ease: "none" },
-          0
-        );
+        tl.to(card, { scale: 0.62, yPercent: -3, ease: "power1.in", duration: 1 }, 0)
+          .to(shade, { opacity: 0.85, ease: "none", duration: 1 }, 0)
+          // растворяется в самом конце — когда следующий уже почти накрыл
+          .to(card, { autoAlpha: 0, ease: "power1.in", duration: 0.4 }, 0.6);
       });
 
-      // ПОСЛЕДНИЙ кейс уходит ВДАЛЬ, в глубину: уменьшается, темнеет и растворяется.
-      // Остальные кейсы «уже давно исчезли» — гасим их сразу, чтобы позапрошлый не
-      // выглядывал из-за уменьшающегося последнего (за ним — чёрный фон секции).
-      // Дальше короткая пустота — чёрный «вдох» перед блоком боли.
+      // ПОСЛЕДНИЙ кейс (за ним следующего нет) уходит вдаль в «хвосте» прокрутки:
+      // уменьшается, темнеет и растворяется. Предыдущие уже ушли по очереди, так
+      // что за ним — чистый люкс-чёрный фон, без выглядываний.
       const last = cards[cards.length - 1];
-      const others = cards.slice(0, -1);
       if (last) {
         const shade = last.querySelector(".work-shade");
         const tl = gsap.timeline({
@@ -85,13 +86,9 @@ export default function Works() {
             scrub: 0.6,
           },
         });
-        // остальные кейсы плавно растворяются вместе с уходом (не резко/рано) —
-        // быстрый, но мягкий фейд, чтобы позапрошлый не «мигал» из-за последнего
-        if (others.length)
-          tl.to(others, { autoAlpha: 0, ease: "power2.out", duration: 0.45 }, 0);
-        tl.to(last, { scale: 0.4, yPercent: -2, ease: "power1.inOut", duration: 1 }, 0)
-          .to(shade, { opacity: 0.92, ease: "none", duration: 1 }, 0)
-          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.42 }, 0.6);
+        tl.to(last, { scale: 0.42, yPercent: -3, ease: "power1.inOut", duration: 1 }, 0)
+          .to(shade, { opacity: 0.9, ease: "none", duration: 1 }, 0)
+          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.5 }, 0.55);
       }
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());

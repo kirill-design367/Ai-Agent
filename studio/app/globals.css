@@ -92,7 +92,9 @@
   black-fill CTAs invert to white-fill automatically — no per-element overrides.
 */
 .theme-dark {
-  --bg-base: #0a0a0b;
+  /* единый «люкс-чёрный» для всех тёмных секций → нет разделительных стыков
+     между блоками (напр. пустой экран после кейсов и блок «Боль») */
+  --bg-base: #070708;
   --bg-elevated: #141417;
   --bg-sunken: #050506;
   --text-primary: #f4f2ee;
@@ -425,7 +427,8 @@ body {
 /* — WORKS: бегущая лента-баннер (заголовок) + sticky stacking cinema */
 .works {
   position: relative;
-  background: var(--bg-dark);
+  /* тот же люкс-чёрный, что и у «Боли» — без стыка на пустом экране */
+  background: var(--bg-base);
   padding: clamp(2.4rem, 6vh, 4rem) clamp(1.5rem, 6vw, 6rem) clamp(8rem, 20vh, 16rem);
 }
 /* одна горизонтальная лента-строка «ПОРТФОЛИО / ПРИМЕРЫ РАБОТ», бесконечный цикл.
@@ -436,32 +439,23 @@ body {
   margin-left: calc(50% - 50vw);
   margin-bottom: clamp(2.5rem, 7vh, 5rem);
   overflow: hidden;
-  /* фиксированный светлый (не токен — он инвертируется в .theme-dark) */
-  background: #f4f3f0;
-  /* высота ленты под крупный шрифт, текст центрируется */
-  min-height: clamp(62px, 11vh, 112px);
+  /* лента выше — есть место для длинного вертикального градиента */
+  min-height: clamp(150px, 28vh, 260px);
   display: flex;
   align-items: center;
-}
-/* мягкие края: короткий градиент чёрный→прозрачный сверху и снизу — убирает
-   резкий чёрно-белый стык ленты с тёмными секциями */
-.works-banner::before,
-.works-banner::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: clamp(12px, 2.4vh, 26px);
-  z-index: 3;
-  pointer-events: none;
-}
-.works-banner::before {
-  top: 0;
-  background: linear-gradient(#0a0a0b, rgba(10, 10, 11, 0));
-}
-.works-banner::after {
-  bottom: 0;
-  background: linear-gradient(rgba(10, 10, 11, 0), #0a0a0b);
+  /* ВЕРТИКАЛЬНЫЙ градиент: тёмный (край) → около-белый ТОНКИМ слоем ровно по
+     центру → тёмный (другой край). Плавно от 0 до середины и от середины к краю —
+     никакого резкого чёрно-белого стыка, лента «светится» тонкой полосой. */
+  background: linear-gradient(
+    to bottom,
+    #070708 0%,
+    #2b2b28 20%,
+    #cbc9c3 39%,
+    #f4f3f0 50%,
+    #cbc9c3 61%,
+    #2b2b28 80%,
+    #070708 100%
+  );
 }
 .works-band {
   position: relative;
@@ -514,7 +508,7 @@ body {
 /* прокрутка-«хвост»: даёт залипшему последнему кейсу дистанцию, чтобы уйти
    вдаль и раствориться; оставшаяся высота = короткий чёрный «вдох» */
 .works-tail {
-  height: 45vh;
+  height: 28vh;
   pointer-events: none;
 }
 .work-card {
@@ -793,9 +787,9 @@ body {
     transform: rotate(-1.4deg);
     transform-origin: right center;
   }
-  /* микрокопию приподнять от нижнего края */
+  /* микрокопию заметно приподнять от нижнего края */
   .hero-microcopy {
-    transform: translateY(clamp(-4rem, -7vh, -1.5rem));
+    transform: translateY(clamp(-8rem, -13vh, -3.5rem));
   }
 }
 
@@ -1211,7 +1205,7 @@ body {
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
     /* микрокопия чуть выше, но всё ещё под нижним кристаллом (vw — стабильно) */
-    margin-top: clamp(2.5rem, 18vw, 5.5rem);
+    margin-top: clamp(2rem, 16.5vw, 5rem);
   }
   .hero-cta-row .btn {
     flex: 1;
@@ -1431,14 +1425,22 @@ body {
 .pain {
   position: relative;
   background: #070708;
-  overflow: hidden;
+  /* overflow:clip (не hidden!) — hidden создаёт скролл-контекст и ЛОМАЕТ sticky
+     портала; clip обрезает горизонт, но sticky продолжает работать от app-scroll */
+  overflow: clip;
 }
 
-/* кирпичики «А теперь — о наболевшем» (перетекание из кейсов): сваливаются
-   сверху, собираются в фразу, затем морф во «Вам сделали сайт…» */
-.pain-portal {
+/* ПОРТАЛ-перетекание из кейсов. Трек задаёт длину прокрутки анимации, а сам
+   портал внутри ЛИПНЕТ (position:sticky) — держится нативно на GPU, без пере-
+   расчёта transform каждый кадр (это и убирает дрожание текста). */
+.pain-portal-track {
   position: relative;
-  height: 100lvh;
+  height: 220vh;
+}
+.pain-portal {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   display: grid;
   place-items: center;
   overflow: hidden;
