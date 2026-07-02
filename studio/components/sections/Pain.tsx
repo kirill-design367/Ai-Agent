@@ -51,8 +51,15 @@ export default function Pain() {
       // и снизу выезжает первый аргумент «Вам сделали сайт. Но заявок больше не стало».
       const focus = document.querySelector(".pain-focus");
       if (focus) {
-        gsap.set(".pain-focus", { autoAlpha: 0, filter: "blur(20px)", scale: 1.24 });
-        gsap.set(".pain-morph", { autoAlpha: 0, y: 95, filter: "blur(0px)" });
+        // ПРОИЗВОДИТЕЛЬНОСТЬ: не анимируем filter:blur (дорогой repaint каждый кадр —
+        // отсюда и был лаг). Вместо этого — две копии фразы: заранее размытая
+        // (статичный blur, растеризуется 1 раз) и резкая. Кроссфейд их opacity +
+        // масштаб = только композитор, идеально гладко.
+        // обе копии сперва скрыты → чёрный «вдох»; затем фраза проявляется из тумана
+        gsap.set(".pf--blur", { autoAlpha: 0, scale: 1.24 });
+        gsap.set(".pf--sharp", { autoAlpha: 0, scale: 1.24 });
+        gsap.set(".pain-focus", { autoAlpha: 1, y: 0 });
+        gsap.set(".pain-morph", { autoAlpha: 0, y: 95 });
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ".pain-portal",
@@ -63,25 +70,19 @@ export default function Pain() {
             anticipatePin: 1,
           },
         });
-        tl.to({}, { duration: 0.06 }) // короткий чёрный «вдох»
-          // проявление из тумана + наводка резкости
-          .to(
-            ".pain-focus",
-            { autoAlpha: 1, filter: "blur(0px)", scale: 1, ease: "power2.out", duration: 0.5 }
-          )
-          .to({}, { duration: 0.22 }) // держим в фокусе
-          // фраза уплывает вверх и растворяется (уходит полностью — без каши)
-          .to(
-            ".pain-focus",
-            { autoAlpha: 0, y: -180, filter: "blur(12px)", ease: "power2.in", duration: 0.34 }
-          )
-          // первый аргумент выезжает снизу ПОСЛЕ ухода фразы (лёгкое касание -0.05)
-          .to(
-            ".pain-morph",
-            { autoAlpha: 1, y: 0, ease: "power3.out", duration: 0.44 },
-            ">-0.05"
-          )
-          .to({}, { duration: 0.18 });
+        tl.to({}, { duration: 0.08 }) // короткий чёрный «вдох»
+          // выходит из тумана — размытая копия проявляется
+          .to(".pf--blur", { autoAlpha: 1, ease: "power1.out", duration: 0.16 })
+          // наводка резкости: резкая копия проявляется и сжимается к норме,
+          // размытая — гаснет (кроссфейд по opacity/scale, без пересчёта блюра)
+          .to(".pf--sharp", { autoAlpha: 1, scale: 1, ease: "power2.out", duration: 0.44 })
+          .to(".pf--blur", { autoAlpha: 0, scale: 1.06, ease: "power2.out", duration: 0.34 }, "<")
+          .to({}, { duration: 0.2 }) // держим в фокусе
+          // фраза уплывает вверх и растворяется (transform+opacity, без блюра)
+          .to(".pain-focus", { autoAlpha: 0, y: -180, ease: "power2.in", duration: 0.34 })
+          // первый аргумент выезжает снизу ПОСЛЕ ухода фразы (лёгкое касание)
+          .to(".pain-morph", { autoAlpha: 1, y: 0, ease: "power3.out", duration: 0.44 }, ">-0.05")
+          .to({}, { duration: 0.16 });
       }
 
       // тоннель-параллакс по болям (lead/turn исключены — у них своя режиссура)
@@ -121,8 +122,14 @@ export default function Pain() {
           затем уплывает вверх, открывая первый аргумент */}
       <div className="pain-portal">
         <h2 className="pain-focus" aria-label="Мы знаем, через что вы прошли">
-          <span className="l">Мы&nbsp;знаем,</span>
-          <span className="l">через что вы&nbsp;прошли</span>
+          <span className="pf pf--blur" aria-hidden>
+            <span className="l">Мы&nbsp;знаем,</span>
+            <span className="l">через что вы&nbsp;прошли</span>
+          </span>
+          <span className="pf pf--sharp" aria-hidden>
+            <span className="l">Мы&nbsp;знаем,</span>
+            <span className="l">через что вы&nbsp;прошли</span>
+          </span>
         </h2>
         <h2 className="pain-morph pain-big">
           <span className="l">Вам сделали сайт.</span>

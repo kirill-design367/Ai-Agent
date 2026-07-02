@@ -28,6 +28,28 @@ export default function Works() {
     () => {
       registerGsap();
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      // ЛЕНТА — горизонтальный parallax, привязанный к scrollY (не к времени):
+      // текст едет со скоростью прокрутки, назад — при скролле вверх. «Живой», а
+      // не рекламный автомат. Два идентичных трека → сдвиг на -50% бесшовный.
+      const ticker = root.current?.querySelector(".works-ticker");
+      if (ticker) {
+        gsap.fromTo(
+          ticker,
+          { xPercent: 4 },
+          {
+            xPercent: -34,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".works-banner",
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.5,
+            },
+          }
+        );
+      }
+
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
       cards.forEach((card, i) => {
         if (i === cards.length - 1) return;
@@ -47,9 +69,12 @@ export default function Works() {
         );
       });
 
-      // ПОСЛЕДНИЙ кейс уходит НЕ вверх, а ВДАЛЬ, в глубину: уменьшается, темнеет
-      // и растворяется. Дальше короткая пустота (чёрный «вдох») перед блоком боли.
+      // ПОСЛЕДНИЙ кейс уходит ВДАЛЬ, в глубину: уменьшается, темнеет и растворяется.
+      // Остальные кейсы «уже давно исчезли» — гасим их сразу, чтобы позапрошлый не
+      // выглядывал из-за уменьшающегося последнего (за ним — чёрный фон секции).
+      // Дальше короткая пустота — чёрный «вдох» перед блоком боли.
       const last = cards[cards.length - 1];
+      const others = cards.slice(0, -1);
       if (last) {
         const shade = last.querySelector(".work-shade");
         const tl = gsap.timeline({
@@ -60,9 +85,11 @@ export default function Works() {
             scrub: 0.6,
           },
         });
-        tl.to(last, { scale: 0.5, yPercent: -3, ease: "none", duration: 1 }, 0)
-          .to(shade, { opacity: 0.85, ease: "none", duration: 1 }, 0)
-          .to(".works-stack", { autoAlpha: 0, ease: "power1.in", duration: 0.82 }, 0);
+        if (others.length)
+          tl.to(others, { autoAlpha: 0, ease: "power1.in", duration: 0.12 }, 0);
+        tl.to(last, { scale: 0.4, yPercent: -2, ease: "power1.in", duration: 1 }, 0)
+          .to(shade, { opacity: 0.92, ease: "none", duration: 1 }, 0)
+          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.4 }, 0.62);
       }
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());

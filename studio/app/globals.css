@@ -468,12 +468,12 @@ body {
   overflow: hidden;
   width: 100%;
 }
-/* compositor-only marquee: translate3d, без layout/paint каждый кадр */
+/* горизонтальный parallax, привязанный к scrollY (GSAP scrub в Works.tsx),
+   а не к времени — движется со скоростью прокрутки, компонуется на GPU */
 .works-ticker {
   display: flex;
   width: max-content;
   will-change: transform;
-  animation: worksticker 32s linear infinite;
 }
 .works-ticker-group {
   display: flex;
@@ -1441,17 +1441,24 @@ body {
   place-items: center;
   overflow: hidden;
 }
-/* фраза, выходящая из тумана и наводящаяся в резкость */
+/* фраза, выходящая из тумана и наводящаяся в резкость.
+   Две наложенные копии: размытая (статичный blur, растеризуется 1 раз) и резкая —
+   кроссфейд по opacity/scale (композитор, без пересчёта блюра каждый кадр). */
 .pain-focus {
   position: absolute;
   inset: 0;
   z-index: 2;
+  margin: 0;
+  will-change: transform, opacity;
+}
+.pain-focus .pf {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.06em;
-  margin: 0;
   padding: 0 clamp(1.2rem, 6vw, 4rem);
   text-align: center;
   font-family: var(--font-headline), system-ui, sans-serif;
@@ -1461,7 +1468,11 @@ body {
   letter-spacing: 0.005em;
   text-transform: uppercase;
   color: var(--text-on-dark);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+.pain-focus .pf--blur {
+  filter: blur(13px);
 }
 .pain-focus .l {
   display: block;
