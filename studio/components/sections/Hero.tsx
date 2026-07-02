@@ -134,23 +134,40 @@ export default function Hero() {
       <div className="hero-gems">
         <svg className="gem-defs" width="0" height="0" aria-hidden>
           <defs>
-            {/* корпус камня — глубокий объём, свет сверху-слева → тень снизу */}
+            {/* корпус камня — глубокий объём, свет сверху-слева → тень снизу,
+                с ледяным намёком Tiffany вверху (почти незаметно) */}
             <linearGradient id="gem-grad" x1="0" y1="0" x2="0.32" y2="1">
-              <stop offset="0" stopColor="#4d4d5c" />
-              <stop offset="0.44" stopColor="#191921" />
-              <stop offset="1" stopColor="#050509" />
+              <stop offset="0" stopColor="#495863" />
+              <stop offset="0.44" stopColor="#181a1e" />
+              <stop offset="1" stopColor="#050608" />
             </linearGradient>
-            {/* table-facet блик (верхняя площадка ловит свет) */}
-            <linearGradient id="gem-shine" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="rgba(255,255,255,0.5)" />
+            {/* table-facet блик (верхняя площадка ловит свет), с мятным холодком */}
+            <linearGradient id="gem-shine" x1="0" y1="0" x2="0.1" y2="1">
+              <stop offset="0" stopColor="rgba(226,246,242,0.6)" />
+              <stop offset="1" stopColor="rgba(226,246,242,0)" />
+            </linearGradient>
+            {/* внутреннее свечение — свет проходит сквозь грани (мягкий объёмный) */}
+            <radialGradient id="gem-core" cx="0.44" cy="0.4" r="0.62">
+              <stop offset="0" stopColor="rgba(206,238,232,0.6)" />
+              <stop offset="0.6" stopColor="rgba(206,238,232,0.12)" />
+              <stop offset="1" stopColor="rgba(206,238,232,0)" />
+            </radialGradient>
+            {/* дисперсия — очень бледный Tiffany (5–10% насыщенности), скорее чувствуется */}
+            <linearGradient id="gem-iri" x1="0" y1="0.1" x2="1" y2="0.9">
+              <stop offset="0" stopColor="#d8f3ee" />
+              <stop offset="0.5" stopColor="#a9dcda" />
+              <stop offset="1" stopColor="#e9f4f0" />
+            </linearGradient>
+            {/* бегущий блик по граням */}
+            <linearGradient id="gem-glint" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="rgba(255,255,255,0)" />
+              <stop offset="0.5" stopColor="rgba(233,249,245,0.9)" />
               <stop offset="1" stopColor="rgba(255,255,255,0)" />
             </linearGradient>
-            {/* переливающийся свет (дисперсия): холодный→сиреневый→тёплый */}
-            <linearGradient id="gem-iri" x1="0" y1="0.1" x2="1" y2="0.9">
-              <stop offset="0" stopColor="#8fdcff" />
-              <stop offset="0.5" stopColor="#c9b6ff" />
-              <stop offset="1" stopColor="#ffd7a6" />
-            </linearGradient>
+            {/* контур огранки — чтобы блик не вылезал за камень */}
+            <clipPath id="gem-clip" clipPathUnits="userSpaceOnUse">
+              <polygon points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82" />
+            </clipPath>
           </defs>
         </svg>
         <a href="#work" className="gem gem--left" data-magnetic aria-label="Смотреть работы">
@@ -191,12 +208,24 @@ export default function Hero() {
 function MarquiseGem() {
   return (
     <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
-      {/* рундист (контур камня) */}
+      {/* рундист (контур камня) — базовый градиент-объём */}
       <polygon
         className="gem-body"
         points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
       />
-      {/* площадка-table — ловит свет */}
+      {/* РЕФРАКЦИЯ: грани разной яркости — стекло, где свет ломается.
+          светлые (свет ловят) — сверху-слева; тёмные — снизу-справа */}
+      <polygon className="gem-facet gem-facet--lt" points="0,50 60,18 44,50" />
+      <polygon className="gem-facet gem-facet--lt" points="60,18 120,30 44,50" />
+      <polygon className="gem-facet gem-facet--lt" points="60,18 120,10 120,30" />
+      <polygon className="gem-facet gem-facet--md" points="120,10 180,18 120,30" />
+      <polygon className="gem-facet gem-facet--dk" points="196,50 180,82 120,70" />
+      <polygon className="gem-facet gem-facet--dk" points="120,70 120,90 60,82" />
+      <polygon className="gem-facet gem-facet--dk" points="196,50 240,50 180,82" />
+      <polygon className="gem-facet gem-facet--md" points="180,18 240,50 196,50" />
+      {/* внутреннее свечение — свет сквозь грани */}
+      <ellipse className="gem-core" cx="112" cy="48" rx="78" ry="26" />
+      {/* площадка-table — самый яркий блик */}
       <polygon className="gem-table" points="44,50 120,30 196,50 120,70" />
       {/* фасетная сетка бриллиантовой огранки */}
       <path
@@ -209,11 +238,15 @@ function MarquiseGem() {
            M44,50 L60,18 M44,50 L60,82
            M196,50 L180,18 M196,50 L180,82"
       />
-      {/* переливающийся свет поверх — тихо дышит (opacity, без repaint) */}
+      {/* дисперсия — бледный Tiffany, тихо дышит (opacity) */}
       <polygon
         className="gem-iri"
         points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
       />
+      {/* редкий бегущий блик, обрезан контуром камня */}
+      <g clipPath="url(#gem-clip)">
+        <polygon className="gem-glint" points="-34,-24 2,-24 26,124 -10,124" />
+      </g>
     </svg>
   );
 }

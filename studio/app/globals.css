@@ -680,7 +680,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.14em;
-  color: var(--text-on-dark);
+  /* логотип на 5–8% ярче базового белого — акцент читается чуть сильнее */
+  color: #fdfcf9;
   user-select: none;
   line-height: 1;
 }
@@ -739,9 +740,10 @@ body {
   margin: clamp(1.6rem, 4vh, 2.6rem) 0 0 clamp(0rem, 4vw, 4.5rem);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: clamp(1.05rem, 1.5vw, 1.35rem);
-  line-height: 1.62;
+  /* выразительнее интерлиньяж + чуть контрастнее — подзаголовок не теряется */
+  line-height: 1.74;
   letter-spacing: 0.002em;
-  color: rgba(244, 242, 238, 0.74);
+  color: rgba(245, 243, 239, 0.88);
 }
 .hero-sub .word {
   display: inline-block;
@@ -850,28 +852,92 @@ body {
   width: 100%;
   height: 100%;
   overflow: visible;
+  /* «жизнь»: плавное покачивание 1–2° + едва заметное дыхание (0.99↔1.01).
+     НЕ вращение. Каждый кристалл — свой характер (правый живее, левый медленнее). */
+  transform-origin: 62% 50%;
+  transform: translateZ(0);
+  animation: gemSwayR 7.5s ease-in-out infinite;
+}
+.gem--left .gem-cut {
+  transform-origin: 40% 50%;
+  animation: gemSwayL 10.5s ease-in-out infinite;
+}
+@keyframes gemSwayR {
+  0%,
+  100% {
+    transform: rotate(-1deg) scale(0.994);
+  }
+  50% {
+    transform: rotate(1.1deg) scale(1.008);
+  }
+}
+@keyframes gemSwayL {
+  0%,
+  100% {
+    transform: rotate(0.85deg) scale(1.006);
+  }
+  50% {
+    transform: rotate(-1deg) scale(0.992);
+  }
 }
 /* корпус камня — вертикальный градиент даёт объём (свет сверху → тень снизу) */
 .gem-cut .gem-body {
   fill: url(#gem-grad);
-  stroke: rgba(244, 242, 238, 0.72);
+  stroke: rgba(226, 246, 242, 0.72);
   stroke-width: 1.3;
   vector-effect: non-scaling-stroke;
+  transition: stroke 0.5s var(--ease-expo);
 }
-/* площадка-table — ловит свет (яркий блик по центру огранки) */
+/* РЕФРАКЦИЯ: грани разной яркости — стекло, где свет ломается */
+.gem-cut .gem-facet {
+  pointer-events: none;
+}
+.gem-cut .gem-facet--lt {
+  fill: rgba(210, 238, 233, 0.12);
+}
+.gem-cut .gem-facet--md {
+  fill: rgba(255, 255, 255, 0.035);
+}
+.gem-cut .gem-facet--dk {
+  fill: rgba(3, 4, 8, 0.42);
+}
+/* внутреннее свечение — свет проходит сквозь грани (мягкий объёмный, дышит) */
+.gem-cut .gem-core {
+  fill: url(#gem-core);
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: gemCore 6.5s ease-in-out infinite;
+  transition: opacity 0.5s var(--ease-expo);
+}
+.gem--left .gem-cut .gem-core {
+  animation-duration: 8.5s;
+  animation-delay: -2.6s;
+}
+@keyframes gemCore {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.56;
+  }
+}
+/* площадка-table — самый яркий блик по центру огранки */
 .gem-cut .gem-table {
   fill: url(#gem-shine);
   opacity: 0.55;
   pointer-events: none;
+  transition: opacity 0.5s var(--ease-expo);
 }
 /* фасетная сетка — тонкие рёбра граней */
 .gem-cut .gem-facets {
   fill: none;
-  stroke: rgba(244, 242, 238, 0.3);
+  stroke: rgba(230, 246, 242, 0.3);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
-/* переливающийся свет (дисперсия) — тихо дышит по opacity (композитор, без repaint) */
+/* дисперсия — очень бледный Tiffany, тихо дышит по opacity (композитор) */
 .gem-cut .gem-iri {
   fill: url(#gem-iri);
   opacity: 0.08;
@@ -888,7 +954,37 @@ body {
     opacity: 0.05;
   }
   50% {
-    opacity: 0.2;
+    opacity: 0.16;
+  }
+}
+/* редкий бегущий блик — проходит по граням раз в ~8/11с, у каждого свой ритм */
+.gem-cut .gem-glint {
+  fill: url(#gem-glint);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: gemGlint 8s ease-in-out infinite;
+  animation-delay: 2.5s;
+}
+.gem--left .gem-cut .gem-glint {
+  animation-duration: 11s;
+  animation-delay: 6.5s;
+}
+@keyframes gemGlint {
+  0% {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  4% {
+    opacity: 0.8;
+  }
+  11% {
+    transform: translateX(300px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(300px);
+    opacity: 0;
   }
 }
 /* тихое постоянное сияние-ореол — «премиально и тихо», едва заметно дышит (только opacity) */
@@ -906,9 +1002,20 @@ body {
     animation: none;
     opacity: 0.45;
   }
+  .gem-cut {
+    animation: none;
+  }
   .gem-cut .gem-iri {
     animation: none;
     opacity: 0.12;
+  }
+  .gem-cut .gem-core {
+    animation: none;
+    opacity: 0.4;
+  }
+  .gem-cut .gem-glint {
+    animation: none;
+    opacity: 0;
   }
 }
 .gem-label {
@@ -929,6 +1036,8 @@ body {
   top: 51%;
   right: clamp(-84px, -9vw, -44px);
   transform: rotate(-9deg);
+  /* «Обсудить проект» — главный из двух, ~18% крупнее (не теряется у типографики) */
+  width: clamp(224px, 40vw, 354px);
 }
 .gem--left {
   top: 69%;
@@ -948,15 +1057,29 @@ body {
   .gem--left:hover {
     transform: rotate(3deg) translateX(8px) scale(1.05);
   }
+  /* при наведении кристалл «раскрывается»: внутри появляется свет */
   .gem:hover .gem-cut .gem-body {
-    stroke: rgba(244, 242, 238, 0.95);
+    stroke: rgba(232, 249, 245, 0.96);
   }
   .gem:hover .gem-cut .gem-facets {
-    stroke: rgba(244, 242, 238, 0.45);
+    stroke: rgba(232, 249, 245, 0.48);
+  }
+  .gem:hover .gem-cut .gem-core {
+    opacity: 0.75;
+  }
+  .gem:hover .gem-cut .gem-table {
+    opacity: 0.85;
   }
 }
+/* касание на мобильном — тот же «внутренний свет» */
 .gem:active {
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55)) brightness(1.12);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55)) brightness(1.1);
+}
+.gem:active .gem-cut .gem-core {
+  opacity: 0.8;
+}
+.gem:active .gem-cut .gem-table {
+  opacity: 0.88;
 }
 /* десктоп: подзаголовок справа-в-центре, поэтому «бриллианты» уводим в нижнюю
    свободную полосу (правый ниже левого — золотое сечение по вертикали) */
@@ -969,6 +1092,8 @@ body {
   }
   .gem--right {
     top: 79%;
+    /* крупнее левого — главный акцент */
+    width: clamp(272px, 25vw, 368px);
   }
 }
 
@@ -1029,8 +1154,9 @@ body {
        margin-top больше — подзаголовок садится НИЖЕ правого кристалла (41%),
        в чистую полосу между кристаллами */
     margin: clamp(7.4rem, 37vw, 11.5rem) 0 0 0.7rem;
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: 1.02rem;
+    /* просторнее интерлиньяж — читается легче, не теряется */
+    line-height: 1.68;
     letter-spacing: 0.01em;
     transform: rotate(-2deg);
     transform-origin: left center;
