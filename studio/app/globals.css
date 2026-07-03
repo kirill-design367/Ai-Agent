@@ -1680,13 +1680,37 @@ body {
   /* симметричный овэрскан сверху/снизу — тёмное гарантированно перекрывает любую
      белую полосу следующего блока (центр текста не смещается) */
   inset: 0;
-  z-index: 5;
-  display: grid;
-  place-items: center;
+  z-index: 4;
   background: #070708;
   will-change: opacity;
 }
+/* белый свет-блум: пробивается из центра сквозь буквы и разрастается в экран.
+   Мягкие края радиального градиента дают «дорогой» размытый вид БЕЗ filter:blur
+   (никакого пер-кадрового repaint → не дрожит). По умолчанию скрыт (десктоп его
+   не использует); анимируется только на мобиле. */
+.proc-bloom {
+  position: absolute;
+  inset: -20%;
+  z-index: 5;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--bg-base) 0%,
+    var(--bg-base) 34%,
+    rgba(244, 242, 238, 0) 66%
+  );
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
 .proc-turn {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
   margin: 0;
   padding: 0 1rem;
   text-align: center;
@@ -1859,17 +1883,48 @@ body {
   /* по вертикали overflow видим — волна-чернила выходит вверх в Процесс */
   overflow-x: clip;
 }
-/* переход-вход: волна-чернила, тёмный верхний край блока, бьющий вверх в светлый Процесс */
-.adv-wave {
+/* переход-вход: живое море-чернила, бьющее вверх в светлый Процесс.
+   Контейнер сидит над блоком (bottom:100%); плавники могут выступать выше воды. */
+.adv-sea {
   position: absolute;
   left: 0;
   bottom: 100%;
   width: 100%;
   height: clamp(46px, 8vw, 130px);
   margin-bottom: -1px;
-  display: block;
   pointer-events: none;
+  overflow: hidden;
+}
+.adv-wave {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
   will-change: transform;
+  backface-visibility: hidden;
+}
+.adv-wave-back {
+  opacity: 0.7;
+}
+/* акулий плавник — режет ватерлинию, ныряет и выныривает */
+.adv-fin {
+  position: absolute;
+  bottom: 30%;
+  left: 0;
+  width: clamp(26px, 5vw, 54px);
+  height: auto;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.adv-fin-2 {
+  bottom: 44%;
+  width: clamp(20px, 3.6vw, 40px);
+  opacity: 0.82;
+}
+.adv-fin-3 {
+  bottom: 24%;
+  width: clamp(30px, 5.8vw, 62px);
 }
 /* космос — звёздная пыль + дрейфующие орбиты (невесомость при входе в блок) */
 .adv-space {
@@ -1937,9 +1992,12 @@ body {
   margin: 0;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 800;
-  font-size: clamp(2.5rem, 7.8vw, 6.4rem);
-  line-height: 1.04;
-  letter-spacing: -0.03em;
+  /* крупно, почти во весь экран — короткие строки (по слову) позволяют.
+     Ограничение — самое широкое слово «АГЕНТСТВО?», чтобы не переносить и не
+     вылезать за край. */
+  font-size: clamp(2.6rem, 8vw, 6rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
   text-transform: uppercase;
   color: var(--text-on-dark);
   text-align: left;
@@ -1947,15 +2005,23 @@ body {
 }
 .aq-l {
   display: block;
+  /* каждая строка — в одну линию, слова не переносятся */
+  white-space: nowrap;
   transform-style: preserve-3d;
   will-change: transform;
 }
 .aq-l2 {
-  margin-left: 12vw;
-  color: rgba(244, 242, 238, 0.45);
+  margin-left: 13vw;
 }
 .aq-l3 {
   margin-left: 5vw;
+  color: rgba(244, 242, 238, 0.45);
+}
+.aq-l4 {
+  margin-left: 18vw;
+}
+.aq-l5 {
+  margin-left: 2vw;
 }
 /* обёртки SplitText (слова/буквы) должны жить в 3D и без изнанки;
    nowrap — чтобы буквы одного слова не переносились по одной */
@@ -2222,10 +2288,22 @@ body {
   }
 
   .aq-title {
-    font-size: clamp(1.6rem, 8.8vw, 2.3rem);
+    /* крупно, но самое широкое слово «АГЕНТСТВО?» помещается в строку без выхода
+       за край; щедрый интерлиньяж — блок занимает почти весь экран по высоте */
+    font-size: clamp(2rem, 10.6vw, 3rem);
+    line-height: 1.16;
   }
   .aq-l2 {
-    margin-left: 10vw;
+    margin-left: 6vw;
+  }
+  .aq-l3 {
+    margin-left: 3vw;
+  }
+  .aq-l4 {
+    margin-left: 8vw;
+  }
+  .aq-l5 {
+    margin-left: 0;
   }
   .adv-list {
     grid-template-columns: 1fr;

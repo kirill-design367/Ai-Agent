@@ -60,11 +60,11 @@ export default function Advantages() {
       // бесконечные твины (дрейф ответов, пульс капли) — ставятся на паузу вне экрана
       const idleTweens: gsap.core.Tween[] = [];
 
-      // ПЕРЕХОД-ВХОД: тёмная волна-чернила поднимается из Процесса и затапливает блок
-      const wave = root.current!.querySelector(".adv-wave");
-      if (wave) {
+      // ПЕРЕХОД-ВХОД: море-чернила поднимается из Процесса и затапливает блок
+      const sea = root.current!.querySelector(".adv-sea");
+      if (sea) {
         gsap.fromTo(
-          wave,
+          sea,
           { yPercent: 36 },
           {
             yPercent: 0,
@@ -78,6 +78,49 @@ export default function Advantages() {
           }
         );
       }
+
+      // ЖИВАЯ ВОДА: два слоя волн мягко дышат в противофазе (transform-only)
+      gsap.utils.toArray<HTMLElement>(".adv-wave").forEach((w, i) => {
+        idleTweens.push(
+          gsap.to(w, {
+            xPercent: i ? 2.4 : -2.4,
+            y: i ? 5 : 7,
+            duration: 5 + i * 1.6,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          })
+        );
+      });
+
+      // АКУЛЫ РЫНКА: плавники режут ватерлинию слева-направо, ныряя и выныривая.
+      // Проплыв — линейный transform x (GPU), качка — отдельный sine-твин.
+      const swimW = () => window.innerWidth + 160;
+      gsap.utils.toArray<HTMLElement>(".adv-fin").forEach((fin, i) => {
+        idleTweens.push(
+          gsap.fromTo(
+            fin,
+            { x: -140 },
+            {
+              x: swimW(),
+              duration: 11 + i * 4,
+              ease: "none",
+              repeat: -1,
+              delay: i * 3.4,
+            }
+          )
+        );
+        idleTweens.push(
+          gsap.to(fin, {
+            y: -8 - i * 2,
+            rotation: i % 2 ? 5 : -4,
+            duration: 1.5 + i * 0.35,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          })
+        );
+      });
 
       // ВОПРОС-ТИТР (3D-кинетика, awwwards): буквы «встают» из глубины сцены —
       // rotateX −95°→0 от базовой линии, каскадом, в перспективе. Как титры в
@@ -244,13 +287,41 @@ export default function Advantages() {
 
   return (
     <section id="advantages" className="theme-dark adv" ref={root}>
-      {/* переход-вход: волна-чернила, поднимающаяся из Процесса */}
-      <svg className="adv-wave" viewBox="0 0 1440 140" preserveAspectRatio="none" aria-hidden>
-        <path
-          d="M0,70 C220,128 430,8 720,60 C1010,112 1230,18 1440,70 L1440,140 L0,140 Z"
-          fill="#08080a"
-        />
-      </svg>
+      {/* переход-вход: живое море-чернила поднимается из Процесса. Два слоя волн
+          мягко дрейфуют, а по ватерлинии РЕЖУТ воду акульи плавники (мы — акулы
+          рынка). Всё на transform → GPU, дёшево. */}
+      <div className="adv-sea" aria-hidden>
+        <svg
+          className="adv-wave adv-wave-back"
+          viewBox="0 0 1440 140"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,84 C260,116 470,44 720,74 C980,106 1200,40 1440,80 L1440,140 L0,140 Z"
+            fill="#0c0c12"
+          />
+        </svg>
+        <svg
+          className="adv-wave adv-wave-front"
+          viewBox="0 0 1440 140"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,70 C220,128 430,8 720,60 C1010,112 1230,18 1440,70 L1440,140 L0,140 Z"
+            fill="#08080a"
+          />
+        </svg>
+        {/* акульи плавники — стильные силуэты, режущие волну */}
+        <svg className="adv-fin adv-fin-1" viewBox="0 0 80 62" preserveAspectRatio="xMidYMax meet">
+          <path d="M3,60 C36,54 56,28 66,3 C69,22 75,44 79,60 Z" fill="#07070a" />
+        </svg>
+        <svg className="adv-fin adv-fin-2" viewBox="0 0 80 62" preserveAspectRatio="xMidYMax meet">
+          <path d="M3,60 C36,54 56,28 66,3 C69,22 75,44 79,60 Z" fill="#07070a" />
+        </svg>
+        <svg className="adv-fin adv-fin-3" viewBox="0 0 80 62" preserveAspectRatio="xMidYMax meet">
+          <path d="M3,60 C36,54 56,28 66,3 C69,22 75,44 79,60 Z" fill="#07070a" />
+        </svg>
+      </div>
 
       {/* космос — звёздная пыль и дрейфующие орбиты (невесомость) */}
       <div className="adv-space" aria-hidden>
@@ -262,9 +333,11 @@ export default function Advantages() {
       <div className="adv-stage">
         <div className="adv-quest3d">
           <h2 className="aq-title">
-            <span className="aq-l">Почему выбирают</span>
-            <span className="aq-l aq-l2">меня,</span>
-            <span className="aq-l aq-l3">а&nbsp;не&nbsp;агентство?</span>
+            <span className="aq-l">Почему</span>
+            <span className="aq-l aq-l2">выбирают</span>
+            <span className="aq-l aq-l3">меня,</span>
+            <span className="aq-l aq-l4">а&nbsp;не</span>
+            <span className="aq-l aq-l5">агентство?</span>
           </h2>
         </div>
       </div>
