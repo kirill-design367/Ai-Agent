@@ -1,1 +1,1 @@
-2026-07-03 20:21 UTC — final edits pt1: TG form, texts, ₽ float, process no-pin zoom, overflow fix
+2026-07-03 20:44 UTC — final pt2: process crossfade zoom, prices title fix, faq-reviews spacing
