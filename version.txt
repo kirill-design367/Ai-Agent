@@ -1,1 +1,1 @@
-2026-07-03 04:53 UTC — restore smooth unified portal (revert jitter transition), static wave
+2026-07-03 05:08 UTC — mobile transition no-scale (opacity+translateY, kill jitter)
