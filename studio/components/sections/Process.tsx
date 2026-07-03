@@ -81,43 +81,56 @@ export default function Process() {
       }
       const mobile = window.matchMedia("(max-width: 760px)").matches;
 
-      // ПОРТАЛ: надпись «Мы строим работу иначе» приближается (scale) и
-      // растворяется, сцена «Как мы работаем» проявляется. Пин — CSS sticky на
-      // документе (root-scroll) → аппаратно-ускорен, не дрожит.
+      // ДЕСКТОП — ПИННИНГ-ПОРТАЛ (scrub): экран липнет, надпись «Мы строим работу
+      // иначе» приближается (scale) и растворяется, сцена «Как мы работаем»
+      // проявляется изнутри. Есть паузы-«притормаживания» скролла — на десктопе
+      // это плавно.
       //
-      // МОБАЙЛ — критично для плавности: НЕ масштабируем сцену-интро. Внутри неё
-      // 28 вопросов, у каждого свой GPU-слой (idle-дрейф) — масштаб родителя
-      // заставлял браузер пере-composе-ить ВСЕ вложенные слои каждый кадр → дрожал
-      // весь светлый экран. Зато завеса просто растворяется (opacity), открывая
-      // сцену в масштабе 1. И зум уходящей фразы мягче (2.6 вместо 5): она гаснет,
-      // поэтому лёгкая ре-растеризация не видна. Десктоп — полный портал.
-      const enter = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".proc-enter-track",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.8,
-        },
-      });
-      enter
-        .fromTo(
+      // МОБАЙЛ — БЕЗ пиннинга и скраба ВООБЩЕ. Именно удержание экрана на месте,
+      // пока палец скроллит (пин + притормаживание паузами), и давало дрожание:
+      // нативный скролл «тянет» контент вниз, а пин держит — они борются каждый
+      // кадр. Убираем эту борьбу: два экрана в ОБЫЧНОМ ПОТОКЕ (тёмный «Мы строим»,
+      // затем светлый «Как мы работаем»), просто пролистываются нативно — нечему
+      // дрожать. Только одноразовые входные анимации на opacity/translateY.
+      if (!mobile) {
+        const enter = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".proc-enter-track",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.8,
+          },
+        });
+        enter
+          .fromTo(
+            ".proc-turn",
+            { scale: 1, opacity: 1 },
+            { scale: 5, opacity: 0, ease: "power2.in", duration: 0.4 },
+            0
+          )
+          .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
+          .fromTo(
+            ".proc-intro",
+            { scale: 1.14 },
+            { scale: 1, ease: "power1.out", duration: 0.45 },
+            0.1
+          )
+          .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
+          .to({}, { duration: 0.6 });
+      } else {
+        // фраза «Мы строим работу иначе» мягко проявляется один раз при входе
+        gsap.fromTo(
           ".proc-turn",
-          { scale: 1, opacity: 1 },
-          { scale: mobile ? 2.6 : 5, opacity: 0, ease: "power2.in", duration: 0.4 },
-          0
-        )
-        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32);
-      // масштаб всей сцены-интро (28 вложенных слоёв) — ТОЛЬКО десктоп
-      if (!mobile)
-        enter.fromTo(
-          ".proc-intro",
-          { scale: 1.14 },
-          { scale: 1, ease: "power1.out", duration: 0.45 },
-          0.1
+          { opacity: 0, y: 34 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1.1,
+            ease: "expo.out",
+            scrollTrigger: { trigger: ".proc-veil", start: "top 65%" },
+          }
         );
-      enter
-        .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
-        .to({}, { duration: 0.6 });
+      }
 
       // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
       // 21 скраб-триггер съедал кадры)
@@ -152,8 +165,10 @@ export default function Process() {
             duration: 1,
             ease: "expo.out",
             scrollTrigger: {
-              trigger: ".proc-enter",
-              start: "top 30%",
+              // на мобиле интро — отдельный экран-панель (без пина): раскрываем
+              // титул, когда светлая панель входит в кадр
+              trigger: mobile ? ".proc-intro" : ".proc-enter",
+              start: mobile ? "top 68%" : "top 30%",
             },
           }
         );
