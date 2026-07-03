@@ -1,1 +1,1 @@
-2026-07-03 12:02 UTC — LIVE via API deploy: mobile zoom (as desktop) + sticky GPU-layer jitter fix
+2026-07-03 14:36 UTC — root-scroll mobile jitter fix + Offer removed
