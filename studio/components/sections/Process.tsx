@@ -118,28 +118,29 @@ export default function Process() {
           .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
           .to({}, { duration: 0.6 });
       } else {
-        // МОБАЙЛ — ЗУМ БЕЗ УДЕРЖАНИЯ ЭКРАНА. Без пина/скраб-паузы (нечему бороться
-        // со скроллом). Пока тёмный экран «Мы строим работу иначе» ЛИСТАЕТСЯ вверх,
-        // фраза приближается (scale) и растворяется — а снизу уже наезжает светлый
-        // «Как мы работаем». Скролл идёт непрерывно, чёрное «перетекает» в белое
-        // по мере зума. Скраб привязан к самому экрану (он же и уходит) → никакого
-        // зависания. Один элемент (фраза) масштабируется + гаснет — дёшево и плавно.
+        // МОБАЙЛ — зум РАСТВОРЯЕТСЯ в «Как мы работаем» (кроссфейд на месте), без
+        // удержания анимируемого. Светлый экран — sticky-подложка, СТАТИЧНА (не
+        // масштабируется → не дрожит). Тёмная завеса листается ПОВЕРХ неё, гаснет и
+        // приближает фразу (scale на неудерживаемой завесе → плавно). Чёрное
+        // перетекает в белое по мере зума, и остаёшься на светлом экране.
+        gsap.set(".proc-intro", { autoAlpha: 1 });
         gsap.set(".proc-turn", { transformOrigin: "50% 46%" });
-        gsap.fromTo(
-          ".proc-turn",
-          { scale: 1, autoAlpha: 1 },
-          {
-            scale: 2.7,
-            autoAlpha: 0,
-            ease: "power1.in",
-            scrollTrigger: {
-              trigger: ".proc-veil",
-              start: "top top",
-              end: "bottom top",
-              scrub: 0.5,
-            },
-          }
-        );
+        const enter = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".proc-enter-track",
+            start: "top top",
+            end: "42% top",
+            scrub: 0.5,
+          },
+        });
+        enter
+          .fromTo(
+            ".proc-turn",
+            { scale: 1, autoAlpha: 1 },
+            { scale: 3.4, autoAlpha: 0, ease: "power1.in", duration: 1 },
+            0
+          )
+          .to(".proc-veil", { autoAlpha: 0, ease: "power1.inOut", duration: 0.85 }, 0.15);
       }
 
       // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
@@ -163,9 +164,10 @@ export default function Process() {
           );
         });
 
-      // заголовок + лёгкое «дыхание» роя (внутренний float на обёртке-флоут)
+      // заголовок «Как мы работаем»: на мобиле — статичная подложка (видна сразу,
+      // без анимации-раскрытия). На десктопе — проявляется в портале.
       const title = root.current!.querySelector(".proc-bigtitle");
-      if (title)
+      if (title && !mobile)
         gsap.fromTo(
           title,
           { y: 30, opacity: 0 },

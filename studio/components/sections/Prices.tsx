@@ -166,9 +166,7 @@ export default function Prices() {
       <div className="prices-portal">
         <div className="prices-reveal">
           <header className="prices-head">
-            <h2 className="prices-title">
-              Прозрачная стоимость без&nbsp;неожиданных доплат
-            </h2>
+            <h2 className="prices-title">Прозрачная стоимость без неожиданных доплат</h2>
           </header>
         </div>
 
