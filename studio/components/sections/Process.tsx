@@ -76,9 +76,6 @@ export default function Process() {
 
       // ДЕСКТОП — портал: sticky-пин, надпись приближается и растворяется,
       // блок проявляется изнутри (скраб). Здесь всё идеально — не трогаем.
-      // МОБАЙЛ — ПЕРЕСОБРАН С НУЛЯ: обычный поток из двух экранов, ни одного
-      // scroll-привязанного пересчёта (скраба/пина нет вообще — нечему дрожать).
-      // Только одноразовые входные анимации на transform/opacity.
       if (!mobile) {
         const enter = gsap.timeline({
           scrollTrigger: {
@@ -107,18 +104,44 @@ export default function Process() {
           // ПАУЗА: сцена замирает — можно рассмотреть вопросы (≈40% прокрутки пина)
           .to({}, { duration: 0.6 });
       } else {
-        // фраза «Мы строим работу иначе» мягко проявляется один раз при входе
-        gsap.fromTo(
-          ".proc-turn",
-          { opacity: 0, y: 34 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1.1,
-            ease: "expo.out",
-            scrollTrigger: { trigger: ".proc-veil", start: "top 62%" },
-          }
-        );
+        // МОБАЙЛ — кинематографичный ЗУМ СКВОЗЬ фразу. Тот же sticky-портал, но
+        // облегчённый под мобильный GPU: минимум одновременных слоёв, только
+        // transform/opacity на собственных GPU-слоях (backface-visibility + will-change).
+        // Камера приближается к «Мы строим работу иначе» и пролетает СКВОЗЬ неё
+        // (текст разгоняется в масштабе из центра — будто проходишь между букв —
+        // и растворяется), а из глубины НАВСТРЕЧУ выезжает белый экран
+        // «Как мы работаем». Ни одного дорогого слоя (filter/blur) → идеально гладко.
+        gsap.set(".proc-intro", { scale: 0.62, autoAlpha: 0, transformOrigin: "50% 50%" });
+        gsap.set(".proc-turn", { transformOrigin: "50% 50%" });
+        const enter = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".proc-enter-track",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.85,
+          },
+        });
+        enter
+          // фраза приближается и пролетает сквозь зрителя (камера идёт между букв)
+          .fromTo(
+            ".proc-turn",
+            { scale: 1, opacity: 1 },
+            { scale: 9, opacity: 0, ease: "power2.in", duration: 0.52 },
+            0
+          )
+          // тёмная завеса растворяется — за ней уже растёт белый экран
+          .to(".proc-veil", { autoAlpha: 0, ease: "power1.inOut", duration: 0.34 }, 0.34)
+          // белый экран «Как мы работаем» выезжает НАВСТРЕЧУ из глубины
+          .fromTo(
+            ".proc-intro",
+            { scale: 0.62, autoAlpha: 0 },
+            { scale: 1, autoAlpha: 1, ease: "power2.out", duration: 0.5 },
+            0.3
+          )
+          // лёгкий дрейф роя во время раскрытия
+          .to(".proc-questions", { yPercent: -8, ease: "none", duration: 0.62 }, 0)
+          // ПАУЗА: сцена замирает — можно рассмотреть
+          .to({}, { duration: 0.5 });
       }
 
       // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
@@ -154,8 +177,8 @@ export default function Process() {
             duration: 1,
             ease: "expo.out",
             scrollTrigger: {
-              trigger: mobile ? ".proc-intro" : ".proc-enter",
-              start: mobile ? "top 70%" : "top 30%",
+              trigger: ".proc-enter",
+              start: "top 30%",
             },
           }
         );

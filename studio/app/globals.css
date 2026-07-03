@@ -1698,6 +1698,8 @@ body {
   text-transform: uppercase;
   color: var(--text-on-dark);
   will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .proc-turn span {
   display: block;
@@ -1713,7 +1715,9 @@ body {
   justify-content: center;
   text-align: center;
   background: var(--bg-base);
-  will-change: transform;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .proc-questions {
   position: absolute;
@@ -2190,35 +2194,13 @@ body {
     font-size: 64vw;
   }
 
-  /* МОБИЛЬНАЯ ПЕРЕСБОРКА ПОРТАЛА С НУЛЯ: никакого sticky и скраба — обычный
-     поток из двух экранов. Сначала тёмный экран «Мы строим работу иначе»,
-     затем светлый «Как мы работаем» с живым роем. Нечему дрожать: ни одного
-     scroll-привязанного пересчёта, только одноразовые входные анимации. */
+  /* МОБАЙЛ — тот же sticky-портал, что и на десктопе: кинематографичный ЗУМ
+     СКВОЗЬ фразу «Мы строим работу иначе», камера пролетает между букв, а
+     навстречу из глубины выезжает белый экран «Как мы работаем» (тайминги в
+     Process.tsx). Плавность: GPU-слои (backface-visibility + force3D GSAP) +
+     overflow-anchor:none (глобально) + тёмный фон трека. Трек короче — снаппи. */
   .proc-enter-track {
-    height: auto;
-  }
-  .proc-enter {
-    position: relative;
-    top: 0;
-    height: auto;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-  }
-  .proc-veil {
-    position: relative;
-    inset: auto;
-    order: -1;
-    min-height: 92svh;
-    will-change: auto;
-  }
-  .proc-intro {
-    position: relative;
-    inset: auto;
-    min-height: 94svh;
-    padding-top: clamp(3rem, 10vh, 5rem);
-    padding-bottom: clamp(3rem, 10vh, 5rem);
-    will-change: auto;
+    height: 240vh;
   }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
