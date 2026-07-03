@@ -85,95 +85,43 @@ export default function Process() {
       // параллакса/дрейфа. На десктопе — всё в полном объёме.
       const mobile = window.matchMedia("(max-width: 760px)").matches;
 
-      // ДЕСКТОП — портал: sticky-пин, надпись приближается и растворяется,
-      // блок проявляется изнутри (скраб). Здесь всё идеально — не трогаем.
-      if (!mobile) {
-        const enter = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".proc-enter-track",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 0.8,
-          },
-        });
-        enter
-          .fromTo(
-            ".proc-turn",
-            { scale: 1, opacity: 1 },
-            { scale: 5, opacity: 0, ease: "power2.in", duration: 0.4 },
-            0
-          )
-          .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
-          .fromTo(
-            ".proc-intro",
-            { scale: 1.14 },
-            { scale: 1, ease: "power1.out", duration: 0.45 },
-            0.1
-          )
-          // лёгкий дрейф роя во время раскрытия
-          .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
-          // ПАУЗА: сцена замирает — можно рассмотреть вопросы (≈40% прокрутки пина)
-          .to({}, { duration: 0.6 });
-      } else {
-        // МОБАЙЛ — «перерождение из тьмы». Тот же sticky-портал, режиссура:
-        // 1) камера приближается к «Мы строим работу иначе», фраза разгоняется в
-        //    масштабе из центра и растворяется — проход СКВОЗЬ буквы;
-        // 2) из центра, СКВОЗЬ буквы, пробивается белый СВЕТ (мягкий радиальный
-        //    блум — сам по себе «размытый», без дорогого filter:blur) и разрастается;
-        // 3) тьма-завеса растворяется, свет-дымка рассеивается — и открывается
-        //    чёткий белый экран «Как мы работаем» (БЕЗ чёрных краёв: интро всегда
-        //    во весь экран, лишь оседает 1.04→1). Только transform/opacity на
-        //    GPU-слоях → плавно и на медленном скролле.
-        gsap.set(".proc-intro", { scale: 1.04, autoAlpha: 0, transformOrigin: "50% 50%" });
-        gsap.set(".proc-bloom", { scale: 0.25, autoAlpha: 0, transformOrigin: "50% 50%" });
-        gsap.set(".proc-turn", { transformOrigin: "50% 50%" });
-        const enter = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".proc-enter-track",
-            start: "top top",
-            end: "bottom bottom",
-            // повыше сглаживание — на медленном скролле шаги не «дрожат»
-            scrub: 1,
-          },
-        });
-        enter
-          // фраза приближается и пролетает сквозь зрителя (проход между букв)
-          .fromTo(
-            ".proc-turn",
-            { scale: 1, opacity: 1 },
-            {
-              scale: 7,
-              opacity: 0,
-              ease: "power2.in",
-              duration: 0.55,
-              force3D: true,
-              transformPerspective: 800,
-            },
-            0
-          )
-          // белый свет пробивается из центра сквозь буквы и разрастается
-          .fromTo(
-            ".proc-bloom",
-            { scale: 0.25, autoAlpha: 0 },
-            { scale: 3.4, autoAlpha: 1, ease: "power2.in", duration: 0.54, force3D: true },
-            0.12
-          )
-          // тьма-завеса растворяется — рождается свет
-          .to(".proc-veil", { autoAlpha: 0, ease: "power1.inOut", duration: 0.3 }, 0.4)
-          // чёткий белый экран проявляется под светом и оседает (без чёрных краёв)
-          .fromTo(
-            ".proc-intro",
-            { scale: 1.04, autoAlpha: 0 },
-            { scale: 1, autoAlpha: 1, ease: "power2.out", duration: 0.44 },
-            0.48
-          )
-          // свет-дымка рассеивается, открывая чёткий экран «Как мы работаем»
-          .to(".proc-bloom", { autoAlpha: 0, ease: "power1.out", duration: 0.44 }, 0.64)
-          // лёгкий дрейф роя во время раскрытия
-          .to(".proc-questions", { yPercent: -7, ease: "none", duration: 0.7 }, 0)
-          // ПАУЗА: сцена замирает — можно рассмотреть
-          .to({}, { duration: 0.5 });
-      }
+      // ПОРТАЛ-ВХОД (ЕДИНЫЙ для десктопа и мобилки — премиальный, плавный):
+      // надпись приближается и растворяется, следующий блок проявляется изнутри.
+      // Пин — через CSS position:sticky (трек .proc-enter-track), а не pin
+      // ScrollTrigger: нативный GPU-пин без per-frame transform → нет дрожания.
+      // Скролл трека скрабит анимацию. На мобиле облегчаем ТОЛЬКО нагрузку (зум
+      // текста меньше, без масштабирования всей сцены-интро с вопросами и без
+      // пер-вопросного параллакса) — механика и ощущение те же, что на десктопе.
+      const enter = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".proc-enter-track",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.8,
+        },
+      });
+      enter
+        .fromTo(
+          ".proc-turn",
+          { scale: 1, opacity: 1 },
+          { scale: mobile ? 2.6 : 5, opacity: 0, ease: "power2.in", duration: 0.4 },
+          0
+        )
+        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32);
+      // масштаб всей сцены-интро (с роем вопросов) — только десктоп: на мобиле
+      // ре-растеризация целого поддерева = дрожание, поэтому там его нет
+      if (!mobile)
+        enter.fromTo(
+          ".proc-intro",
+          { scale: 1.14 },
+          { scale: 1, ease: "power1.out", duration: 0.45 },
+          0.1
+        );
+      enter
+        // лёгкий дрейф роя во время раскрытия
+        .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
+        // ПАУЗА: сцена замирает — можно рассмотреть вопросы (≈40% прокрутки пина)
+        .to({}, { duration: 0.6 });
 
       // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
       // 21 скраб-триггер съедал кадры)
@@ -320,15 +268,12 @@ export default function Process() {
           <h2 className="proc-bigtitle">Как&nbsp;мы работаем</h2>
         </div>
 
-        {/* тёмная завеса (только фон) */}
-        <div className="proc-veil" aria-hidden />
-        {/* белый свет пробивается ИЗ-ЗА букв (мобильное «перерождение») */}
-        <div className="proc-bloom" aria-hidden />
-        {/* надпись — поверх света: свет рождается позади букв */}
-        <h2 className="proc-turn" aria-hidden>
-          <span>Мы строим</span>
-          <span>работу иначе</span>
-        </h2>
+        <div className="proc-veil" aria-hidden>
+          <h2 className="proc-turn">
+            <span>Мы строим</span>
+            <span>работу иначе</span>
+          </h2>
+        </div>
       </div>
       </div>
 
