@@ -79,49 +79,74 @@ export default function Process() {
         gsap.set(".proc-veil", { autoAlpha: 0 });
         return;
       }
-      // МОБИЛЬНЫЙ GPU не вывозит полную сцену (зум огромного текста ×5 + зум всей
-      // сцены + 21 параллакс-вопрос) → кадры проседают, текст «дрожит и троит».
-      // На мобиле облегчаем: зум меньше, без зума сцены и без пер-вопросного
-      // параллакса/дрейфа. На десктопе — всё в полном объёме.
       const mobile = window.matchMedia("(max-width: 760px)").matches;
 
-      // ПОРТАЛ-ВХОД (ЕДИНЫЙ для десктопа и мобилки — премиальный, плавный):
-      // надпись приближается и растворяется, следующий блок проявляется изнутри.
-      // Пин — через CSS position:sticky (трек .proc-enter-track), а не pin
-      // ScrollTrigger: нативный GPU-пин без per-frame transform → нет дрожания.
-      // Скролл трека скрабит анимацию. На мобиле облегчаем ТОЛЬКО нагрузку (зум
-      // текста меньше, без масштабирования всей сцены-интро с вопросами и без
-      // пер-вопросного параллакса) — механика и ощущение те же, что на десктопе.
-      const enter = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".proc-enter-track",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.8,
-        },
-      });
-      enter
-        .fromTo(
-          ".proc-turn",
-          { scale: 1, opacity: 1 },
-          { scale: mobile ? 2.6 : 5, opacity: 0, ease: "power2.in", duration: 0.4 },
-          0
-        )
-        .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32);
-      // масштаб всей сцены-интро (с роем вопросов) — только десктоп: на мобиле
-      // ре-растеризация целого поддерева = дрожание, поэтому там его нет
-      if (!mobile)
-        enter.fromTo(
-          ".proc-intro",
-          { scale: 1.14 },
-          { scale: 1, ease: "power1.out", duration: 0.45 },
-          0.1
-        );
-      enter
-        // лёгкий дрейф роя во время раскрытия
-        .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
-        // ПАУЗА: сцена замирает — можно рассмотреть вопросы (≈40% прокрутки пина)
-        .to({}, { duration: 0.6 });
+      // Пин — через CSS position:sticky (трек .proc-enter-track), скролл скрабит
+      // переход. НО механика перехода разная:
+      //
+      // ДЕСКТОП — «портал»: надпись приближается (scale) и растворяется, сцена
+      //   проявляется изнутри (scale 1.14→1). На десктопе зум текста плавный.
+      //
+      // МОБАЙЛ — БЕЗ ЕДИНОГО SCALE НА ТЕКСТЕ. Масштабирование глифов на high-DPI
+      //   мобиле заставляет браузер ПЕРЕ-РАСТЕРИЗОВЫВАТЬ текст каждый кадр → это и
+      //   есть «дрожание/троение». Переход построен ТОЛЬКО на opacity + translateY
+      //   (чистый композитор, глифы не перерисовываются) — как в портале Боли,
+      //   который не дрожит. Тёмный экран уходит вверх и растворяется, светлый
+      //   «Как мы работаем» всплывает навстречу и проявляется. Плавно на любом
+      //   скролле, включая медленный.
+      if (!mobile) {
+        const enter = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".proc-enter-track",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.8,
+          },
+        });
+        enter
+          .fromTo(
+            ".proc-turn",
+            { scale: 1, opacity: 1 },
+            { scale: 5, opacity: 0, ease: "power2.in", duration: 0.4 },
+            0
+          )
+          .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
+          .fromTo(
+            ".proc-intro",
+            { scale: 1.14 },
+            { scale: 1, ease: "power1.out", duration: 0.45 },
+            0.1
+          )
+          .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
+          .to({}, { duration: 0.6 });
+      } else {
+        // МОБАЙЛ — кроссфейд БЕЗ scale: только opacity + translateY (композитор)
+        gsap.set(".proc-intro", { autoAlpha: 0, yPercent: 8 });
+        const enter = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".proc-enter-track",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.8,
+          },
+        });
+        enter
+          // тёмный экран «Мы строим работу иначе» мягко уходит вверх и растворяется
+          .to(
+            ".proc-veil",
+            { autoAlpha: 0, yPercent: -10, ease: "power1.inOut", duration: 0.55 },
+            0
+          )
+          // светлый «Как мы работаем» всплывает навстречу и проявляется
+          .fromTo(
+            ".proc-intro",
+            { autoAlpha: 0, yPercent: 8 },
+            { autoAlpha: 1, yPercent: 0, ease: "power1.out", duration: 0.55 },
+            0.3
+          )
+          .to(".proc-questions", { yPercent: -8, ease: "none", duration: 0.6 }, 0)
+          .to({}, { duration: 0.55 });
+      }
 
       // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
       // 21 скраб-триггер съедал кадры)
