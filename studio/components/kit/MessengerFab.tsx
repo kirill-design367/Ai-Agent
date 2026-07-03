@@ -38,7 +38,9 @@ export default function MessengerFab() {
       aria-hidden={!shown}
       tabIndex={shown ? 0 : -1}
     >
-      <span aria-hidden>✦</span> Написать
+      {/* тихая премиальная линия-свет, обходящая контур кнопки */}
+      <span className="msg-fab-ring" aria-hidden />
+      <span className="msg-fab-label">Написать</span>
     </a>
   );
 }

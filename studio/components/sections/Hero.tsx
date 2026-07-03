@@ -127,7 +127,7 @@ export default function Hero() {
         </h1>
 
         <p className="hero-sub" ref={sub}>
-          <span className="hs-line hs-l1">Мы&nbsp;проектируем каждый пиксель так,</span>{" "}
+          <span className="hs-line hs-l1">Мы&nbsp;проектируем каждый пиксель вашего&nbsp;сайта так,</span>{" "}
           <span className="hs-line hs-l2">чтобы он&nbsp;усиливал доверие</span>{" "}
           <span className="hs-line hs-l3">к&nbsp;вашему бизнесу, помогал получать</span>{" "}
           <span className="hs-line hs-l4">больше обращений и&nbsp;делал компанию</span>{" "}

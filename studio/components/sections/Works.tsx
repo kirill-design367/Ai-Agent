@@ -121,10 +121,12 @@ export default function Works() {
             scrub: 0.9,
           },
         });
-        tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.45 }, 0)
-          .to(last, { scale: 0.42, yPercent: -3, ease: "power1.inOut", duration: 1 }, 0)
+        // уходит в глубину так же «паровозиком», как остальные кейсы (scale 0.6,
+        // не 0.42 — раньше слишком резко/мелко), и растворяется позже и мягче
+        tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.5 }, 0)
+          .to(last, { scale: 0.6, yPercent: -3, ease: "power1.inOut", duration: 1 }, 0)
           .to(shade, { opacity: 0.9, ease: "none", duration: 1 }, 0)
-          .to(last, { autoAlpha: 0, ease: "power2.in", duration: 0.4 }, 0.66);
+          .to(last, { autoAlpha: 0, ease: "power1.in", duration: 0.34 }, 0.78);
         // описание уезжает вдогонку за кейсом — вверх, уменьшаясь и растворяясь
         if (lastDesc)
           tl.to(

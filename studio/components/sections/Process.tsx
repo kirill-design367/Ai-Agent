@@ -118,16 +118,26 @@ export default function Process() {
           .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
           .to({}, { duration: 0.6 });
       } else {
-        // фраза «Мы строим работу иначе» мягко проявляется один раз при входе
+        // МОБАЙЛ — ЗУМ БЕЗ УДЕРЖАНИЯ ЭКРАНА. Без пина/скраб-паузы (нечему бороться
+        // со скроллом). Пока тёмный экран «Мы строим работу иначе» ЛИСТАЕТСЯ вверх,
+        // фраза приближается (scale) и растворяется — а снизу уже наезжает светлый
+        // «Как мы работаем». Скролл идёт непрерывно, чёрное «перетекает» в белое
+        // по мере зума. Скраб привязан к самому экрану (он же и уходит) → никакого
+        // зависания. Один элемент (фраза) масштабируется + гаснет — дёшево и плавно.
+        gsap.set(".proc-turn", { transformOrigin: "50% 46%" });
         gsap.fromTo(
           ".proc-turn",
-          { opacity: 0, y: 34 },
+          { scale: 1, autoAlpha: 1 },
           {
-            opacity: 1,
-            y: 0,
-            duration: 1.1,
-            ease: "expo.out",
-            scrollTrigger: { trigger: ".proc-veil", start: "top 65%" },
+            scale: 2.7,
+            autoAlpha: 0,
+            ease: "power1.in",
+            scrollTrigger: {
+              trigger: ".proc-veil",
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.5,
+            },
           }
         );
       }

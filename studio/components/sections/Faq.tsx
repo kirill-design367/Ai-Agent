@@ -47,7 +47,6 @@ export default function Faq() {
   return (
     <section id="faq" className="theme-dark faq">
       <header className="faq-head">
-        <span className="faq-kicker">(08) Вопросы</span>
         <h2 className="faq-title">Что обычно спрашивают</h2>
       </header>
 

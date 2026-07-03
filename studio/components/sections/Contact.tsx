@@ -7,10 +7,14 @@ import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 /*
   КОНТАКТ — финал. Не сухая форма, а предвкушение. Гигантский заголовок и живая
   форма заявки: имя + любой удобный контакт + пара слов о проекте. Сайт —
-  статика (GitHub Pages, без сервера), поэтому заявка уходит прямо в WhatsApp
-  владельца готовым сообщением. Ниже — прямые каналы («мои данные»).
+  статика (GitHub Pages, без сервера), поэтому заявка уходит прямо в Telegram
+  владельцу через Bot API. Ниже — прямые каналы («мои данные»).
 */
-const WHATSAPP = "79185367424";
+// Заявки летят в личный Telegram владельца через его бота.
+const TG_TOKEN = "8601781365:AAHWzepLoHs4l9PIJz6_HyJq2Qk4P_wxh0o";
+const TG_CHAT = "6303245443";
+
+type SendState = "idle" | "sending" | "sent" | "error";
 
 export default function Contact() {
   const root = useRef<HTMLElement>(null);
@@ -18,17 +22,44 @@ export default function Contact() {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [about, setAbout] = useState("");
+  const [state, setState] = useState<SendState>("idle");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const lines = [
-      "Здравствуйте! Заявка с сайта AUREA.",
-      `Имя: ${name || "—"}`,
-      `Контакт: ${contact || "—"}`,
-      about ? `О проекте: ${about}` : "",
-    ].filter(Boolean);
-    const text = encodeURIComponent(lines.join("\n"));
-    window.open(`https://wa.me/${WHATSAPP}?text=${text}`, "_blank", "noopener");
+    if (state === "sending") return;
+    const now = new Date().toLocaleString("ru-RU", {
+      timeZone: "Europe/Moscow",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const text = [
+      "🔔 Новая заявка с сайта AUREA",
+      "",
+      `👤 Имя: ${name || "—"}`,
+      `📞 Контакт: ${contact || "—"}`,
+      about ? `📝 О проекте: ${about}` : "",
+      `🕒 Время: ${now} (МСК)`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    setState("sending");
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: TG_CHAT, text }),
+      });
+      if (!res.ok) throw new Error("tg");
+      setState("sent");
+      setName("");
+      setContact("");
+      setAbout("");
+    } catch {
+      setState("error");
+    }
   };
 
   useGSAP(
@@ -64,9 +95,6 @@ export default function Contact() {
   return (
     <section id="contact" className="theme-dark contact" ref={root}>
       <div className="contact-inner">
-        <span className="contact-kicker" data-magnetic>
-          (10) С чего начать
-        </span>
         <h2 className="contact-title" ref={title}>
           Расскажите
           <br />о проекте
@@ -77,7 +105,7 @@ export default function Contact() {
           лично, обычно в&nbsp;течение пары часов.
         </p>
 
-        {/* форма заявки — уходит готовым сообщением в WhatsApp */}
+        {/* форма заявки — уходит прямо в Telegram владельцу */}
         <form className="contact-form contact-row" onSubmit={submit}>
           <div className="contact-field">
             <label htmlFor="cf-name">Как вас зовут</label>
@@ -114,10 +142,31 @@ export default function Contact() {
               onChange={(e) => setAbout(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn--primary contact-submit" data-magnetic>
-            <span className="btn-cta-label">Отправить заявку</span>
-            <span className="btn-cta-arrow" aria-hidden>→</span>
+          <button
+            type="submit"
+            className="btn btn--primary contact-submit"
+            data-magnetic
+            data-state={state}
+            disabled={state === "sending"}
+          >
+            <span className="btn-cta-label">
+              {state === "sending"
+                ? "Отправляю…"
+                : state === "sent"
+                ? "Заявка отправлена ✓"
+                : state === "error"
+                ? "Ошибка — напишите напрямую"
+                : "Отправить заявку"}
+            </span>
+            <span className="btn-cta-arrow" aria-hidden>
+              →
+            </span>
           </button>
+          {state === "sent" && (
+            <p className="contact-note" role="status">
+              Спасибо! Отвечу лично, обычно в&nbsp;течение пары часов.
+            </p>
+          )}
         </form>
 
         <p className="contact-or contact-row">или напишите напрямую</p>
@@ -143,7 +192,7 @@ export default function Contact() {
             <circle cx="40" cy="49" r="3" />
           </svg>
           <span className="contact-sign">
-            AUREA — от точки до шедевра. Без чат-ботов и менеджеров.
+            AUREA — от точки до шедевра.
           </span>
         </div>
       </div>

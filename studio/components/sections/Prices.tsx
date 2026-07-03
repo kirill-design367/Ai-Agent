@@ -47,6 +47,27 @@ const RUB_COLS = 14;
 const RUB_ROWS = 7;
 const RUB_CELLS = Array.from({ length: RUB_COLS * RUB_ROWS });
 
+/* невесомо парящие ₽ на фоне блока цен (как рой вопросов в «Как мы работаем»,
+   только знаки рубля). x/y — %, s — размер, o — прозрачность. */
+const RUB_FLOAT = [
+  { x: 8, y: 12, s: 3.6, o: 0.06 },
+  { x: 88, y: 9, s: 2.6, o: 0.07 },
+  { x: 22, y: 26, s: 1.6, o: 0.08 },
+  { x: 70, y: 20, s: 2.0, o: 0.06 },
+  { x: 50, y: 8, s: 1.3, o: 0.07 },
+  { x: 6, y: 44, s: 2.2, o: 0.06 },
+  { x: 94, y: 40, s: 1.8, o: 0.06 },
+  { x: 34, y: 54, s: 1.4, o: 0.05 },
+  { x: 82, y: 60, s: 3.0, o: 0.05 },
+  { x: 14, y: 68, s: 1.7, o: 0.07 },
+  { x: 58, y: 72, s: 2.0, o: 0.05 },
+  { x: 90, y: 82, s: 1.5, o: 0.06 },
+  { x: 26, y: 88, s: 2.4, o: 0.05 },
+  { x: 66, y: 92, s: 1.4, o: 0.06 },
+  { x: 44, y: 34, s: 1.2, o: 0.05 },
+  { x: 76, y: 46, s: 1.3, o: 0.05 },
+];
+
 export default function Prices() {
   const root = useRef<HTMLElement>(null);
 
@@ -123,15 +144,30 @@ export default function Prices() {
 
   return (
     <section id="prices" className="prices" ref={root}>
+      {/* невесомо парящие знаки рубля на фоне */}
+      <div className="prices-rub-float" aria-hidden>
+        {RUB_FLOAT.map((r, i) => (
+          <span
+            key={i}
+            style={{
+              left: `${r.x}%`,
+              top: `${r.y}%`,
+              fontSize: `${r.s}rem`,
+              opacity: r.o,
+              animationDelay: `${(i % 7) * 0.9}s`,
+              animationDuration: `${7 + (i % 5)}s`,
+            }}
+          >
+            ₽
+          </span>
+        ))}
+      </div>
       {/* переход-вход: пиксельное табло ₽ */}
       <div className="prices-portal">
         <div className="prices-reveal">
           <header className="prices-head">
-            <span className="prices-kicker">Цены</span>
             <h2 className="prices-title">
-              Честно и&nbsp;по&nbsp;делу.
-              <br />
-              Без скрытых платежей.
+              Прозрачная стоимость без&nbsp;неожиданных доплат
             </h2>
           </header>
         </div>

@@ -130,6 +130,9 @@
 html {
   scroll-behavior: auto;
   width: 100%;
+  /* жёсткий запрет горизонтального сдвига: clip не даёт «увести» экран вправо
+     пальцем (в отличие от hidden, clip запрещает и программный скролл по X) */
+  overflow-x: clip;
 }
 
 body {
@@ -146,7 +149,7 @@ body {
   /* СКРОЛЛ НА ДОКУМЕНТЕ (root): sticky-пины на руте аппаратно-ускорены и НЕ
      дрожат на мобиле (в отличие от sticky внутри фикс-контейнера). По горизонтали
      скрыт (без бокового скролла), по вертикали — нативный скролл документа. */
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior: none;
   /* выключаем scroll anchoring — чтобы браузер не «подправлял» позицию под
      sticky-сцены с трансформациями (иначе короткие скачки скролла) */
@@ -499,8 +502,41 @@ body {
 }
 /* прокрутка-«хвост»: дистанция для ухода последнего кейса + короткая чёрная пауза */
 .works-tail {
-  height: 42vh;
+  /* длиннее → уход последнего кейса растянут по прокрутке, медленнее и плавнее */
+  height: 78vh;
   pointer-events: none;
+}
+
+/* невесомо парящие ₽ на фоне блока цен */
+.prices-rub-float {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.prices-rub-float span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-headline), system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  will-change: transform;
+  animation: rubFloat 8s ease-in-out infinite;
+}
+@keyframes rubFloat {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 26px)) rotate(4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prices-rub-float span {
+    animation: none;
+  }
 }
 /* sticky-подпись внизу экрана: по одному описанию на кейс, кроссфейд при смене */
 .works-desc {
@@ -1439,6 +1475,48 @@ body {
 }
 .msg-fab.is-shown:hover {
   transform: translateY(-3px);
+}
+.msg-fab-label {
+  position: relative;
+  z-index: 2;
+}
+/* тихая премиальная линия-свет, непрерывно обходящая контур кнопки.
+   Тонкое кольцо через маску, бегущий блик — через анимируемый угол conic-gradient. */
+@property --fab-a {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.msg-fab-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--fab-a),
+    transparent 0deg,
+    transparent 290deg,
+    rgba(244, 242, 238, 0.9) 332deg,
+    rgba(255, 255, 255, 1) 344deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: fabRing 4.6s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes fabRing {
+  to {
+    --fab-a: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msg-fab-ring {
+    animation: none;
+  }
 }
 
 /* — Portfolio case hover zoom (tactility, III.7.10) */
@@ -2402,6 +2480,8 @@ body {
   letter-spacing: -0.02em;
 }
 .price-grid {
+  position: relative;
+  z-index: 1;
   max-width: 1300px;
   margin: 0 auto;
   display: grid;
