@@ -14,11 +14,11 @@ export function registerGsap() {
   if (registered || typeof window === "undefined") return;
   gsap.registerPlugin(ScrollTrigger, SplitText);
   ScrollTrigger.config({ ignoreMobileResize: true });
-  // APP-SHELL: скроллится внутренний контейнер .app-scroll, а не сам документ.
-  // Значит ScrollTrigger должен читать скролл именно из него. Ставим ДО создания
-  // любых триггеров (registerGsap вызывается в начале каждого useGSAP).
-  const scroller = document.querySelector<HTMLElement>(".app-scroll");
-  if (scroller) ScrollTrigger.defaults({ scroller });
+  // СКРОЛЛ ЖИВЁТ НА ДОКУМЕНТЕ (root-scroll). Раньше был внутренний фикс-контейнер
+  // .app-scroll, но CSS position:sticky ВНУТРИ не-рутового overflow-контейнера
+  // НЕ ускоряется композитором на мобиле → все пиннинг-сцены (Процесс, Цены…)
+  // дрожали всем экраном. На руте sticky аппаратно-ускорен → плавно. Значит
+  // scroller по умолчанию = window; ничего не переопределяем.
   registered = true;
 }
 

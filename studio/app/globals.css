@@ -130,14 +130,12 @@
 html {
   scroll-behavior: auto;
   width: 100%;
-  height: 100%;
 }
 
 body {
   margin: 0;
   width: 100%;
   max-width: 100%;
-  height: 100%;
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-body), system-ui, sans-serif;
@@ -145,22 +143,18 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* APP-SHELL: сам документ НЕ скроллится — тогда панель Safari не прячется и
-     ничего не «прыгает». Скролл живёт во внутреннем .app-scroll. */
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-/* внутренний скролл-контейнер = вьюпорт; скроллится он, а не документ */
-.app-scroll {
-  position: fixed;
-  inset: 0;
+  /* СКРОЛЛ НА ДОКУМЕНТЕ (root): sticky-пины на руте аппаратно-ускорены и НЕ
+     дрожат на мобиле (в отличие от sticky внутри фикс-контейнера). По горизонтали
+     скрыт (без бокового скролла), по вертикали — нативный скролл документа. */
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
-  /* КРИТИЧНО: выключаем scroll anchoring — на мобильном Chrome он «подправлял»
-     scrollTop при изменениях в sticky-сценах с трансформациями (порталы «Боли»
-     и «Процесса») → скролл прерывался короткими скачками */
+  /* выключаем scroll anchoring — чтобы браузер не «подправлял» позицию под
+     sticky-сцены с трансформациями (иначе короткие скачки скролла) */
+  overflow-anchor: none;
+}
+/* .app-scroll больше не скролл-контейнер (Lenis в root-режиме, скроллит документ).
+   Оставлен как прозрачная обёртка на случай старой разметки. */
+.app-scroll {
   overflow-anchor: none;
 }
 .lenis.lenis-smooth {

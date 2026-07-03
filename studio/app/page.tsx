@@ -9,7 +9,6 @@ import Pain from "@/components/sections/Pain";
 import Process from "@/components/sections/Process";
 import Advantages from "@/components/sections/Advantages";
 import Prices from "@/components/sections/Prices";
-import Offer from "@/components/sections/Offer";
 import Faq from "@/components/sections/Faq";
 import BlackHole from "@/components/sections/BlackHole";
 import Reviews from "@/components/sections/Reviews";
@@ -37,7 +36,6 @@ export default function Home() {
         <Process />
         <Advantages />
         <Prices />
-        <Offer />
         <Faq />
         <BlackHole />
         <Reviews />

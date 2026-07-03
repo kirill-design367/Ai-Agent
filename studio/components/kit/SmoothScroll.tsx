@@ -27,16 +27,14 @@ function LenisGsapBridge() {
     // (рой вопросов + комета) он снимал защиту от просадок кадров и добавлял лаги.
     // Дрожание пиннингов уже устранено переводом порталов на CSS position:sticky.
 
-    // Всегда стартуем с Hero. history.scrollRestoration управляет ТОЛЬКО скроллом
-    // документа, а у нас app-shell — скроллится div .app-scroll, чью позицию
-    // браузер восстанавливает отдельно и ПОЗЖЕ (после layout/load, из bfcache).
-    // Поэтому сбрасываем и window, и .app-scroll, и Lenis — многократно, пока идёт
-    // прелоадер, перекрывая момент восстановления браузером.
+    // Всегда стартуем с Hero. Скролл теперь на документе (root) — сбрасываем
+    // window/documentElement/body и Lenis многократно, пока идёт прелоадер,
+    // перекрывая момент восстановления позиции браузером (в т.ч. из bfcache).
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     const toTop = () => {
-      const sc = document.querySelector<HTMLElement>(".app-scroll");
-      if (sc) sc.scrollTop = 0;
       window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
       lenis.scrollTo(0, { immediate: true, force: true });
     };
     toTop();
@@ -78,11 +76,14 @@ function LenisGsapBridge() {
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   return (
     <ReactLenis
-      className="app-scroll"
+      root
       options={{
         duration: 1.2,
         // Premium expo easing (matches reference portfolios).
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        // ГЛАДКОСТЬ ТОЛЬКО КОЛЕСОМ (десктоп). На тач-устройствах Lenis НЕ
+        // перехватывает скролл (syncTouch:false по умолчанию) → нативный
+        // скролл документа, а значит sticky-пины аппаратно-ускорены и не дрожат.
         smoothWheel: true,
         wheelMultiplier: 1,
         touchMultiplier: 1.4,

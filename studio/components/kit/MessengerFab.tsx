@@ -15,14 +15,13 @@ export default function MessengerFab() {
   useEffect(() => {
     const work = document.getElementById("work");
     if (!work) return;
-    // корень наблюдения — контейнер app-scroll (скроллится он, не документ)
-    const scroller = document.querySelector<HTMLElement>(".app-scroll");
+    // корень наблюдения — вьюпорт (скроллится документ)
     const io = new IntersectionObserver(
       ([entry]) => {
         // показываем, когда низ блока «Портфолио» ушёл выше верхней кромки экрана
         setShown(entry.boundingClientRect.bottom < 0);
       },
-      { root: scroller ?? null, threshold: 0, rootMargin: "0px" }
+      { root: null, threshold: 0, rootMargin: "0px" }
     );
     io.observe(work);
     return () => io.disconnect();
