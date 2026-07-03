@@ -1,1 +1,1 @@
-2026-07-03 15:12 UTC — Process mobile unpinned (two-screen flow, no jitter)
+2026-07-03 20:21 UTC — final edits pt1: TG form, texts, ₽ float, process no-pin zoom, overflow fix
