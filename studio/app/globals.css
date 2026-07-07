@@ -1130,16 +1130,22 @@ body {
 }
 /* золотое сечение по вертикали: правый выше (~38%), левый ниже (~62%);
    часть уходит за край, лёгкий наклон — «алмаз, торчащий из породы» */
+/* дополнительный барьер горизонтального сдвига: клипаем на уровне main —
+   ни одна полноширинная сцена не даёт «увести» страницу вбок пальцем */
+main {
+  overflow-x: clip;
+}
 .gem--right {
   top: 51%;
-  right: clamp(-84px, -9vw, -44px);
+  /* меньше торчат за край → надпись читается целиком, кнопки не «уезжают» */
+  right: clamp(-40px, -4.5vw, -22px);
   transform: rotate(-9deg);
   /* «Обсудить проект» — главный из двух, крупнее левого (после общего −15%) */
   width: clamp(190px, 34vw, 301px);
 }
 .gem--left {
   top: 69%;
-  left: clamp(-84px, -9vw, -44px);
+  left: clamp(-40px, -4.5vw, -22px);
   transform: rotate(7deg);
 }
 .gem--right .gem-label {
@@ -2289,40 +2295,36 @@ body {
      скраба). Пин удерживал экран на месте, пока палец скроллит → «борьба» со
      скроллом и дрожание. Здесь — тёмный экран «Мы строим», затем светлый «Как мы
      работаем», просто пролистываются нативно. Нечему дрожать. */
-  /* КРОССФЕЙД-ЗУМ БЕЗ ДРОЖАНИЯ: светлый экран «Как мы работаем» — sticky-подложка,
-     СТАТИЧНА (не масштабируется). Тёмная завеса листается ПОВЕРХ неё (absolute,
-     уезжает со скроллом), гаснет и приближает фразу (scale на неудерживаемой
-     завесе → плавно). Чёрное «перетекает» в белое по мере зума. */
+  /* БЕЗ пиннинга/скраба — два экрана в обычном потоке (нативный скролл, не
+     дрожит). Тёмный «Мы строим», затем светлый «Как мы работаем». */
   .proc-enter-track {
-    height: 175vh;
+    height: auto;
   }
   .proc-enter {
     position: relative;
     top: 0;
-    height: 100%;
+    height: auto;
     overflow: visible;
-    display: block;
+    display: flex;
+    flex-direction: column;
     transform: none;
     will-change: auto;
   }
-  .proc-intro {
-    position: sticky;
+  .proc-veil {
+    position: relative;
     inset: auto;
-    top: 0;
-    height: 100svh;
-    min-height: 100svh;
-    z-index: 1;
-    padding-top: 0;
-    padding-bottom: 0;
+    order: -1;
+    min-height: 92svh;
+    z-index: auto;
     will-change: auto;
   }
-  .proc-veil {
-    position: absolute;
-    inset: 0 0 auto 0;
-    width: 100%;
-    height: 100svh;
-    z-index: 3;
-    will-change: opacity;
+  .proc-intro {
+    position: relative;
+    inset: auto;
+    min-height: 94svh;
+    padding-top: clamp(3rem, 10vh, 5rem);
+    padding-bottom: clamp(3rem, 10vh, 5rem);
+    will-change: auto;
   }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
@@ -2389,88 +2391,13 @@ body {
   position: relative;
   background: var(--bg-base);
   color: var(--text-primary);
-  padding: 0 clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
-}
-/* портал-вход: пиксельное табло ₽, наезжает и растворяется */
-.prices-portal {
-  position: relative;
-  height: 100lvh;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  overflow: hidden;
-  background: var(--bg-base);
-}
-.prices-reveal {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  padding: 0 clamp(1.4rem, 6vw, 7rem);
-  background: var(--bg-base);
-  will-change: transform, opacity;
-}
-.prices-reveal .prices-head {
-  margin: 0;
-  text-align: center;
-}
-.rub-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  place-items: center;
-  background: #08080a;
-  overflow: hidden;
-  will-change: opacity;
-}
-/* свет в конце туннеля — премиальная вспышка, пробивающая сквозь ₽.
-   Центрируем через inset+margin (а не translate), чтобы GSAP свободно крутил scale. */
-.rub-light {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 60vmin;
-  height: 60vmin;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    #ffffff 0%,
-    rgba(255, 255, 255, 0.85) 22%,
-    rgba(201, 165, 91, 0.35) 45%,
-    transparent 70%
-  );
-  opacity: 0;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-.rub-field {
-  display: grid;
-  grid-template-columns: repeat(14, 1fr);
-  gap: clamp(0.3rem, 1.2vw, 1rem);
-  width: min(120vw, 1100px);
-  will-change: transform, opacity;
-  transform-origin: center center;
-}
-.rub-cell {
-  font-family: ui-monospace, "SF Mono", "Roboto Mono", monospace;
-  font-weight: 700;
-  font-size: clamp(1rem, 3.4vw, 2.4rem);
-  line-height: 1;
-  text-align: center;
-  color: rgba(244, 242, 238, 0.85);
-  /* мерцание как у LED-табло → читается «пиксельно» */
-  animation: rubflicker 1.3s steps(2, end) infinite;
-}
-@keyframes rubflicker {
-  0%, 100% { opacity: 0.14; }
-  45% { opacity: 0.14; }
-  50% { opacity: 0.92; }
-  85% { opacity: 0.92; }
+  /* верхний отступ вернулся: портал-обёртка (100lvh) убрана, заголовку нужен воздух */
+  padding: clamp(5rem, 13vh, 10rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
 }
 .prices-head {
   max-width: 1300px;
   margin: 0 auto clamp(2.5rem, 7vh, 4.5rem);
+  text-align: center;
 }
 .prices-kicker {
   font-size: var(--text-xs);

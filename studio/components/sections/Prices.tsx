@@ -7,9 +7,10 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 /*
   ЦЕНЫ — отвечает на «Сколько стоит и не разведут ли меня?».
 
-  Переход-вход: поле из знаков ₽ мерцает как пиксельное табло, наезжает на
-  зрителя (zoom) и растворяется — блок цены «рождается» изнутри. Тёмные
-  карточки с бегущим огоньком по рамке; рекомендуемый тариф крупнее, живёт.
+  Вход без пиннинга: заголовок мягко всплывает и проявляется, следом карточки
+  выезжают снизу (ощущение, что цены «лежали под» предыдущим блоком). На фоне —
+  невесомо парящие знаки ₽. Тёмные карточки с бегущим огоньком по рамке;
+  рекомендуемый тариф крупнее. Никаких резких смен — нативный скролл, не дрожит.
 */
 const TIERS = [
   {
@@ -42,11 +43,6 @@ const TIERS = [
   },
 ];
 
-// поле ₽ для пиксельного табло-перехода
-const RUB_COLS = 14;
-const RUB_ROWS = 7;
-const RUB_CELLS = Array.from({ length: RUB_COLS * RUB_ROWS });
-
 /* невесомо парящие ₽ на фоне блока цен (как рой вопросов в «Как мы работаем»,
    только знаки рубля). x/y — %, s — размер, o — прозрачность. */
 const RUB_FLOAT = [
@@ -75,34 +71,22 @@ export default function Prices() {
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) {
-        gsap.set(".rub-veil", { autoAlpha: 0 });
-        return;
-      }
+      if (reduce) return;
 
-      // ПОРТАЛ ₽ → СВЕТ-ТУННЕЛЬ: поле ₽ по экрану, премиальное свечение приближается
-      // и эстетично «пробивает» светом (конец туннеля), из света рождается блок цены.
-      // В конце — краткая ПАУЗА, чтобы прочитать заголовок.
-      const portal = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".prices-portal",
-          start: "top top",
-          end: "+=210%",
-          scrub: 0.8,
-          pin: true,
-          anticipatePin: 1,
-        },
-      });
-      portal
-        .fromTo(".rub-field", { scale: 1, opacity: 1 }, { scale: 3.8, opacity: 0.12, ease: "power2.in", duration: 0.6 }, 0)
-        // свет приближается из глубины
-        .fromTo(".rub-light", { scale: 0.15, opacity: 0 }, { scale: 1.1, opacity: 0.95, ease: "power2.in", duration: 0.5 }, 0.12)
-        // ПРОБИТИЕ светом — вспышка расширяется
-        .to(".rub-light", { scale: 7, opacity: 0, ease: "power2.in", duration: 0.4 }, 0.52)
-        .to(".rub-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.3 }, 0.5)
-        .fromTo(".prices-reveal", { scale: 1.16, opacity: 0.3 }, { scale: 1, opacity: 1, ease: "power1.out", duration: 0.4 }, 0.5)
-        // краткая пауза на заголовке
-        .to({}, { duration: 0.45 });
+      // ВХОД БЕЗ ПИННИНГА (плавно, без резких смен): заголовок «рождается» —
+      // мягко всплывает и проявляется, следом карточки выезжают снизу. Нативный
+      // скролл, ничего не удерживается → не дрожит.
+      gsap.fromTo(
+        ".prices-head",
+        { y: 48, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1.1,
+          ease: "expo.out",
+          scrollTrigger: { trigger: ".prices-head", start: "top 84%" },
+        }
+      );
 
       // карточки появляются со stagger и слегка дышат
       gsap.utils.toArray<HTMLElement>(".price-card").forEach((card, i) => {
@@ -162,30 +146,10 @@ export default function Prices() {
           </span>
         ))}
       </div>
-      {/* переход-вход: пиксельное табло ₽ */}
-      <div className="prices-portal">
-        <div className="prices-reveal">
-          <header className="prices-head">
-            <h2 className="prices-title">Прозрачная стоимость без неожиданных доплат</h2>
-          </header>
-        </div>
-
-        <div className="rub-veil" aria-hidden>
-          <div className="rub-field">
-            {RUB_CELLS.map((_, i) => (
-              <span
-                className="rub-cell"
-                key={i}
-                style={{ animationDelay: `${(i % 13) * 0.11 + Math.floor(i / RUB_COLS) * 0.07}s` }}
-              >
-                ₽
-              </span>
-            ))}
-          </div>
-          {/* свет в конце туннеля — приближается и пробивает */}
-          <span className="rub-light" />
-        </div>
-      </div>
+      {/* заголовок — рождается плавно (без резких смен, без пиннинга) */}
+      <header className="prices-head">
+        <h2 className="prices-title">Прозрачная стоимость без неожиданных доплат</h2>
+      </header>
 
       <div className="price-grid">
         {TIERS.map((t) => (

@@ -118,29 +118,26 @@ export default function Process() {
           .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
           .to({}, { duration: 0.6 });
       } else {
-        // МОБАЙЛ — зум РАСТВОРЯЕТСЯ в «Как мы работаем» (кроссфейд на месте), без
-        // удержания анимируемого. Светлый экран — sticky-подложка, СТАТИЧНА (не
-        // масштабируется → не дрожит). Тёмная завеса листается ПОВЕРХ неё, гаснет и
-        // приближает фразу (scale на неудерживаемой завесе → плавно). Чёрное
-        // перетекает в белое по мере зума, и остаёшься на светлом экране.
-        gsap.set(".proc-intro", { autoAlpha: 1 });
+        // МОБАЙЛ — БЕЗ пиннинга/удержания: два экрана листаются нативно (не дрожит).
+        // Пока тёмный экран «Мы строим работу иначе» уходит вверх, фраза
+        // приближается (scale) и растворяется — зум есть, но экран не замирает.
+        gsap.set(".proc-intro", { clearProps: "opacity,visibility" });
         gsap.set(".proc-turn", { transformOrigin: "50% 46%" });
-        const enter = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".proc-enter-track",
-            start: "top top",
-            end: "42% top",
-            scrub: 0.5,
-          },
-        });
-        enter
-          .fromTo(
-            ".proc-turn",
-            { scale: 1, autoAlpha: 1 },
-            { scale: 3.4, autoAlpha: 0, ease: "power1.in", duration: 1 },
-            0
-          )
-          .to(".proc-veil", { autoAlpha: 0, ease: "power1.inOut", duration: 0.85 }, 0.15);
+        gsap.fromTo(
+          ".proc-turn",
+          { scale: 1, autoAlpha: 1 },
+          {
+            scale: 2.7,
+            autoAlpha: 0,
+            ease: "power1.in",
+            scrollTrigger: {
+              trigger: ".proc-veil",
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.5,
+            },
+          }
+        );
       }
 
       // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
@@ -164,10 +161,10 @@ export default function Process() {
           );
         });
 
-      // заголовок «Как мы работаем»: на мобиле — статичная подложка (видна сразу,
-      // без анимации-раскрытия). На десктопе — проявляется в портале.
+      // заголовок «Как мы работаем» проявляется при входе (на мобиле — когда
+      // светлый экран-панель входит в кадр; на десктопе — в портале)
       const title = root.current!.querySelector(".proc-bigtitle");
-      if (title && !mobile)
+      if (title)
         gsap.fromTo(
           title,
           { y: 30, opacity: 0 },
