@@ -76,111 +76,47 @@ export default function Process() {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) {
+        // без анимации — сразу показываем «Как мы работаем», тёмную завесу прячем
+        gsap.set(".proc-intro", { yPercent: 0 });
         gsap.set(".proc-veil", { autoAlpha: 0 });
         return;
       }
       const mobile = window.matchMedia("(max-width: 760px)").matches;
 
-      // ДЕСКТОП — ПИННИНГ-ПОРТАЛ (scrub): экран липнет, надпись «Мы строим работу
-      // иначе» приближается (scale) и растворяется, сцена «Как мы работаем»
-      // проявляется изнутри. Есть паузы-«притормаживания» скролла — на десктопе
-      // это плавно.
-      //
-      // МОБАЙЛ — БЕЗ пиннинга и скраба ВООБЩЕ. Именно удержание экрана на месте,
-      // пока палец скроллит (пин + притормаживание паузами), и давало дрожание:
-      // нативный скролл «тянет» контент вниз, а пин держит — они борются каждый
-      // кадр. Убираем эту борьбу: два экрана в ОБЫЧНОМ ПОТОКЕ (тёмный «Мы строим»,
-      // затем светлый «Как мы работаем»), просто пролистываются нативно — нечему
-      // дрожать. Только одноразовые входные анимации на opacity/translateY.
-      if (!mobile) {
-        const enter = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".proc-enter-track",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 0.8,
-          },
-        });
-        enter
-          .fromTo(
-            ".proc-turn",
-            { scale: 1, opacity: 1 },
-            { scale: 5, opacity: 0, ease: "power2.in", duration: 0.4 },
-            0
-          )
-          .to(".proc-veil", { autoAlpha: 0, ease: "power1.in", duration: 0.28 }, 0.32)
-          .fromTo(
-            ".proc-intro",
-            { scale: 1.14 },
-            { scale: 1, ease: "power1.out", duration: 0.45 },
-            0.1
-          )
-          .to(".proc-questions", { yPercent: -10, ease: "none", duration: 0.6 }, 0)
-          .to({}, { duration: 0.6 });
-      } else {
-        // МОБАЙЛ — БЕЗ пиннинга/удержания: два экрана листаются нативно (не дрожит).
-        // Пока тёмный экран «Мы строим работу иначе» уходит вверх, фраза
-        // приближается (scale) и растворяется — зум есть, но экран не замирает.
-        gsap.set(".proc-intro", { clearProps: "opacity,visibility" });
-        gsap.set(".proc-turn", { transformOrigin: "50% 46%" });
-        gsap.fromTo(
-          ".proc-turn",
-          { scale: 1, autoAlpha: 1 },
-          {
-            scale: 2.7,
-            autoAlpha: 0,
-            ease: "power1.in",
-            scrollTrigger: {
-              trigger: ".proc-veil",
-              start: "top top",
-              end: "bottom top",
-              scrub: 0.5,
-            },
-          }
-        );
-      }
+      // ПЕРЕХОД-ШТОРА (awwwards-style, единый для мобилы и десктопа):
+      // экран ЛИПНЕТ (нативный sticky, не GSAP-пин → не борется со скроллом),
+      // тёмный блок «Мы строим работу иначе» стоит фоном, а СВЕТЛАЯ панель
+      // «Как мы работаем» НАЕЗЖАЕТ снизу ПОВЕРХ него (translateY 100%→0) — это не
+      // просто скролл, а штора над блоком. Затем ЗАДЕРЖКА: пока трек ещё
+      // прокручивается, панель держится на месте (linger), «Как мы работаем»
+      // полностью показан. Анимируем ТОЛЬКО transform (GPU-слой) — не дрожит.
+      gsap.set(".proc-intro", { yPercent: 100 });
+      gsap.set(".proc-veil", { autoAlpha: 1 });
+      gsap.set(".proc-turn", { transformOrigin: "50% 44%" });
 
-      // у каждого вопроса своя глубина параллакса (только десктоп — на мобиле
-      // 21 скраб-триггер съедал кадры)
-      if (!mobile)
-        gsap.utils.toArray<HTMLElement>(".proc-q").forEach((q) => {
-          const depth = parseFloat(q.dataset.depth || "1");
-          gsap.fromTo(
-            q,
-            { yPercent: 22 * depth },
-            {
-              yPercent: -22 * depth,
-              ease: "none",
-              scrollTrigger: {
-                trigger: ".proc-enter-track",
-                start: "top top",
-                end: "bottom bottom",
-                scrub: 1,
-              },
-            }
-          );
-        });
-
-      // заголовок «Как мы работаем» проявляется при входе (на мобиле — когда
-      // светлый экран-панель входит в кадр; на десктопе — в портале)
-      const title = root.current!.querySelector(".proc-bigtitle");
-      if (title)
-        gsap.fromTo(
-          title,
-          { y: 30, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1,
-            ease: "expo.out",
-            scrollTrigger: {
-              // на мобиле интро — отдельный экран-панель (без пина): раскрываем
-              // титул, когда светлая панель входит в кадр
-              trigger: mobile ? ".proc-intro" : ".proc-enter",
-              start: mobile ? "top 68%" : "top 30%",
-            },
-          }
-        );
+      const enter = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".proc-enter-track",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: mobile ? 0.6 : 0.8,
+        },
+      });
+      enter
+        // штора поднимается поверх тёмного блока (первые ~45% прокрутки трека)
+        .to(".proc-intro", { yPercent: 0, ease: "power2.inOut", duration: 0.45 }, 0)
+        // тёмный блок мягко «уходит под» штору — параллакс + лёгкий зум (одна
+        // надпись, не поддерево → дёшево, без дрожания)
+        .to(".proc-turn", { yPercent: -7, scale: 1.08, ease: "power1.in", duration: 0.45 }, 0)
+        // заголовок рождается, когда штора почти закрыла экран
+        .fromTo(
+          ".proc-bigtitle",
+          { y: 42, opacity: 0 },
+          { y: 0, opacity: 1, ease: "expo.out", duration: 0.22 },
+          0.34
+        )
+        // ЗАДЕРЖКА — панель держится полностью раскрытой (linger)
+        .to({}, { duration: 0.5 });
       // дрейф вопросов — ЖИВОЙ ВЕЗДЕ (и на мобиле): хаотично и эстетично,
       // transform-only твины на собственных GPU-слоях (will-change) — дёшево
       const qFloatTweens: gsap.core.Tween[] = [];

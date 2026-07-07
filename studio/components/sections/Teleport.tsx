@@ -6,8 +6,9 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   TELEPORT — переход Отзывы → Контакт. Последняя мысль клиента растворяется в
-  тысячи маленьких точек, точки собираются в большую кнопку «Рассказать о
-  проекте». Мысль буквально превращается в действие.
+  тысячи маленьких точек, точки собираются в световую точку-портал, которая
+  раскрывается и ведёт прямо в финальный блок с формой. Без кнопки — мысль
+  клиента сама «телепортирует» его к действию.
 */
 // детерминированный разброс (phyllotaxis) — одинаков на сервере и клиенте,
 // чтобы не было рассинхрона гидрации
@@ -33,7 +34,7 @@ export default function Teleport() {
         scrollTrigger: {
           trigger: ".teleport",
           start: "top top",
-          end: "+=160%",
+          end: "+=130%",
           scrub: 0.7,
           pin: true,
           anticipatePin: 1,
@@ -43,7 +44,7 @@ export default function Teleport() {
       // строка растворяется
       tl.fromTo(".tp-line", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(10px)", ease: "power2.in" }, 0);
 
-      // точки слетаются из разброса к центру (собираются в кнопку)
+      // точки слетаются из разброса к центру (собираются в световую точку)
       gsap.utils.toArray<HTMLElement>(".tp-dot").forEach((dot) => {
         const dx = parseFloat(dot.dataset.x || "0");
         const dy = parseFloat(dot.dataset.y || "0");
@@ -56,13 +57,14 @@ export default function Teleport() {
         ).to(dot, { opacity: 0, scale: 0.4, ease: "power2.in" }, 0.62);
       });
 
-      // кнопка материализуется из собравшихся точек
+      // световая точка-портал разгорается из собравшихся точек и раскрывается —
+      // визуально «открывает» вход в финальный блок (без кнопки)
       tl.fromTo(
-        ".tp-cta",
-        { scale: 0.4, opacity: 0, filter: "blur(8px)" },
-        { scale: 1, opacity: 1, filter: "blur(0px)", ease: "back.out(1.6)" },
-        0.6
-      );
+        ".tp-orb",
+        { scale: 0.2, opacity: 0 },
+        { scale: 1, opacity: 1, ease: "power2.out", duration: 0.28 },
+        0.55
+      ).to(".tp-orb", { scale: 1.6, opacity: 0, ease: "power2.in", duration: 0.3 }, 0.84);
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
@@ -89,9 +91,7 @@ export default function Teleport() {
           ))}
         </div>
 
-        <a href="#contact" className="btn btn--cut tp-cta" data-magnetic>
-          <span>Рассказать о&nbsp;проекте&nbsp;&nbsp;→</span>
-        </a>
+        <span className="tp-orb" aria-hidden />
       </div>
     </div>
   );

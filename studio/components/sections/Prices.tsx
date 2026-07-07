@@ -152,43 +152,42 @@ export default function Prices() {
       </header>
 
       <div className="price-grid">
-        {TIERS.map((t) => (
-          <article
-            className={`price-card star-border${t.rec ? " price-card--rec" : ""}`}
-            key={t.name}
-            data-magnetic
-          >
-            <span className="star-move star-move--b" aria-hidden />
-            <span className="star-move star-move--t" aria-hidden />
+        {TIERS.map((t, i) => (
+          <article className="price-card" key={t.name} data-magnetic>
             <div className="price-inner">
-              {t.rec && <span className="price-badge">Чаще выбирают</span>}
-              <span className="price-name">{t.name}</span>
-              <span className="price-value">
-                <i className="price-pre">{t.pre}</i>
-                <b className="price-num" data-val={t.num.replace(/\s/g, "")}>
-                  {t.num}
-                </b>
-                <i className="price-cur">{t.cur}</i>
-              </span>
-              <span className="price-time">срок · {t.time}</span>
+              <span className="price-idx">{String(i + 1).padStart(2, "0")}</span>
+              <h3 className="price-name">{t.name}</h3>
               <p className="price-desc">{t.desc}</p>
               <ul className="price-feats">
                 {t.feats.map((f) => (
                   <li key={f}>{f}</li>
                 ))}
               </ul>
-              <a href="#contact" className="btn btn--primary price-cta" data-magnetic>
-                Обсудить
+              <a
+                href="#contact"
+                className="price-buy"
+                data-magnetic
+                aria-label={`Обсудить тариф «${t.name}»`}
+              >
+                <span className="price-buy-info">
+                  <span className="price-buy-label">цена вопроса</span>
+                  <span className="price-buy-sum">
+                    <b className="price-num" data-val={t.num.replace(/\s/g, "")}>
+                      {t.num}
+                    </b>
+                    <i className="price-cur">{t.cur}</i>
+                  </span>
+                </span>
+                <span className="price-buy-arrow" aria-hidden>
+                  →
+                </span>
               </a>
             </div>
           </article>
         ))}
       </div>
 
-      <p className="prices-note">
-        Точная цена — после короткого разговора. Без абонентской платы: платите
-        один раз за&nbsp;сайт.
-      </p>
+      <p className="prices-note">Нужен другой формат? Соберём решение под&nbsp;вас.</p>
     </section>
   );
 }

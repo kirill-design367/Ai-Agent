@@ -1766,14 +1766,14 @@ main {
 }
 .proc-veil {
   position: absolute;
-  /* симметричный овэрскан сверху/снизу — тёмное гарантированно перекрывает любую
-     белую полосу следующего блока (центр текста не смещается) */
+  /* тёмный блок «Мы строим работу иначе» — ФОН перехода: светлая штора
+     «Как мы работаем» наезжает ПОВЕРХ него (z-index ниже шторы) */
   inset: 0;
-  z-index: 5;
+  z-index: 1;
   display: grid;
   place-items: center;
   background: #070708;
-  will-change: opacity;
+  will-change: transform;
 }
 .proc-turn {
   margin: 0;
@@ -1796,7 +1796,8 @@ main {
 .proc-intro {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  /* светлая ШТОРА поверх тёмного блока — наезжает снизу (translateY) */
+  z-index: 2;
   padding: 0 clamp(1.4rem, 6vw, 7rem);
   display: flex;
   flex-direction: column;
@@ -1804,7 +1805,13 @@ main {
   justify-content: center;
   text-align: center;
   background: var(--bg-base);
+  /* собственный GPU-слой: композитор держит штору ровно на дробных координатах,
+     без субпиксельного дрожания при скролле на мобиле */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .proc-questions {
   position: absolute;
@@ -2291,40 +2298,10 @@ main {
     font-size: 64vw;
   }
 
-  /* МОБАЙЛ — ПОРТАЛ РАЗОБРАН НА ДВА ЭКРАНА В ОБЫЧНОМ ПОТОКЕ (без sticky-пина и
-     скраба). Пин удерживал экран на месте, пока палец скроллит → «борьба» со
-     скроллом и дрожание. Здесь — тёмный экран «Мы строим», затем светлый «Как мы
-     работаем», просто пролистываются нативно. Нечему дрожать. */
-  /* БЕЗ пиннинга/скраба — два экрана в обычном потоке (нативный скролл, не
-     дрожит). Тёмный «Мы строим», затем светлый «Как мы работаем». */
+  /* МОБАЙЛ — ТА ЖЕ ШТОРА, что и на десктопе (нативный sticky + transform-only →
+     не дрожит). Трек чуть короче, чтобы переход не растягивался на телефоне. */
   .proc-enter-track {
-    height: auto;
-  }
-  .proc-enter {
-    position: relative;
-    top: 0;
-    height: auto;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-    transform: none;
-    will-change: auto;
-  }
-  .proc-veil {
-    position: relative;
-    inset: auto;
-    order: -1;
-    min-height: 92svh;
-    z-index: auto;
-    will-change: auto;
-  }
-  .proc-intro {
-    position: relative;
-    inset: auto;
-    min-height: 94svh;
-    padding-top: clamp(3rem, 10vh, 5rem);
-    padding-bottom: clamp(3rem, 10vh, 5rem);
-    will-change: auto;
+    height: 260vh;
   }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
@@ -2428,169 +2405,150 @@ main {
   align-items: center;
   perspective: 1400px;
 }
+/* КАРТОЧКИ ЦЕН — светлые, минималистичные (по референсу клиента): номер тарифа
+   с тонкой линейкой, крупное serif-имя, чек-лист, снизу панель «цена вопроса»
+   с суммой и круглой кнопкой-стрелкой на форму. Монохром-люкс в светлой теме. */
 .price-card {
   position: relative;
+  display: flex;
+  border: 1px solid rgba(22, 20, 17, 0.13);
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  isolation: isolate;
+  background: var(--bg-base);
   will-change: transform, opacity;
-  transition: transform 0.55s var(--ease-expo), box-shadow 0.55s var(--ease-expo);
+  transition: transform 0.55s var(--ease-expo), box-shadow 0.55s var(--ease-expo),
+    border-color 0.55s var(--ease-expo);
 }
 .price-card:hover {
-  transform: translateY(-10px);
-}
-/* рекомендуемый тариф крупнее и приподнят — визуальная иерархия */
-.price-card--rec {
-  z-index: 2;
-  transform: scale(1.05);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
-}
-.price-card--rec:hover {
-  transform: scale(1.05) translateY(-10px);
-}
-.star-move {
-  position: absolute;
-  z-index: 0;
-  width: 200%;
-  height: 60%;
-  border-radius: 50%;
-  filter: blur(6px);
-  opacity: 0.9;
-}
-.star-move--b {
-  bottom: -22%;
-  right: -100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 12%);
-  animation: starb 6s linear infinite alternate;
-}
-.star-move--t {
-  top: -22%;
-  left: -100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 12%);
-  animation: start 6s linear infinite alternate;
-}
-.price-card--rec .star-move {
-  filter: blur(5px);
-  opacity: 1;
-}
-@keyframes starb {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
-}
-@keyframes start {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(100%); }
+  transform: translateY(-8px);
+  border-color: rgba(22, 20, 17, 0.24);
+  box-shadow: 0 26px 60px rgba(22, 20, 17, 0.1);
 }
 .price-inner {
-  position: relative;
-  z-index: 1;
-  margin: 2px;
-  height: calc(100% - 4px);
-  border-radius: calc(var(--radius-lg) - 2px);
-  background: #0d0d10;
-  color: var(--text-on-dark);
-  padding: clamp(1.6rem, 3vw, 2.4rem);
+  width: 100%;
+  padding: clamp(1.5rem, 2.6vw, 2.2rem);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
-.price-card--rec .price-inner {
-  background: #111116;
-  box-shadow: inset 0 0 0 1px rgba(244, 242, 238, 0.16);
-}
-.price-badge {
-  align-self: flex-start;
-  font-size: var(--text-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--bg-dark);
-  background: var(--text-on-dark);
-  border-radius: var(--radius-pill);
-  padding: 0.3rem 0.8rem;
-  margin-bottom: 0.4rem;
+/* номер тарифа + тонкая линейка под ним */
+.price-idx {
+  display: block;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--text-base);
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  padding-bottom: clamp(1rem, 2.4vw, 1.5rem);
+  border-bottom: 1px solid rgba(22, 20, 17, 0.1);
 }
 .price-name {
+  margin: clamp(1.1rem, 2.6vw, 1.6rem) 0 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 500;
-  font-size: clamp(1.05rem, 1.8vw, 1.4rem);
-  letter-spacing: 0;
-  text-transform: none;
-  color: rgba(244, 242, 238, 0.86);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
-/* типографическая иерархия цены: «от» мелко, число крупно, ₽ акцентом */
-.price-value {
+.price-desc {
+  margin: clamp(0.7rem, 1.6vw, 1rem) 0 0;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.price-feats {
+  list-style: none;
+  margin: clamp(1.1rem, 2.6vw, 1.5rem) 0 clamp(1.6rem, 3.4vw, 2.2rem);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.price-feats li {
+  position: relative;
+  padding-left: 1.7rem;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.price-feats li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: -0.05em;
+  font-size: 0.95em;
+  color: var(--text-primary);
+}
+/* нижняя панель «цена вопроса» — сумма слева, круглая кнопка-стрелка справа */
+.price-buy {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(0.9rem, 2vw, 1.2rem) clamp(1rem, 2.2vw, 1.4rem);
+  border: 1px solid rgba(22, 20, 17, 0.12);
+  border-radius: calc(var(--radius-lg) - 8px);
+  background: rgba(22, 20, 17, 0.02);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.4s var(--ease-expo), border-color 0.4s var(--ease-expo);
+}
+.price-buy:hover {
+  background: rgba(22, 20, 17, 0.05);
+  border-color: rgba(22, 20, 17, 0.26);
+}
+.price-buy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.price-buy-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+}
+.price-buy-sum {
   display: flex;
   align-items: baseline;
-  gap: 0.28em;
-  margin-top: 0.1rem;
+  gap: 0.18em;
   font-family: var(--font-headline), system-ui, sans-serif;
-  letter-spacing: -0.02em;
   line-height: 1;
 }
-.price-pre {
-  font-style: normal;
-  font-weight: 500;
-  font-size: 0.86rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.5);
-}
 .price-num {
-  font-weight: 800;
-  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 .price-cur {
   font-style: normal;
   font-weight: 600;
-  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
-  color: var(--accent);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  color: var(--text-primary);
 }
-.price-card--rec .price-num {
-  font-size: clamp(2.3rem, 4.8vw, 3.7rem);
+.price-buy-arrow {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: clamp(2.7rem, 5vw, 3.4rem);
+  height: clamp(2.7rem, 5vw, 3.4rem);
+  border-radius: 50%;
+  border: 1px solid rgba(22, 20, 17, 0.3);
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  transition: transform 0.4s var(--ease-expo), background 0.4s var(--ease-expo),
+    color 0.4s var(--ease-expo), border-color 0.4s var(--ease-expo);
 }
-.price-time {
-  font-size: var(--text-sm);
-  color: rgba(244, 242, 238, 0.5);
-}
-.price-desc {
-  margin: 0.4rem 0 0.6rem;
-  font-size: var(--text-base);
-  line-height: 1.5;
-  color: rgba(244, 242, 238, 0.72);
-}
-.price-feats {
-  list-style: none;
-  margin: 0 0 1.4rem;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.price-feats li {
-  position: relative;
-  padding-left: 1.4rem;
-  font-size: var(--text-sm);
-  color: rgba(244, 242, 238, 0.8);
-}
-.price-feats li::before {
-  content: "—";
-  position: absolute;
-  left: 0;
-  color: rgba(244, 242, 238, 0.4);
-}
-.price-cta {
-  margin-top: auto;
-  align-self: flex-start;
-  background: var(--text-on-dark);
-  color: #0d0d10;
-}
-.price-cta:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+.price-buy:hover .price-buy-arrow {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-base);
+  transform: translateX(3px);
 }
 .prices-note {
   max-width: 1300px;
-  margin: clamp(2rem, 5vh, 3rem) auto 0;
+  margin: clamp(2.4rem, 6vh, 3.6rem) auto 0;
+  text-align: center;
   font-size: var(--text-sm);
   color: var(--text-tertiary);
 }
@@ -3100,13 +3058,6 @@ main {
   .price-grid {
     grid-template-columns: 1fr;
   }
-  .price-card--rec {
-    order: -1;
-    transform: none;
-  }
-  .price-card--rec:hover {
-    transform: translateY(-10px);
-  }
   .bento {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -3238,15 +3189,24 @@ main {
   opacity: 0;
   will-change: transform, opacity;
 }
-.tp-cta {
+/* точки собираются в световую точку-портал, которая раскрывается в финальный
+   блок (без кнопки — мысль клиента ведёт прямо к форме) */
+.tp-orb {
   position: relative;
   z-index: 2;
-  height: clamp(60px, 8vw, 80px);
-  padding: 0 clamp(2rem, 4vw, 3.4rem);
-  font-size: clamp(1rem, 1.6vw, 1.3rem);
-  font-weight: 600;
+  width: clamp(120px, 22vw, 240px);
+  height: clamp(120px, 22vw, 240px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.7) 26%,
+    rgba(255, 255, 255, 0.12) 52%,
+    transparent 72%
+  );
   opacity: 0;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 @media (max-width: 760px) {
   .bh-word { font-size: 0.8em !important; }
