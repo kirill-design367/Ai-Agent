@@ -75,48 +75,58 @@ export default function Process() {
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) {
-        // без анимации — сразу показываем «Как мы работаем», тёмную завесу прячем
-        gsap.set(".proc-intro", { yPercent: 0 });
-        gsap.set(".proc-veil", { autoAlpha: 0 });
-        return;
-      }
-      const mobile = window.matchMedia("(max-width: 760px)").matches;
+      if (reduce) return; // оба экрана в обычном потоке — читаются как есть
 
-      // ПЕРЕХОД-ШТОРА (awwwards-style, единый для мобилы и десктопа):
-      // экран ЛИПНЕТ (нативный sticky, не GSAP-пин → не борется со скроллом),
-      // тёмный блок «Мы строим работу иначе» стоит фоном, а СВЕТЛАЯ панель
-      // «Как мы работаем» НАЕЗЖАЕТ снизу ПОВЕРХ него (translateY 100%→0) — это не
-      // просто скролл, а штора над блоком. Затем ЗАДЕРЖКА: пока трек ещё
-      // прокручивается, панель держится на месте (linger), «Как мы работаем»
-      // полностью показан. Анимируем ТОЛЬКО transform (GPU-слой) — не дрожит.
-      gsap.set(".proc-intro", { yPercent: 100 });
-      gsap.set(".proc-veil", { autoAlpha: 1 });
-      gsap.set(".proc-turn", { transformOrigin: "50% 44%" });
+      // ПЕРЕХОД БЕЗ ПИННИНГА/СТОПОРА (что и давало дрожание): два экрана в
+      // обычном потоке — тёмный «Мы строим работу иначе», затем светлый «Как мы
+      // работаем». Премиальность даёт ПАРАЛЛАКС ГЛУБИНЫ, а не удержание экрана:
+      // надпись тёмного экрана плывёт медленнее прокрутки и мягко тает к выходу,
+      // на светлом — заголовок и рой вопросов въезжают со своей глубиной.
+      // Только transform/opacity на GPU, ничего не стопорится → не дрожит.
 
-      const enter = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".proc-enter-track",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: mobile ? 0.6 : 0.8,
-        },
-      });
-      enter
-        // штора поднимается поверх тёмного блока (первые ~45% прокрутки трека)
-        .to(".proc-intro", { yPercent: 0, ease: "power2.inOut", duration: 0.45 }, 0)
-        // тёмный блок мягко «уходит под» штору — параллакс + лёгкий зум (одна
-        // надпись, не поддерево → дёшево, без дрожания)
-        .to(".proc-turn", { yPercent: -7, scale: 1.08, ease: "power1.in", duration: 0.45 }, 0)
-        // заголовок рождается, когда штора почти закрыла экран
-        .fromTo(
-          ".proc-bigtitle",
-          { y: 42, opacity: 0 },
-          { y: 0, opacity: 1, ease: "expo.out", duration: 0.22 },
-          0.34
-        )
-        // ЗАДЕРЖКА — панель держится полностью раскрытой (linger)
-        .to({}, { duration: 0.5 });
+      // тёмный экран: надпись — параллакс (медленнее скролла) + затухание к концу
+      gsap.fromTo(
+        ".proc-turn",
+        { yPercent: -14 },
+        {
+          yPercent: 14,
+          ease: "none",
+          scrollTrigger: { trigger: ".proc-veil", start: "top bottom", end: "bottom top", scrub: 0.8 },
+        }
+      );
+      gsap.fromTo(
+        ".proc-turn",
+        { opacity: 1 },
+        {
+          opacity: 0.16,
+          ease: "power1.in",
+          scrollTrigger: { trigger: ".proc-veil", start: "center 60%", end: "bottom 20%", scrub: 0.8 },
+        }
+      );
+
+      // светлый экран: рой вопросов дрейфует со своей глубиной (один триггер)
+      gsap.fromTo(
+        ".proc-questions",
+        { yPercent: 10 },
+        {
+          yPercent: -10,
+          ease: "none",
+          scrollTrigger: { trigger: ".proc-intro", start: "top bottom", end: "bottom top", scrub: 1 },
+        }
+      );
+
+      // заголовок «Как мы работаем» рождается, когда светлый экран входит в кадр
+      gsap.fromTo(
+        ".proc-bigtitle",
+        { y: 54, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "expo.out",
+          scrollTrigger: { trigger: ".proc-intro", start: "top 72%" },
+        }
+      );
       // дрейф вопросов — ЖИВОЙ ВЕЗДЕ (и на мобиле): хаотично и эстетично,
       // transform-only твины на собственных GPU-слоях (will-change) — дёшево
       const qFloatTweens: gsap.core.Tween[] = [];

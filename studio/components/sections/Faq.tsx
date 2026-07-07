@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   FAQ — снимает последние возражения перед заявкой.
-  Аккордеон на grid-template-rows (0fr→1fr): открытие/закрытие плавное и дешёвое
-  по перформансу (без помегабайтной анимации каждой буквы — она лагала). Ответ
-  мягко проявляется со сдвигом. Высота подстраивается под контент автоматически.
+  Вход-переход (из блока цен): вопросы «валяются» в хаосе (разлетелись, повёрнуты)
+  и ПО МЕРЕ СКРОЛЛА встают на свои места — собираются в аккуратный список.
+  Аккордеон на grid-template-rows (0fr→1fr): открытие/закрытие плавное и дешёвое.
 */
 const QA = [
   {
@@ -40,12 +42,55 @@ const QA = [
 ];
 
 export default function Faq() {
+  const root = useRef<HTMLElement>(null);
   const [open, setOpen] = useState<number | null>(0);
 
   const toggle = (i: number) => setOpen((cur) => (cur === i ? null : i));
 
+  useGSAP(
+    () => {
+      registerGsap();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      // заголовок проявляется
+      gsap.from(".faq-title", {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        ease: "expo.out",
+        scrollTrigger: { trigger: ".faq", start: "top 82%" },
+      });
+
+      // ХАОС → ПОРЯДОК: каждый вопрос прилетает из своей стороны, повёрнутый, и
+      // по мере скролла встаёт ровно на своё место (scrub привязывает к прокрутке)
+      gsap.utils.toArray<HTMLElement>(".faq-item").forEach((item, i) => {
+        const dir = i % 2 ? 1 : -1;
+        gsap.fromTo(
+          item,
+          {
+            x: dir * gsap.utils.random(46, 92),
+            y: gsap.utils.random(24, 64),
+            rotation: dir * gsap.utils.random(3.5, 9),
+            opacity: 0,
+          },
+          {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            opacity: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: item, start: "top 94%", end: "top 58%", scrub: 0.8 },
+          }
+        );
+      });
+
+      return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+    },
+    { scope: root }
+  );
+
   return (
-    <section id="faq" className="theme-dark faq">
+    <section id="faq" className="theme-dark faq" ref={root}>
       <header className="faq-head">
         <h2 className="faq-title">Что обычно спрашивают</h2>
       </header>

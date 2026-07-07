@@ -62,23 +62,8 @@ export default function Works() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // ЛЕНТА — горизонтальный parallax, привязанный к scrollY (не ко времени).
-      const ticker = root.current?.querySelector(".works-ticker");
-      if (ticker)
-        gsap.fromTo(
-          ticker,
-          { xPercent: 2 },
-          {
-            xPercent: -22,
-            ease: "none",
-            scrollTrigger: {
-              trigger: ".works-banner",
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1.4,
-            },
-          }
-        );
+      // ЛЕНТА «ПОРТФОЛИО» — постоянный медленный дрейф (CSS-анимация worksticker,
+      // не привязан к скроллу): плывёт всегда, ровно и на GPU. См. globals.css.
 
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
 

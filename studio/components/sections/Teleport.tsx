@@ -34,7 +34,7 @@ export default function Teleport() {
         scrollTrigger: {
           trigger: ".teleport",
           start: "top top",
-          end: "+=130%",
+          end: "+=95%",
           scrub: 0.7,
           pin: true,
           anticipatePin: 1,

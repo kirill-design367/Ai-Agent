@@ -127,11 +127,10 @@ export default function Hero() {
         </h1>
 
         <p className="hero-sub" ref={sub}>
-          <span className="hs-line hs-l1">Мы&nbsp;проектируем каждый пиксель вашего&nbsp;сайта так,</span>{" "}
-          <span className="hs-line hs-l2">чтобы он&nbsp;усиливал доверие</span>{" "}
-          <span className="hs-line hs-l3">к&nbsp;вашему бизнесу, помогал получать</span>{" "}
-          <span className="hs-line hs-l4">больше обращений и&nbsp;делал компанию</span>{" "}
-          <span className="hs-line hs-l5">сильнее в&nbsp;глазах клиентов.</span>
+          <span className="hs-line hs-l1">Поэтому мы&nbsp;создаём сайты, которые</span>{" "}
+          <span className="hs-line hs-l2">вызывают доверие с&nbsp;первых секунд</span>{" "}
+          <span className="hs-line hs-l3">и&nbsp;помогают превращать</span>{" "}
+          <span className="hs-line hs-l4">посетителей в&nbsp;клиентов.</span>
         </p>
       </div>
 
@@ -177,30 +176,31 @@ export default function Hero() {
             </clipPath>
           </defs>
         </svg>
-        <a href="#work" className="gem gem--left" data-magnetic aria-label="Смотреть работы">
+        <a href="#prices" className="gem gem--left" data-magnetic aria-label="Узнать стоимость">
           <MarquiseGem />
           <span className="gem-label">
-            Смотреть
+            Узнать
             <br />
-            работы
+            стоимость
           </span>
         </a>
-        <a href="#contact" className="gem gem--right" data-magnetic aria-label="Обсудить проект">
+        <a href="#contact" className="gem gem--right" data-magnetic aria-label="Бесплатно обсудить проект">
           <MarquiseGem />
           <span className="gem-label">
-            Обсудить
+            Бесплатно
             <br />
-            проект
+            обсудить проект
           </span>
         </a>
       </div>
 
-      {/* нижняя зона: микрокопия одной строкой (кнопки убраны) */}
+      {/* нижняя зона: ключевые фишки — вертикально, крупно, по золотому сечению */}
       <div className="hero-foot">
-        <p className="hero-microcopy" data-hero-fade>
-          Индивидуальный дизайн <i>•</i> Пожизненная гарантия <i>•</i> Запуск
-          от&nbsp;5&nbsp;дней
-        </p>
+        <ul className="hero-feats" data-hero-fade>
+          <li>Индивидуальный дизайн</li>
+          <li>Пожизненная гарантия</li>
+          <li>Запуск от&nbsp;5&nbsp;дней</li>
+        </ul>
       </div>
     </section>
   );

@@ -65,16 +65,25 @@ export default function Reviews() {
         // слетаются из разных сторон и встают под своим углом
         gsap.fromTo(
           card,
-          { x: FROM_X[i % FROM_X.length], y: 70, opacity: 0, rotation: rot * 4 },
+          {
+            x: FROM_X[i % FROM_X.length],
+            y: 70,
+            opacity: 0,
+            scale: 0.62,
+            filter: "blur(6px)",
+            rotation: rot * 4,
+          },
           {
             x: 0,
             y: 0,
             opacity: 1,
+            scale: 1,
+            filter: "blur(0px)",
             rotation: rot,
-            duration: 1.2,
+            duration: 1.25,
             ease: "expo.out",
-            scrollTrigger: { trigger: ".rev-grid", start: "top 82%" },
-            delay: i * 0.08,
+            scrollTrigger: { trigger: ".rev-grid", start: "top 84%" },
+            delay: i * 0.1,
             onComplete: () => {
               // невесомый дрейф вокруг своего угла (rotation сохраняется)
               driftTweens.push(

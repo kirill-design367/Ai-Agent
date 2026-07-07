@@ -36,7 +36,7 @@ export default function BlackHole() {
         scrollTrigger: {
           trigger: ".blackhole",
           start: "top top",
-          end: "+=170%",
+          end: "+=105%",
           scrub: 0.7,
           pin: true,
           anticipatePin: 1,

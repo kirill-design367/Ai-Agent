@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
 
 /*
   ЦЕНЫ — отвечает на «Сколько стоит и не разведут ли меня?».
@@ -73,17 +73,31 @@ export default function Prices() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) return;
 
-      // ВХОД БЕЗ ПИННИНГА (плавно, без резких смен): заголовок «рождается» —
-      // мягко всплывает и проявляется, следом карточки выезжают снизу. Нативный
-      // скролл, ничего не удерживается → не дрожит.
-      gsap.fromTo(
-        ".prices-head",
-        { y: 48, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1.1,
+      // ВХОД-РЕВИЛ (awwwards-подача, без пиннинга → не дрожит): заголовок
+      // «раскрывается» — буквы всплывают из-под маски со stagger; фон из знаков ₽
+      // мягко проявляется; следом карточки выезжают снизу с лёгкой 3D-глубиной.
+      const titleEl = root.current!.querySelector<HTMLElement>(".prices-title");
+      if (titleEl) {
+        const split = new SplitText(titleEl, { type: "lines,chars", linesClass: "prices-line" });
+        gsap.set(".prices-line", { overflow: "hidden" });
+        gsap.from(split.chars, {
+          yPercent: 118,
+          opacity: 0,
+          duration: 1,
           ease: "expo.out",
+          stagger: { each: 0.018, from: "start" },
+          scrollTrigger: { trigger: ".prices-head", start: "top 82%" },
+        });
+      }
+
+      // фон из парящих ₽ проявляется на входе
+      gsap.fromTo(
+        ".prices-rub-float",
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 1.4,
+          ease: "power2.out",
           scrollTrigger: { trigger: ".prices-head", start: "top 84%" },
         }
       );
@@ -92,15 +106,15 @@ export default function Prices() {
       gsap.utils.toArray<HTMLElement>(".price-card").forEach((card, i) => {
         gsap.fromTo(
           card,
-          { y: 60, opacity: 0, rotateX: 8 },
+          { y: 70, opacity: 0, rotateX: 10 },
           {
             y: 0,
             opacity: 1,
             rotateX: 0,
-            duration: 1,
+            duration: 1.05,
             ease: "expo.out",
             delay: i * 0.1,
-            scrollTrigger: { trigger: ".price-grid", start: "top 82%" },
+            scrollTrigger: { trigger: ".price-grid", start: "top 84%" },
           }
         );
       });

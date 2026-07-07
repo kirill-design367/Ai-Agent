@@ -452,12 +452,16 @@ body {
   overflow: hidden;
   width: 100%;
 }
-/* горизонтальный parallax, привязанный к scrollY (GSAP scrub в Works.tsx),
-   а не к времени — движется со скоростью прокрутки, компонуется на GPU */
+/* постоянный медленный дрейф (не привязан к скроллу): два идентичных трека,
+   -50% сдвигает ровно на один → шов невидим, лента плывёт бесконечно на GPU */
 .works-ticker {
   display: flex;
   width: max-content;
   will-change: transform;
+  animation: worksticker 42s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .works-ticker { animation: none; }
 }
 .works-ticker-group {
   display: flex;
@@ -859,9 +863,9 @@ body {
     transform: rotate(-1.4deg);
     transform-origin: right center;
   }
-  /* микрокопию ещё заметнее приподнять от нижнего края */
-  .hero-microcopy {
-    transform: translateY(clamp(-11rem, -17vh, -5rem));
+  /* фишки приподнять в золотую зону (нижняя треть, между кнопками) */
+  .hero-feats {
+    transform: translateY(clamp(-9rem, -15vh, -4rem));
   }
 }
 
@@ -885,21 +889,35 @@ body {
   gap: var(--space-md);
   pointer-events: auto;
 }
-/* микрокопия — одна строка, мелким */
-.hero-microcopy {
+/* ключевые фишки — вертикально, крупно, по золотому сечению (в свободной
+   центральной полосе между «бриллиантами»-кнопками) */
+.hero-feats {
+  list-style: none;
   margin: 0;
-  align-self: flex-end;
-  font-size: clamp(0.6rem, 1vw, 0.72rem);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(244, 242, 238, 0.5);
-  white-space: nowrap;
-  text-align: center;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.5rem, 1.5vh, 0.95rem);
 }
-.hero-microcopy i {
-  font-style: normal;
-  margin: 0 0.45em;
-  color: rgba(244, 242, 238, 0.3);
+.hero-feats li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.98rem, 1.7vw, 1.32rem);
+  letter-spacing: 0.015em;
+  line-height: 1.15;
+  color: rgba(245, 243, 239, 0.86);
+  white-space: nowrap;
+}
+.hero-feats li::before {
+  content: "◆";
+  position: absolute;
+  left: 0;
+  top: 0.24em;
+  font-size: 0.6em;
+  color: rgba(226, 246, 242, 0.72);
 }
 
 /* — креативные кнопки-«бриллианты маркиз», торчащие из левого и правого краёв */
@@ -1244,12 +1262,13 @@ main {
   }
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
-  /* правый над подзаголовком; левый («Смотреть работы») — чуть ниже */
+  /* правый над подзаголовком; левый уводим ВЫШЕ — в полосу под подзаголовком,
+     чтобы не наезжал на список фишек внизу */
   .gem--right {
-    top: 38.5%;
+    top: 36%;
   }
   .gem--left {
-    top: 75%;
+    top: 61%;
   }
   .hero-sub {
     max-width: 100%;
@@ -1284,24 +1303,16 @@ main {
     padding-right: 0;
     /* убираем vh-паддинг из базы (2.5vh) — иначе высота панели Safari влияет */
     padding-top: 0;
-    /* микрокопия выше (кластер сдвинут вверх), но всё ещё под нижним кристаллом */
-    margin-top: clamp(2.2rem, 17vw, 4.6rem);
+    /* фишки уходят в самый низ — чётко ПОД нижним кристаллом (нет наложения) */
+    margin-top: clamp(6rem, 30vw, 11rem);
   }
-  .hero-cta-row .btn {
-    flex: 1;
-    text-align: center;
-    justify-content: center;
+  /* ключевые фишки на мобиле — вертикально, крупно, по левому краю */
+  .hero-feats {
+    align-items: flex-start;
+    gap: clamp(0.55rem, 2vw, 0.9rem);
   }
-  .hero-microcopy {
-    align-self: flex-start;
-    text-align: left;
-    /* каплю левее */
-    margin-left: -0.35rem;
-    font-size: 0.58rem;
-    letter-spacing: 0.05em;
-  }
-  .hero-microcopy i {
-    margin: 0 0.3em;
+  .hero-feats li {
+    font-size: clamp(1rem, 4.4vw, 1.2rem);
   }
 }
 
@@ -1736,43 +1747,31 @@ main {
    (та самая «тонкая белая линия», мерцающая при скролле = «дрожание»). */
 .proc-enter-track {
   position: relative;
-  height: 320vh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   background: #070708;
-  /* браузер НЕ доскраливает трек ради «зазоров» → нет пер-кадровой поправки */
-  overflow-anchor: none;
 }
 /* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок.
    sticky-пин (не ScrollTrigger pin); края перекрыты на 1px (top:-1px + 2px
    высоты) — субпиксельные щели сверху/снизу гарантированно закрашены. */
 .proc-enter {
-  position: sticky;
-  top: -1px;
-  height: calc(100vh + 2px);
+  position: relative;
   width: 100%;
-  overflow: hidden;
-  /* фон-страховка: тёмный, чтобы под завесой никогда не светилась белая полоса */
+  /* БЕЗ ПИНА/СТОПОРА (это и давало дрожание) — два экрана в обычном потоке */
+  display: flex;
+  flex-direction: column;
   background: #070708;
-  /* ГЛАВНЫЙ ФИКС ДРОЖАНИЯ: прилипший слой — на СВОЙ GPU-слой. Тогда композитор
-     держит его на дробных координатах ровно, без пер-кадровой пере-раскладки и
-     субпиксельного округления (из-за которого дрожал ВЕСЬ экран на мобиле). */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  overflow-anchor: none;
 }
 .proc-veil {
-  position: absolute;
-  /* тёмный блок «Мы строим работу иначе» — ФОН перехода: светлая штора
-     «Как мы работаем» наезжает ПОВЕРХ него (z-index ниже шторы) */
-  inset: 0;
-  z-index: 1;
+  /* тёмный экран «Мы строим работу иначе» — идёт ПЕРВЫМ (order -1: в разметке
+     он после светлого), надпись плывёт параллаксом при прокрутке */
+  position: relative;
+  order: -1;
+  min-height: 100svh;
   display: grid;
   place-items: center;
   background: #070708;
+  overflow: hidden;
   will-change: transform;
 }
 .proc-turn {
@@ -1794,10 +1793,9 @@ main {
   display: block;
 }
 .proc-intro {
-  position: absolute;
-  inset: 0;
-  /* светлая ШТОРА поверх тёмного блока — наезжает снизу (translateY) */
-  z-index: 2;
+  /* светлый экран «Как мы работаем» — идёт ВТОРЫМ, обычный поток */
+  position: relative;
+  min-height: 100svh;
   padding: 0 clamp(1.4rem, 6vw, 7rem);
   display: flex;
   flex-direction: column;
@@ -1805,13 +1803,7 @@ main {
   justify-content: center;
   text-align: center;
   background: var(--bg-base);
-  /* собственный GPU-слой: композитор держит штору ровно на дробных координатах,
-     без субпиксельного дрожания при скролле на мобиле */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  overflow: hidden;
 }
 .proc-questions {
   position: absolute;
@@ -2298,10 +2290,11 @@ main {
     font-size: 64vw;
   }
 
-  /* МОБАЙЛ — ТА ЖЕ ШТОРА, что и на десктопе (нативный sticky + transform-only →
-     не дрожит). Трек чуть короче, чтобы переход не растягивался на телефоне. */
-  .proc-enter-track {
-    height: 260vh;
+  /* МОБАЙЛ — тот же параллакс без пина; экраны чуть ниже 100svh, чтобы переход
+     не был растянутым */
+  .proc-veil,
+  .proc-intro {
+    min-height: 92svh;
   }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
@@ -2943,11 +2936,13 @@ main {
   margin: clamp(1rem, 3vh, 2rem) 0 0;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(3rem, 11vw, 9rem);
+  font-size: clamp(2.9rem, 10vw, 9rem);
   line-height: 0.92;
   letter-spacing: -0.03em;
   text-transform: uppercase;
   color: var(--text-on-dark);
+  /* «Расскажите» — цельным словом в одну строку (не переносится посреди слова) */
+  white-space: nowrap;
 }
 .contact-sub {
   max-width: 46ch;
@@ -3030,7 +3025,6 @@ main {
   gap: 1rem;
   margin-top: clamp(2.5rem, 6vh, 4rem);
   padding-top: clamp(1.4rem, 3vh, 2rem);
-  border-top: 1px solid rgba(244, 242, 238, 0.14);
 }
 .contact-geo {
   flex: 0 0 auto;
@@ -3088,7 +3082,8 @@ main {
     display: none;
   }
   .contact-title {
-    font-size: clamp(2.6rem, 15vw, 4rem);
+    /* «Расскажите» помещается в одну строку целиком (не переносится и не обрезается) */
+    font-size: clamp(1.85rem, 8.8vw, 3rem);
   }
 }
 
@@ -3098,7 +3093,7 @@ main {
 .blackhole {
   position: relative;
   /* короче → меньше пустого пространства между FAQ и отзывами */
-  height: 68vh;
+  height: 52vh;
   background: var(--bg-dark);
   overflow: hidden;
 }
@@ -3161,7 +3156,8 @@ main {
    ============================================================================ */
 .teleport {
   position: relative;
-  height: 100vh;
+  /* короче → меньше пустоты между отзывами и финалом */
+  height: 70vh;
   background: var(--bg-dark);
   overflow: hidden;
 }
