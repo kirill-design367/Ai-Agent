@@ -844,24 +844,19 @@ body {
 .hero-sub .word {
   display: inline-block;
 }
-/* десктоп: подзаголовок уходит ВПРАВО и чуть наклонён (хаос) — баланс к левому
-   заголовку, композиция перестаёт «валиться» влево */
+/* десктоп: гармоничная ЛЕВАЯ КОЛОНКА — заголовок, под ним подзаголовок, всё по
+   левому краю (никаких наложений на заголовок) */
 @media (min-width: 761px) {
   .hero-mid {
     position: relative;
-    /* заголовок чуть приподнять */
-    transform: translateY(clamp(-3.5rem, -4vh, -1.5rem));
+    transform: translateY(clamp(-2.5rem, -3vh, -1rem));
   }
   .hero-sub {
-    position: absolute;
-    right: clamp(0rem, 3vw, 4rem);
-    /* выше (было -4%) */
-    bottom: 5%;
-    max-width: 32ch;
-    margin: 0;
-    text-align: right;
-    transform: rotate(-1.4deg);
-    transform-origin: right center;
+    position: static;
+    margin: clamp(1.8rem, 4vh, 2.8rem) 0 0;
+    max-width: 44ch;
+    text-align: left;
+    transform: none;
   }
   /* фишки приподнять в золотую зону (нижняя треть, между кнопками) */
   .hero-feats {
@@ -1136,15 +1131,19 @@ body {
 .gem-label {
   position: relative;
   z-index: 1;
+  /* текст держим В ПЛОЩАДКЕ кристалла (центр ~64%), чтобы не вылазил на острые
+     края огранки; перенос по словам, не режется */
+  max-width: 66%;
+  margin: 0 auto;
   color: var(--text-on-dark);
   font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 600;
-  /* текст в кристалле чуть крупнее (сами кристаллы уменьшены) */
-  font-size: clamp(0.82rem, 1.7vw, 1.06rem);
-  line-height: 1.08;
-  letter-spacing: 0.05em;
+  font-size: clamp(0.72rem, 1.45vw, 0.95rem);
+  line-height: 1.06;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   text-align: center;
+  overflow-wrap: break-word;
 }
 /* золотое сечение по вертикали: правый выше (~38%), левый ниже (~62%);
    часть уходит за край, лёгкий наклон — «алмаз, торчащий из породы» */
@@ -1155,22 +1154,16 @@ main {
 }
 .gem--right {
   top: 51%;
-  /* меньше торчат за край → надпись читается целиком, кнопки не «уезжают» */
-  right: clamp(-40px, -4.5vw, -22px);
+  /* ПОЛНОСТЬЮ на экране (не торчат за край) → надпись не обрезается кромкой */
+  right: clamp(0.8rem, 2.5vw, 2.4rem);
   transform: rotate(-9deg);
-  /* «Обсудить проект» — главный из двух, крупнее левого (после общего −15%) */
-  width: clamp(190px, 34vw, 301px);
+  width: clamp(190px, 26vw, 264px);
 }
 .gem--left {
   top: 69%;
-  left: clamp(-40px, -4.5vw, -22px);
+  left: clamp(0.8rem, 2.5vw, 2.4rem);
   transform: rotate(7deg);
-}
-.gem--right .gem-label {
-  margin-right: 12%;
-}
-.gem--left .gem-label {
-  margin-left: 12%;
+  width: clamp(190px, 26vw, 264px);
 }
 @media (hover: hover) and (pointer: fine) {
   .gem--right:hover {
@@ -1207,16 +1200,16 @@ main {
    свободную полосу (правый ниже левого — золотое сечение по вертикали) */
 @media (min-width: 761px) {
   .gem {
-    width: clamp(196px, 18vw, 264px);
+    width: clamp(200px, 19vw, 270px);
   }
-  /* левый ниже; правый («Обсудить проект») — чуть выше */
+  /* обе кнопки в нижних углах, симметрично и ПОЛНОСТЬЮ на экране */
   .gem--left {
-    top: 76%;
+    top: 74%;
+    width: clamp(200px, 19vw, 270px);
   }
   .gem--right {
-    top: 82%;
-    /* крупнее левого — главный акцент */
-    width: clamp(231px, 21vw, 313px);
+    top: 74%;
+    width: clamp(200px, 19vw, 270px);
   }
 }
 
@@ -1262,13 +1255,18 @@ main {
   }
   /* кристаллы на мобиле: правый ВЫШЕ подзаголовка, левый — НИЖЕ него, так что
      подзаголовок ложится в полосу МЕЖДУ ними (золотое сечение по вертикали) */
-  /* правый над подзаголовком; левый уводим ВЫШЕ — в полосу под подзаголовком,
-     чтобы не наезжал на список фишек внизу */
+  /* кристаллы компактнее и в ЧИСТЫХ полосах: правый — между заголовком и
+     подзаголовком, левый — между подзаголовком и списком фишек (без наложений) */
+  .gem {
+    width: clamp(150px, 45vw, 186px);
+  }
   .gem--right {
-    top: 36%;
+    top: 35%;
+    width: clamp(150px, 45vw, 186px);
   }
   .gem--left {
-    top: 61%;
+    top: 70%;
+    width: clamp(150px, 45vw, 186px);
   }
   .hero-sub {
     max-width: 100%;
