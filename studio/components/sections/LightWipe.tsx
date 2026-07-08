@@ -6,10 +6,11 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   ПЕРЕХОД 3 — «Почему выбирают меня» (тёмный) → «Прозрачная стоимость» (светлый).
-  Физическое ЗАПОЛНЕНИЕ СВЕТОМ: размытое белое пятно стартует снизу за краем
-  экрана, по скрабу растёт в масштабе и поднимается вверх, вытесняя чёрный фон
-  снизу вверх. Когда свет полностью залил экран — подставляется сплошной белый
-  фон-заглушка (без размытой границы). Только transform/opacity/filter.
+  Физическое ЗАПОЛНЕНИЕ СВЕТОМ: чистый белый флуд с мягкой светящейся кромкой
+  СВЕРХУ ровно поднимается снизу вверх и заливает экран. Низ флуда всегда
+  сплошь-белый (никакого серого «острова»/кольца — прежнее радиальное пятно его
+  и давало), размытие смягчает только переднюю кромку. Только transform,
+  полностью reversible.
 */
 export default function LightWipe() {
   const root = useRef<HTMLDivElement>(null);
@@ -18,7 +19,7 @@ export default function LightWipe() {
     () => {
       registerGsap();
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(".lightwipe-solid", { opacity: 1 });
+        gsap.set(".lightwipe-glow", { yPercent: 0 });
         return;
       }
 
@@ -41,19 +42,13 @@ export default function LightWipe() {
             },
           });
 
-          // размытое пятно света поднимается снизу и разрастается, съедая чёрное
+          // белый флуд ровно поднимается снизу (сплошной низ, мягкая верхняя
+          // кромка) и заливает экран — без серого следа
           tl.fromTo(
             ".lightwipe-glow",
-            { yPercent: 60, scale: 0.45, autoAlpha: 0.85 },
-            { yPercent: -55, scale: 3.4, autoAlpha: 1, ease: "power1.inOut", duration: 1 },
+            { yPercent: 100 },
+            { yPercent: 0, ease: "none", duration: 1 },
             0
-          );
-          // когда свет почти залил экран — сплошной белый без размытой кромки
-          tl.fromTo(
-            ".lightwipe-solid",
-            { autoAlpha: 0 },
-            { autoAlpha: 1, ease: "none", duration: 0.26 },
-            0.72
           );
         }
       );
@@ -66,7 +61,6 @@ export default function LightWipe() {
   return (
     <div className="lightwipe" ref={root} aria-hidden>
       <div className="lightwipe-glow" />
-      <div className="lightwipe-solid" />
     </div>
   );
 }

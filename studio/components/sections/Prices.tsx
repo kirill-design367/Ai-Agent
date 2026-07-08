@@ -86,7 +86,12 @@ export default function Prices() {
           duration: 1,
           ease: "expo.out",
           stagger: { each: 0.018, from: "start" },
-          scrollTrigger: { trigger: ".prices-head", start: "top 82%" },
+          // reversible: играет и вниз, и вверх (при возврате в свет-переход)
+          scrollTrigger: {
+            trigger: ".prices-head",
+            start: "top 82%",
+            toggleActions: "play none none reverse",
+          },
         });
       }
 

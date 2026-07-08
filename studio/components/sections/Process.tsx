@@ -170,10 +170,10 @@ export default function Process() {
       gsap.utils.toArray<HTMLElement>(".proc-q-float").forEach((q) => {
         qFloatTweens.push(
           gsap.to(q, {
-            y: gsap.utils.random(-22, 22),
-            x: gsap.utils.random(-16, 16),
-            rotation: gsap.utils.random(-5, 5),
-            duration: gsap.utils.random(3, 5),
+            y: gsap.utils.random(-26, 26),
+            x: gsap.utils.random(-18, 18),
+            rotation: gsap.utils.random(-6, 6),
+            duration: gsap.utils.random(3.5, 6),
             ease: "sine.inOut",
             repeat: -1,
             yoyo: true,
@@ -181,9 +181,12 @@ export default function Process() {
           })
         );
       });
-      // дрейф не тратит кадры, пока сцена вне экрана
+      // Дрейф не тратит кадры вне экрана. ВАЖНО: триггер — вся секция .process
+      // (root), а НЕ пиннящаяся .proc-scene: у пиннящегося элемента активное
+      // окно схлопывается → вопросы «двигались в начале и застывали». У
+      // непиннящегося root окно охватывает весь путь сцены.
       ScrollTrigger.create({
-        trigger: ".proc-scene",
+        trigger: root.current!,
         start: "top bottom",
         end: "bottom top",
         onToggle: (self) =>
@@ -194,7 +197,9 @@ export default function Process() {
       const line = root.current!.querySelector<HTMLElement>(".proc-line");
       const fill = root.current!.querySelector(".proc-fill");
       const comet = root.current!.querySelector<HTMLElement>(".proc-comet");
-      const lineST = { trigger: ".proc-steps", start: "top 65%", end: "bottom 75%", scrub: 0.6 };
+      // scrub 0.3 (плотнее, чем было 0.6) — точка на линии не «притормаживает»
+      // с инерцией, а идёт вплотную за скроллом
+      const lineST = { trigger: ".proc-steps", start: "top 65%", end: "bottom 75%", scrub: 0.3 };
       if (fill) gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: lineST });
       let onCometRefresh: (() => void) | null = null;
       if (comet && line) {

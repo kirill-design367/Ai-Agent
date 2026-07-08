@@ -3191,113 +3191,74 @@ main {
   background: var(--bg-dark);
   z-index: 4;
 }
+/* Флуд света: сплошной белый низ + мягкая светящаяся кромка сверху. Overscan по
+   бокам (−8%/116%) прячет размытые края за пределы вьюпорта → на экране всегда
+   чистый белый без серых кромок. Высота 220vh — гарантирует, что в конце
+   (yPercent 0) сплошная зона покрывает весь экран. */
 .lightwipe-glow {
   position: absolute;
-  left: 50%;
-  bottom: -30%;
-  width: 150vmax;
-  height: 150vmax;
-  margin-left: -75vmax;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
+  left: -8%;
+  right: -8%;
+  bottom: 0;
+  width: 116%;
+  height: 220vh;
+  background: linear-gradient(
+    to top,
     #ffffff 0%,
-    #ffffff 42%,
-    rgba(255, 255, 255, 0.55) 62%,
-    rgba(255, 255, 255, 0) 78%
+    #ffffff 68%,
+    rgba(255, 255, 255, 0.6) 84%,
+    rgba(255, 255, 255, 0) 100%
   );
-  filter: blur(80px);
-  will-change: transform, opacity;
+  filter: blur(34px);
+  will-change: transform;
   z-index: 1;
-}
-.lightwipe-solid {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-base);
-  opacity: 0;
-  will-change: opacity;
-  z-index: 2;
 }
 
 /* ============================================================================
-   ПЕРЕХОД 4 — SPLIT REVEAL: экран распахивается двумя рваными панелями
+   ПЕРЕХОД 4 — FAQ CURTAIN: занавес цвета прайса рвётся, открывая настоящий FAQ
    ============================================================================ */
-.splitreveal {
-  position: relative;
-  height: 100lvh;
+/* занавес лежит поверх ПЕРВОГО экрана секции FAQ; панели разъезжаются по скрабу
+   и открывают реальный заголовок + верхние вопросы. pointer-events отключены —
+   аккордеон под ним остаётся кликабельным. */
+.faq-curtain {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100vw;
-  margin-left: calc(50% - 50vw);
+  height: 100lvh;
   overflow: hidden;
-  /* тёмный низ — бесшовно ведёт в тёмную секцию вопросов */
-  background: var(--bg-dark);
-  z-index: 4;
-  display: grid;
-  place-items: center;
+  pointer-events: none;
+  z-index: 5;
 }
-.sr-hint {
-  grid-area: 1 / 1;
-  z-index: 1;
-  padding: 0 1rem;
-  text-align: center;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  font-size: clamp(1.9rem, 6vw, 4.5rem);
-  letter-spacing: -0.02em;
-  color: var(--text-on-dark);
-  will-change: transform, opacity;
-}
-.sr-panel {
+.faq-panel {
   position: absolute;
   inset: -2% -2%;
-  z-index: 2;
   /* цвет прайсинга — будто рвётся сам экран цен */
   background: var(--bg-base);
   will-change: transform;
   backface-visibility: hidden;
 }
 /* рваная (не прямая) вертикальная линия разрыва — зигзаг вокруг центра */
-.sr-panel--l {
+.faq-panel--l {
   clip-path: polygon(
     0 0, 53% 0, 47% 9%, 54% 20%, 46% 31%, 53% 43%, 47% 54%,
     54% 65%, 46% 77%, 53% 88%, 48% 100%, 0 100%
   );
 }
-.sr-panel--r {
+.faq-panel--r {
   clip-path: polygon(
     53% 0, 100% 0, 100% 100%, 48% 100%, 53% 88%, 46% 77%, 54% 65%,
     47% 54%, 53% 43%, 46% 31%, 54% 20%, 47% 9%
   );
 }
 
-/* ============================================================================
-   ПЕРЕХОД 5 — TEXT MORPH: буквы рассыпаются и пересобираются
-   ============================================================================ */
-.textmorph {
-  position: relative;
-  height: 100lvh;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  overflow: hidden;
-  background: var(--bg-dark);
-  z-index: 4;
-  display: grid;
-  place-items: center;
-  padding: 0 clamp(1.4rem, 6vw, 7rem);
+/* ПЕРЕХОД 5 (часть 1): буквы последнего вопроса рассыпаются */
+.faq-q-txt .char {
+  will-change: transform, opacity;
 }
-.tm-from,
-.tm-to {
-  grid-area: 1 / 1;
-  margin: 0;
-  text-align: center;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  font-size: clamp(2rem, 7vw, 5.5rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  color: var(--text-on-dark);
-}
-.tm-from .char,
-.tm-to .char {
+/* ПЕРЕХОД 5 (часть 2): буквы заголовка «Отзывов» слетаются */
+.reviews-title .char {
   will-change: transform, opacity;
 }
 

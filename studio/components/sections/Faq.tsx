@@ -2,12 +2,20 @@
 
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
 
 /*
   FAQ — снимает последние возражения перед заявкой.
-  Вход-переход (из блока цен): вопросы «валяются» в хаосе (разлетелись, повёрнуты)
-  и ПО МЕРЕ СКРОЛЛА встают на свои места — собираются в аккуратный список.
+
+  ПЕРЕХОД 4 (вход): поверх начала FAQ лежит «занавес» цвета прайса, поделённый
+  рваной вертикальной линией на две панели. Экран пинится, панели РАСПАХИВАЮТСЯ
+  в стороны — и из-под них открывается НАСТОЯЩИЙ заголовок «Что обычно
+  спрашивают» + верхние вопросы (никаких дублей-подписей).
+
+  ПЕРЕХОД 5 (выход, часть 1): последний вопрос списка при уходе секции наверх
+  РАССЫПАЕТСЯ по буквам (реальный блок, а не дубль) — и пересобирается уже в
+  заголовок «Отзывов» (см. Reviews.tsx).
+
   Аккордеон на grid-template-rows (0fr→1fr): открытие/закрытие плавное и дешёвое.
 */
 const QA = [
@@ -50,15 +58,22 @@ export default function Faq() {
   useGSAP(
     () => {
       registerGsap();
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.set([".faq-panel--l", ".faq-panel--r"], { autoAlpha: 0 });
+        return;
+      }
 
-      // заголовок проявляется
+      // заголовок проявляется (reversible — вниз и вверх)
       gsap.from(".faq-title", {
         y: 40,
         opacity: 0,
         duration: 1,
         ease: "expo.out",
-        scrollTrigger: { trigger: ".faq", start: "top 82%" },
+        scrollTrigger: {
+          trigger: ".faq",
+          start: "top 82%",
+          toggleActions: "play none none reverse",
+        },
       });
 
       // ХАОС → ПОРЯДОК: каждый вопрос прилетает из своей стороны, повёрнутый, и
@@ -84,6 +99,51 @@ export default function Faq() {
         );
       });
 
+      // ── ПЕРЕХОД 4: ЗАНАВЕС ПРАЙСА РВЁТСЯ, открывая настоящий FAQ.
+      // Отдельная калибровка дистанции под mobile/desktop.
+      const mm = gsap.matchMedia();
+      mm.add(
+        { isDesktop: "(min-width: 761px)", isMobile: "(max-width: 760px)" },
+        (self) => {
+          const dist = self.conditions?.isMobile ? 720 : 950;
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: root.current!,
+              start: "top top",
+              end: () => "+=" + dist,
+              pin: true,
+              scrub: 0.8,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
+          tl.to(".faq-panel--l", { xPercent: -100, rotate: -2, ease: "power2.in", duration: 1 }, 0)
+            .to(".faq-panel--r", { xPercent: 100, rotate: 2, ease: "power2.in", duration: 1 }, 0);
+        }
+      );
+
+      // ── ПЕРЕХОД 5 (часть 1): последний вопрос РАССЫПАЕТСЯ при уходе секции.
+      const lastQ = root.current!.querySelector<HTMLElement>(
+        ".faq-item:last-child .faq-q-txt"
+      );
+      if (lastQ) {
+        const split = new SplitText(lastQ, { type: "chars" });
+        gsap.to(split.chars, {
+          x: () => gsap.utils.random(-150, 150),
+          y: () => gsap.utils.random(-90, 90),
+          rotation: () => gsap.utils.random(-80, 80),
+          autoAlpha: 0,
+          ease: "power1.in",
+          stagger: { from: "random", each: 0.01 },
+          scrollTrigger: {
+            trigger: ".faq-item:last-child",
+            start: "top 55%",
+            end: "top 8%",
+            scrub: 0.8,
+          },
+        });
+      }
+
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },
     { scope: root }
@@ -91,6 +151,13 @@ export default function Faq() {
 
   return (
     <section id="faq" className="theme-dark faq" ref={root}>
+      {/* ПЕРЕХОД 4 — занавес цвета прайса: две рваные панели разъезжаются,
+          открывая настоящий заголовок и верхние вопросы */}
+      <div className="faq-curtain" aria-hidden>
+        <div className="faq-panel faq-panel--l" />
+        <div className="faq-panel faq-panel--r" />
+      </div>
+
       <header className="faq-head">
         <h2 className="faq-title">Что обычно спрашивают</h2>
       </header>
@@ -99,7 +166,7 @@ export default function Faq() {
         {QA.map((item, i) => (
           <div className={`faq-item${open === i ? " is-open" : ""}`} key={item.q}>
             <button className="faq-q" onClick={() => toggle(i)} aria-expanded={open === i}>
-              <span>{item.q}</span>
+              <span className="faq-q-txt">{item.q}</span>
               <span className="faq-sign" aria-hidden />
             </button>
             <div className="faq-a-wrap">

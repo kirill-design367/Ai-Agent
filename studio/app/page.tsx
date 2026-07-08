@@ -10,9 +10,7 @@ import Process from "@/components/sections/Process";
 import Advantages from "@/components/sections/Advantages";
 import LightWipe from "@/components/sections/LightWipe";
 import Prices from "@/components/sections/Prices";
-import SplitReveal from "@/components/sections/SplitReveal";
 import Faq from "@/components/sections/Faq";
-import TextMorph from "@/components/sections/TextMorph";
 import Reviews from "@/components/sections/Reviews";
 import Teleport from "@/components/sections/Teleport";
 import Contact from "@/components/sections/Contact";
@@ -45,11 +43,10 @@ export default function Home() {
         {/* T3 — заполнение светом */}
         <LightWipe />
         <Prices />
-        {/* T4 — экран распахивается двумя панелями */}
-        <SplitReveal />
+        {/* T4 — занавес прайса рвётся и открывает FAQ (встроен в Faq) */}
         <Faq />
-        {/* T5 — буквы рассыпаются и пересобираются */}
-        <TextMorph />
+        {/* T5 — последний вопрос рассыпается, заголовок «Отзывов» собирается
+            из букв (встроено в Faq/Reviews) */}
         <Reviews />
         <Teleport />
         <Contact />

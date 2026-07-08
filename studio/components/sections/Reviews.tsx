@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
 
 /*
   ОТЗЫВЫ — социальное доказательство. Реальных отзывов пока нет — это ЧЕРНОВЫЕ
@@ -47,18 +47,30 @@ export default function Reviews() {
 
       const driftTweens: gsap.core.Tween[] = [];
 
-      // заголовок проявляется
-      gsap.fromTo(
-        ".reviews-head",
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: { trigger: ".reviews", start: "top 78%" },
-        }
-      );
+      // ПЕРЕХОД 5 (часть 2): БЛОК «Отзывы» РОЖДАЕТСЯ ИЗ БУКВ. Реальный заголовок
+      // «Что говорят клиенты» собирается из разлетевшихся букв (продолжение
+      // рассыпавшегося последнего вопроса FAQ), следом слетаются карточки —
+      // весь блок «появляется из букв», без дублей-подписей поверх.
+      const titleEl = root.current!.querySelector<HTMLElement>(".reviews-title");
+      if (titleEl) {
+        const split = new SplitText(titleEl, { type: "chars" });
+        const isMobile = window.matchMedia("(max-width: 760px)").matches;
+        const spread = isMobile ? 200 : 380;
+        gsap.from(split.chars, {
+          x: () => gsap.utils.random(-spread, spread),
+          y: () => gsap.utils.random(-spread, spread),
+          rotation: () => gsap.utils.random(-80, 80),
+          autoAlpha: 0,
+          ease: "power3.out",
+          duration: 0.9,
+          stagger: { from: "random", each: 0.02 },
+          scrollTrigger: {
+            trigger: ".reviews",
+            start: "top 74%",
+            toggleActions: "play none none reverse",
+          },
+        });
+      }
 
       gsap.utils.toArray<HTMLElement>(".rev-card").forEach((card, i) => {
         const rot = ROT[i % ROT.length];
