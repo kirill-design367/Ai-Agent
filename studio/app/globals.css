@@ -733,6 +733,11 @@ body {
    12-колоночная сетка: марка/kicker сверху, заголовок ломаными строками слева,
    подзаголовок справа-внизу, действие+фишки на нижней hairline-строке. Под фоном
    живёт fluid-курсор (на телефоне реагирует на касание). Полностью адаптивно. */
+/* стек Hero+Работы — контейнер ограничивает область прилипания Hero (до конца
+   Работ), дальше Hero открепляется и не мешает блокам ниже */
+.hero-works-stack {
+  position: relative;
+}
 .hero {
   /* COVER-СТЕК: Hero «прилипает», следующий блок (Работы) наезжает поверх него —
      нативный sticky, браузер композитит сам → без дрожания */
@@ -1808,9 +1813,10 @@ main {
   text-align: center;
   background: var(--bg-base);
   overflow: hidden;
+  /* скруглённый верх — дёшево; БЕЗ box-shadow (размытая тень пересчитывалась
+     каждый кадр скролла → это и давало дрожание на мобиле) */
   border-top-left-radius: clamp(1.4rem, 5vw, 2.8rem);
   border-top-right-radius: clamp(1.4rem, 5vw, 2.8rem);
-  box-shadow: 0 -34px 60px rgba(0, 0, 0, 0.35);
 }
 .proc-questions {
   position: absolute;
@@ -3214,4 +3220,33 @@ main {
 }
 @media (max-width: 760px) {
   .bh-word { font-size: 0.8em !important; }
+}
+
+/* ============================================================================
+   КИНЕМАТОГРАФИЧНОЕ ПОЯВЛЕНИЕ БЛОКОВ — на чистом CSS scroll-driven (view()).
+   Каждый блок ВЪЕЗЖАЕТ при входе в кадр (поднимается из глубины + проявляется),
+   а не просто листается. Работает НАТИВНО в браузере, без GSAP/JS → не от чего
+   дрожать. Где view() не поддержан (@supports) — блок просто виден (fallback). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cine-in {
+      animation: cineIn linear both;
+      animation-timeline: view();
+      /* появляется, пока верх блока проходит нижние 0–40% экрана */
+      animation-range: entry 0% entry 40%;
+      transform-origin: 50% 100%;
+      will-change: transform, opacity;
+    }
+    /* БЕЗ blur (дорого на мобиле) — только сдвиг+масштаб+прозрачность (GPU) */
+    @keyframes cineIn {
+      from {
+        opacity: 0;
+        transform: translateY(72px) scale(0.965);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  }
 }

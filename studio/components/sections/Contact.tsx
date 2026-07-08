@@ -93,7 +93,7 @@ export default function Contact() {
   );
 
   return (
-    <section id="contact" className="theme-dark contact" ref={root}>
+    <section id="contact" className="theme-dark contact cine-in" ref={root}>
       <div className="contact-inner">
         <h2 className="contact-title" ref={title}>
           Расскажите

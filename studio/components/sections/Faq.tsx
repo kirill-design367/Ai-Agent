@@ -90,7 +90,7 @@ export default function Faq() {
   );
 
   return (
-    <section id="faq" className="theme-dark faq" ref={root}>
+    <section id="faq" className="theme-dark faq cine-in" ref={root}>
       <header className="faq-head">
         <h2 className="faq-title">Что обычно спрашивают</h2>
       </header>

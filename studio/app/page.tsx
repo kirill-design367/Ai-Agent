@@ -30,8 +30,13 @@ export default function Home() {
       <MessengerFab />
 
       <main>
-        <Hero />
-        <Works />
+        {/* Hero прилипает и Работы наезжают поверх — sticky Hero ограничен этим
+            стеком, чтобы Hero НЕ висел приклеенным за всей страницей (иначе он
+            просвечивал сквозь прозрачность блоков ниже) */}
+        <div className="hero-works-stack">
+          <Hero />
+          <Works />
+        </div>
         <Pain />
         <Process />
         <Advantages />
