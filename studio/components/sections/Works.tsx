@@ -111,13 +111,14 @@ export default function Works() {
         tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.5 }, 0)
           .to(last, { scale: 0.6, yPercent: -3, ease: "power1.inOut", duration: 1 }, 0)
           .to(shade, { opacity: 0.9, ease: "none", duration: 1 }, 0)
-          .to(last, { autoAlpha: 0, ease: "power1.in", duration: 0.34 }, 0.78);
-        // описание уезжает вдогонку за кейсом — вверх, уменьшаясь и растворяясь
+          .to(last, { autoAlpha: 0, ease: "power1.in", duration: 0.3 }, 0.7);
+        // описание уходит ВМЕСТЕ с кейсом (синхронно), а не «вдогонку» долго —
+        // тот же тайминг, что и растворение кейса
         if (lastDesc)
           tl.to(
             lastDesc,
-            { autoAlpha: 0, y: -46, scale: 0.86, ease: "power1.in", duration: 0.5 },
-            0.12
+            { autoAlpha: 0, y: -30, scale: 0.9, ease: "power1.in", duration: 0.3 },
+            0.7
           );
       }
 

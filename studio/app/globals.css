@@ -506,8 +506,8 @@ body {
 }
 /* прокрутка-«хвост»: дистанция для ухода последнего кейса + короткая чёрная пауза */
 .works-tail {
-  /* длиннее → уход последнего кейса растянут по прокрутке, медленнее и плавнее */
-  height: 78vh;
+  /* короче → последний кейс и его подпись уходят чётко и сразу, без долгого зависания */
+  height: 46vh;
   pointer-events: none;
 }
 
@@ -1746,35 +1746,34 @@ main {
    КРИТИЧНО: у трека ТЁМНЫЙ фон — секция .process светлая, и без фона при
    субпиксельном позиционировании sticky на кромках проглядывала светлая полоса
    (та самая «тонкая белая линия», мерцающая при скролле = «дрожание»). */
-/* ЗУМ-РАСТВОРЕНИЕ (отличается от cover-наезда Hero): трек задаёт длину прокрутки,
-   портал внутри липнет НАТИВНЫМ sticky (не GSAP-пин → не дрожит). Тёмная надпись
-   «Мы строим работу иначе» приближается (scale) и растворяется, открывая светлую
-   сцену «Как мы работаем» под ней. */
+/* ПЕРЕХОД-РЕВИЛ НА ЧИСТОМ НАТИВНОМ sticky (0 GSAP на пиннинге → абсолютно плавно,
+   как Hero→Портфолио): тёмный экран «Мы строим работу иначе» ПРИЛИПАЕТ, а светлая
+   сцена «Как мы работаем» наезжает поверх него НАТИВНЫМ скроллом. Ничего не
+   скрабится покадрово — нечему дрожать на мобиле. */
 .proc-enter-track {
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  height: 220vh;
   background: #070708;
 }
 .proc-enter {
-  position: sticky;
-  top: 0;
+  position: relative;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: #070708;
 }
 .proc-veil {
-  /* тёмный экран «Мы строим работу иначе» — СВЕРХУ (z2), приближается и тает */
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  /* тёмный экран — ПРИЛИПАЕТ (нативный sticky), идёт первым (order -1) */
+  position: sticky;
+  top: 0;
+  order: -1;
+  height: 100svh;
+  z-index: 1;
   display: grid;
   place-items: center;
   background: #070708;
   overflow: hidden;
-  will-change: opacity;
 }
 .proc-turn {
   margin: 0;
@@ -1795,10 +1794,12 @@ main {
   display: block;
 }
 .proc-intro {
-  /* светлый экран «Как мы работаем» — БАЗА (z1), проявляется из-под тёмной завесы */
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+  /* светлый экран «Как мы работаем» — НАЕЗЖАЕТ поверх прилипшего тёмного (z2)
+     как КАРТА со скруглённым верхом (отличие от плоского cover Hero), обычным
+     потоком (нативный скролл) → плавно */
+  position: relative;
+  z-index: 2;
+  min-height: 100svh;
   padding: 0 clamp(1.4rem, 6vw, 7rem);
   display: flex;
   flex-direction: column;
@@ -1807,7 +1808,9 @@ main {
   text-align: center;
   background: var(--bg-base);
   overflow: hidden;
-  will-change: transform;
+  border-top-left-radius: clamp(1.4rem, 5vw, 2.8rem);
+  border-top-right-radius: clamp(1.4rem, 5vw, 2.8rem);
+  box-shadow: 0 -34px 60px rgba(0, 0, 0, 0.35);
 }
 .proc-questions {
   position: absolute;
@@ -2294,9 +2297,12 @@ main {
     font-size: 64vw;
   }
 
-  /* МОБАЙЛ — та же зум-растворка; трек чуть короче, чтобы переход не растягивался */
-  .proc-enter-track {
-    height: 190vh;
+  /* МОБАЙЛ — тот же нативный sticky-ревил; экраны чуть ниже, чтобы не растягивать */
+  .proc-veil {
+    height: 92svh;
+  }
+  .proc-intro {
+    min-height: 92svh;
   }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
@@ -2842,7 +2848,7 @@ main {
 .reviews {
   position: relative;
   background: var(--bg-sunken);
-  padding: clamp(2.6rem, 6vh, 4.5rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
+  padding: clamp(2.6rem, 6vh, 4.5rem) clamp(1.4rem, 6vw, 7rem) clamp(3rem, 7vh, 5.5rem);
 }
 .reviews-head {
   max-width: 1300px;
@@ -3094,8 +3100,8 @@ main {
    ============================================================================ */
 .blackhole {
   position: relative;
-  /* короче → меньше пустого пространства между FAQ и отзывами */
-  height: 52vh;
+  /* короче → минимум пустоты между вопросами и отзывами */
+  height: 40vh;
   background: var(--bg-dark);
   overflow: hidden;
 }
@@ -3158,8 +3164,8 @@ main {
    ============================================================================ */
 .teleport {
   position: relative;
-  /* короче → меньше пустоты между отзывами и финалом */
-  height: 70vh;
+  /* короче → минимум пустоты между отзывами и финалом */
+  height: 50vh;
   background: var(--bg-dark);
   overflow: hidden;
 }
