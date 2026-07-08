@@ -2,13 +2,16 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
+import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 
 /*
   ОТЗЫВЫ — социальное доказательство. Реальных отзывов пока нет — это ЧЕРНОВЫЕ
   плейсхолдеры со слотами под замену (имя/сфера/текст), без фальшивых «5 звёзд».
-  Карточки разного размера разбросаны по золотому сечению, чуть повёрнуты и
-  невесомо парят; на входе слетаются из разных сторон. Не «на весь экран».
+
+  ПЕРЕХОД 5 «из хаоса в единое» (scrub по позиции скролла, без пина): сначала
+  буквы заголовка «Что говорят клиенты» возникают из ниоткуда, разбросанные по
+  экрану, и по мере листания слетаются в надпись; затем ТОЧНО ТАК ЖЕ карточки-
+  отзывы прилетают из хаоса и собираются в аккуратную сетку.
 */
 const REVIEWS = [
   {
@@ -33,9 +36,8 @@ const REVIEWS = [
   },
 ];
 
-// базовый наклон каждой карточки (хаос по золотому сечению)
+// базовый наклон каждой карточки (хаос по золотому сечению) — сохраняется после сборки
 const ROT = [-1.8, 1.3, 1.9, -1.2];
-const FROM_X = [-160, 160, -130, 150];
 
 export default function Reviews() {
   const root = useRef<HTMLElement>(null);
@@ -45,101 +47,98 @@ export default function Reviews() {
       registerGsap();
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      const driftTweens: gsap.core.Tween[] = [];
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
 
-      // ПЕРЕХОД 5: БЛОК «Отзывы» РОЖДАЕТСЯ ИЗ БУКВ. Экран ПИНИТСЯ, и реальный
-      // заголовок «Что говорят клиенты» СОБИРАЕТСЯ из разлетевшихся букв по
-      // скрабу — пиннинг «съедает» прокрутку, поэтому сборка видимая и
-      // управляемая (без пина проскакивала мгновенно = «нет анимации»).
-      const titleEl = root.current!.querySelector<HTMLElement>(".reviews-title");
-      if (titleEl) {
-        const split = new SplitText(titleEl, { type: "chars" });
-        const mm = gsap.matchMedia();
-        mm.add(
-          { isDesktop: "(min-width: 761px)", isMobile: "(max-width: 760px)" },
-          (self) => {
-            const isMobile = self.conditions?.isMobile;
-            const spread = isMobile ? 240 : 440;
-            const dist = isMobile ? 680 : 900;
-            const tl = gsap.timeline({
-              scrollTrigger: {
-                trigger: root.current!,
-                start: "top top",
-                end: () => "+=" + dist,
-                pin: true,
-                scrub: 0.8,
-                anticipatePin: 1,
-                invalidateOnRefresh: true,
-              },
-            });
-            tl.from(
-              split.chars,
-              {
-                x: () => gsap.utils.random(-spread, spread),
-                y: () => gsap.utils.random(-spread, spread),
-                rotation: () => gsap.utils.random(-90, 90),
-                autoAlpha: 0,
-                ease: "power2.out",
-                stagger: { from: "random", each: 0.03 },
-                duration: 1,
-              },
-              0
-            );
-          }
-        );
+      // ПЕРЕХОД 5 — ИЗ ХАОСА В ЕДИНОЕ. Пуск через IntersectionObserver, а НЕ
+      // ScrollTrigger: у отзывов триггер считался ДО того, как пиннящиеся секции
+      // выше добавляли высоту → сборка «доигрывала» ещё на загрузке, и к приходу
+      // всё стояло собранным («статично»). IO смотрит на РЕАЛЬНУЮ геометрию
+      // вьюпорта (не зависит ни от пинов, ни от Lenis) и запускает СВОЙ таймлайн
+      // ~1.8с ровно когда блок реально виден. SplitText делаем ПОСЛЕ загрузки
+      // шрифта — иначе пере-разбиение «отвязывало» буквы и set() слетал.
+      const observers: IntersectionObserver[] = [];
+      let titleSplit: SplitText | null = null;
+
+      const build = () => {
+        if (!root.current) return;
+
+        // 1) Заголовок «Что говорят клиенты»: буквы из ниоткуда слетаются в надпись.
+        const titleEl = root.current.querySelector<HTMLElement>(".reviews-title");
+        const headEl = root.current.querySelector<HTMLElement>(".reviews-head");
+        if (titleEl && headEl) {
+          const spread = isMobile ? 280 : 520;
+          titleSplit = new SplitText(titleEl, { type: "words,chars" });
+          const chars = titleSplit.chars;
+          gsap.set(chars, {
+            x: () => gsap.utils.random(-spread, spread),
+            y: () => gsap.utils.random(-spread, spread),
+            rotation: () => gsap.utils.random(-140, 140),
+            scale: 0.4,
+            autoAlpha: 0,
+          });
+          const io = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((e) => {
+                if (!e.isIntersecting) return;
+                gsap.to(chars, {
+                  x: 0, y: 0, rotation: 0, scale: 1, autoAlpha: 1,
+                  duration: 1.15, ease: "power3.out",
+                  stagger: { from: "random", each: 0.045 },
+                });
+                io.disconnect();
+              });
+            },
+            { threshold: 0.55 }
+          );
+          io.observe(headEl);
+          observers.push(io);
+        }
+
+        // 2) Карточки-отзывы: ТОЧНО ТАК ЖЕ из хаоса собираются в сетку (базовый
+        //    наклон ROT[i] сохраняется).
+        const gridEl = root.current.querySelector<HTMLElement>(".rev-grid");
+        const cards = gsap.utils.toArray<HTMLElement>(".rev-card");
+        if (gridEl && cards.length) {
+          cards.forEach((card, i) =>
+            gsap.set(card, {
+              x: gsap.utils.random(-260, 260),
+              y: gsap.utils.random(90, 320),
+              rotation: ROT[i % ROT.length] * 6,
+              scale: 0.55,
+              autoAlpha: 0,
+            })
+          );
+          const io2 = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((e) => {
+                if (!e.isIntersecting) return;
+                cards.forEach((card, i) =>
+                  gsap.to(card, {
+                    x: 0, y: 0, rotation: ROT[i % ROT.length], scale: 1, autoAlpha: 1,
+                    duration: 1.1, ease: "power3.out", delay: i * 0.12,
+                  })
+                );
+                io2.disconnect();
+              });
+            },
+            { threshold: 0.12 }
+          );
+          io2.observe(gridEl);
+          observers.push(io2);
+        }
+      };
+
+      // Сплитим и раскидываем ПОСЛЕ загрузки шрифта (иначе пере-разбиение сбросит).
+      if (document.fonts && document.fonts.status !== "loaded") {
+        document.fonts.ready.then(build);
+      } else {
+        build();
       }
 
-      gsap.utils.toArray<HTMLElement>(".rev-card").forEach((card, i) => {
-        const rot = ROT[i % ROT.length];
-        // слетаются из разных сторон и встают под своим углом
-        gsap.fromTo(
-          card,
-          {
-            x: FROM_X[i % FROM_X.length],
-            y: 70,
-            opacity: 0,
-            scale: 0.62,
-            filter: "blur(6px)",
-            rotation: rot * 4,
-          },
-          {
-            x: 0,
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            filter: "blur(0px)",
-            rotation: rot,
-            duration: 1.25,
-            ease: "expo.out",
-            scrollTrigger: { trigger: ".rev-grid", start: "top 84%" },
-            delay: i * 0.1,
-            onComplete: () => {
-              // невесомый дрейф вокруг своего угла (rotation сохраняется)
-              driftTweens.push(
-                gsap.to(card, {
-                  y: gsap.utils.random(-13, 13),
-                  x: gsap.utils.random(-7, 7),
-                  duration: gsap.utils.random(4, 6),
-                  ease: "sine.inOut",
-                  repeat: -1,
-                  yoyo: true,
-                })
-              );
-            },
-          }
-        );
-      });
-
-      // дрейф карточек не тратит кадры, пока секция вне экрана
-      ScrollTrigger.create({
-        trigger: ".rev-grid",
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) =>
-          driftTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
-      });
-
-      return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+      return () => {
+        observers.forEach((o) => o.disconnect());
+        titleSplit?.revert();
+      };
     },
     { scope: root }
   );

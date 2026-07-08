@@ -2829,6 +2829,10 @@ main {
   line-height: 1.02;
   letter-spacing: -0.02em;
   color: var(--text-on-dark);
+  /* перенос только между словами и сбалансированно (не рвём «кл|иенты») */
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 /* хаотичная сетка по золотому сечению: разные ширины + вертикальный сдвиг */
 .rev-grid {
