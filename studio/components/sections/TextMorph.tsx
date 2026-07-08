@@ -50,7 +50,7 @@ export default function TextMorph() {
 
           const tl = gsap.timeline({
             scrollTrigger: {
-              trigger: ".textmorph",
+              trigger: root.current!,
               start: "top top",
               end: () => "+=" + dist,
               pin: true,

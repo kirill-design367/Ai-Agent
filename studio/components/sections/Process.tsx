@@ -163,6 +163,33 @@ export default function Process() {
         }
       );
 
+      // НЕВЕСОМЫЙ ДРЕЙФ вопросов после оседания — плавают в невесомости.
+      // Дрейфует ВНУТРЕННИЙ спан (.proc-q-float), а не .proc-q (его двигает
+      // scrub-таймлайн) → не конфликтует с «оседанием».
+      const qFloatTweens: gsap.core.Tween[] = [];
+      gsap.utils.toArray<HTMLElement>(".proc-q-float").forEach((q) => {
+        qFloatTweens.push(
+          gsap.to(q, {
+            y: gsap.utils.random(-22, 22),
+            x: gsap.utils.random(-16, 16),
+            rotation: gsap.utils.random(-5, 5),
+            duration: gsap.utils.random(3, 5),
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            delay: gsap.utils.random(0, 1.6),
+          })
+        );
+      });
+      // дрейф не тратит кадры, пока сцена вне экрана
+      ScrollTrigger.create({
+        trigger: ".proc-scene",
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          qFloatTweens.forEach((t) => (self.isActive ? t.resume() : t.pause())),
+      });
+
       // ── шаги «Как мы работаем» (линия-комета + глаголы) — как было
       const line = root.current!.querySelector<HTMLElement>(".proc-line");
       const fill = root.current!.querySelector(".proc-fill");
@@ -231,7 +258,7 @@ export default function Process() {
               key={i}
               style={{ left: `${q.x}%`, top: `${q.y}%`, fontSize: `${q.s}rem` }}
             >
-              {q.t}
+              <span className="proc-q-float">{q.t}</span>
             </span>
           ))}
         </div>

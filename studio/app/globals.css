@@ -1748,7 +1748,9 @@ main {
    иначе» уходит, вопросы сыплются с краёв и оседают → «Как мы работаем». */
 .proc-scene {
   position: relative;
-  height: 100svh;
+  /* 100lvh (наибольшая высота вьюпорта) — чтобы при пине снизу НЕ проглядывала
+     белая полоса следующей секции даже когда адресная строка скрыта */
+  height: 100lvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
@@ -1791,6 +1793,10 @@ main {
   color: var(--text-secondary);
   white-space: nowrap;
   will-change: transform, opacity;
+}
+.proc-q-float {
+  display: inline-block;
+  will-change: transform;
 }
 .proc-kicker {
   position: relative;
@@ -3177,7 +3183,7 @@ main {
    ============================================================================ */
 .lightwipe {
   position: relative;
-  height: 100svh;
+  height: 100lvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
@@ -3218,7 +3224,7 @@ main {
    ============================================================================ */
 .splitreveal {
   position: relative;
-  height: 100svh;
+  height: 100lvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
@@ -3268,7 +3274,7 @@ main {
    ============================================================================ */
 .textmorph {
   position: relative;
-  height: 100svh;
+  height: 100lvh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;

@@ -31,7 +31,7 @@ export default function LightWipe() {
 
           const tl = gsap.timeline({
             scrollTrigger: {
-              trigger: ".lightwipe",
+              trigger: root.current!,
               start: "top top",
               end: () => "+=" + dist,
               pin: true,

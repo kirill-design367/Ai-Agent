@@ -29,7 +29,7 @@ export default function SplitReveal() {
           const dist = self.conditions?.isMobile ? 750 : 1050;
           const tl = gsap.timeline({
             scrollTrigger: {
-              trigger: ".splitreveal",
+              trigger: root.current!,
               start: "top top",
               end: () => "+=" + dist,
               pin: true,
