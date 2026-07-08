@@ -116,7 +116,7 @@ export default function Reviews() {
   );
 
   return (
-    <section id="reviews" className="theme-dark reviews cine-in" ref={root}>
+    <section id="reviews" className="theme-dark reviews" ref={root}>
       <header className="reviews-head">
         <h2 className="reviews-title">Что говорят клиенты</h2>
       </header>

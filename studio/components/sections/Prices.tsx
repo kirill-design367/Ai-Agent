@@ -141,7 +141,7 @@ export default function Prices() {
   );
 
   return (
-    <section id="prices" className="prices cine-in" ref={root}>
+    <section id="prices" className="prices" ref={root}>
       {/* невесомо парящие знаки рубля на фоне */}
       <div className="prices-rub-float" aria-hidden>
         {RUB_FLOAT.map((r, i) => (

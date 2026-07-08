@@ -3,7 +3,7 @@
 import { ReactLenis, useLenis } from "lenis/react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   Inertial smooth-scroll (Lenis) — the "expensive" weighted feel (Bible II.6).
@@ -20,31 +20,6 @@ function LenisGsapBridge() {
     (window as unknown as { __lenis?: unknown }).__lenis = lenis;
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
-
-    // КИНЕМАТОГРАФИЧНОЕ ПОЯВЛЕНИЕ БЛОКОВ — FALLBACK для браузеров БЕЗ CSS
-    // scroll-driven (animation-timeline: view()). Там, где view() поддержан,
-    // въезд делает чистый CSS (globals.css .cine-in) и этот код не трогает блоки.
-    // Где не поддержан — тот же въезд одноразово через GSAP (без пиннинга,
-    // без скраба → плавно). Так эффект появления гарантирован на любом телефоне.
-    const noViewTimeline =
-      !(window.CSS && CSS.supports && CSS.supports("animation-timeline: view()"));
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (noViewTimeline && !reduce) {
-      gsap.utils.toArray<HTMLElement>(".cine-in").forEach((el) => {
-        gsap.fromTo(
-          el,
-          { autoAlpha: 0, y: 72, scale: 0.965 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            ease: "expo.out",
-            scrollTrigger: { trigger: el, start: "top 82%" },
-          }
-        );
-      });
-    }
 
     // ГЛАДКОСТЬ: держим ПРОСТУЮ связку — Lenis крутит свой RAF (autoRaf по умолч.),
     // а ScrollTrigger обновляется на каждом событии скролла Lenis (выше). Драйв

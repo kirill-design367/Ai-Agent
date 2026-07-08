@@ -733,16 +733,13 @@ body {
    12-колоночная сетка: марка/kicker сверху, заголовок ломаными строками слева,
    подзаголовок справа-внизу, действие+фишки на нижней hairline-строке. Под фоном
    живёт fluid-курсор (на телефоне реагирует на касание). Полностью адаптивно. */
-/* стек Hero+Работы — контейнер ограничивает область прилипания Hero (до конца
-   Работ), дальше Hero открепляется и не мешает блокам ниже */
 .hero-works-stack {
   position: relative;
 }
 .hero {
-  /* COVER-СТЕК: Hero «прилипает», следующий блок (Работы) наезжает поверх него —
-     нативный sticky, браузер композитит сам → без дрожания */
-  position: sticky;
-  top: 0;
+  /* T1: откат к прошлой реализации — Hero статичен, Работы листаются НИЖЕ него
+     (без наезда внахлёст, который перекрывал нижние строки Hero) */
+  position: relative;
   min-height: 100svh;
   overflow: hidden;
   display: grid;
@@ -1747,40 +1744,22 @@ main {
   color: var(--text-primary);
   padding: 0 clamp(1.4rem, 6vw, 7rem) clamp(6rem, 14vh, 12rem);
 }
-/* трек задаёт длину прокрутки портала; сам портал внутри липнет (sticky).
-   КРИТИЧНО: у трека ТЁМНЫЙ фон — секция .process светлая, и без фона при
-   субпиксельном позиционировании sticky на кромках проглядывала светлая полоса
-   (та самая «тонкая белая линия», мерцающая при скролле = «дрожание»). */
-/* ПЕРЕХОД-РЕВИЛ НА ЧИСТОМ НАТИВНОМ sticky (0 GSAP на пиннинге → абсолютно плавно,
-   как Hero→Портфолио): тёмный экран «Мы строим работу иначе» ПРИЛИПАЕТ, а светлая
-   сцена «Как мы работаем» наезжает поверх него НАТИВНЫМ скроллом. Ничего не
-   скрабится покадрово — нечему дрожать на мобиле. */
-.proc-enter-track {
+/* ПЕРЕХОД 2 — пиннящаяся СЦЕНА: фон скрабом чёрный→белый, «Мы строим работу
+   иначе» уходит, вопросы сыплются с краёв и оседают → «Как мы работаем». */
+.proc-scene {
   position: relative;
+  height: 100svh;
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  overflow: hidden;
   background: #070708;
-}
-.proc-enter {
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #070708;
-}
-.proc-veil {
-  /* тёмный экран — ПРИЛИПАЕТ (нативный sticky), идёт первым (order -1) */
-  position: sticky;
-  top: 0;
-  order: -1;
-  height: 100svh;
-  z-index: 1;
   display: grid;
   place-items: center;
-  background: #070708;
-  overflow: hidden;
+  will-change: background-color;
 }
 .proc-turn {
+  grid-area: 1 / 1;
+  z-index: 3;
   margin: 0;
   padding: 0 1rem;
   text-align: center;
@@ -1792,52 +1771,26 @@ main {
   text-transform: uppercase;
   color: var(--text-on-dark);
   will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 .proc-turn span {
   display: block;
 }
-.proc-intro {
-  /* светлый экран «Как мы работаем» — НАЕЗЖАЕТ поверх прилипшего тёмного (z2)
-     как КАРТА со скруглённым верхом (отличие от плоского cover Hero), обычным
-     потоком (нативный скролл) → плавно */
-  position: relative;
-  z-index: 2;
-  min-height: 100svh;
-  padding: 0 clamp(1.4rem, 6vw, 7rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: var(--bg-base);
-  overflow: hidden;
-  /* скруглённый верх — дёшево; БЕЗ box-shadow (размытая тень пересчитывалась
-     каждый кадр скролла → это и давало дрожание на мобиле) */
-  border-top-left-radius: clamp(1.4rem, 5vw, 2.8rem);
-  border-top-right-radius: clamp(1.4rem, 5vw, 2.8rem);
-}
 .proc-questions {
+  grid-area: 1 / 1;
   position: absolute;
-  inset: -6% 0;
+  inset: 0;
+  z-index: 1;
   pointer-events: none;
-  will-change: transform;
 }
 .proc-q {
   position: absolute;
-  transform: translate(-50%, -50%);
   font-family: ui-monospace, "SF Mono", "Roboto Mono", monospace;
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-secondary);
   white-space: nowrap;
-  will-change: transform;
-}
-.proc-q-float {
-  display: inline-block;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 .proc-kicker {
   position: relative;
@@ -1848,9 +1801,10 @@ main {
   color: var(--text-tertiary);
 }
 .proc-bigtitle {
-  position: relative;
+  grid-area: 1 / 1;
   z-index: 2;
-  margin: clamp(0.6rem, 1.6vh, 1rem) 0 0;
+  margin: 0;
+  text-align: center;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
   font-size: clamp(2.4rem, 7.5vw, 6.5rem);
@@ -2303,15 +2257,11 @@ main {
     font-size: 64vw;
   }
 
-  /* МОБАЙЛ — тот же нативный sticky-ревил; экраны чуть ниже, чтобы не растягивать */
-  .proc-veil {
-    height: 92svh;
-  }
-  .proc-intro {
-    min-height: 92svh;
-  }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
+  }
+  .proc-turn {
+    font-size: clamp(2rem, 11vw, 3.4rem);
   }
   .proc-q {
     font-size: 0.78em !important;
@@ -3222,31 +3172,3 @@ main {
   .bh-word { font-size: 0.8em !important; }
 }
 
-/* ============================================================================
-   КИНЕМАТОГРАФИЧНОЕ ПОЯВЛЕНИЕ БЛОКОВ — на чистом CSS scroll-driven (view()).
-   Каждый блок ВЪЕЗЖАЕТ при входе в кадр (поднимается из глубины + проявляется),
-   а не просто листается. Работает НАТИВНО в браузере, без GSAP/JS → не от чего
-   дрожать. Где view() не поддержан (@supports) — блок просто виден (fallback). */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .cine-in {
-      animation: cineIn linear both;
-      animation-timeline: view();
-      /* появляется, пока верх блока проходит нижние 0–40% экрана */
-      animation-range: entry 0% entry 40%;
-      transform-origin: 50% 100%;
-      will-change: transform, opacity;
-    }
-    /* БЕЗ blur (дорого на мобиле) — только сдвиг+масштаб+прозрачность (GPU) */
-    @keyframes cineIn {
-      from {
-        opacity: 0;
-        transform: translateY(72px) scale(0.965);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-  }
-}
