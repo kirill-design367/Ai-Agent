@@ -134,126 +134,18 @@ export default function Hero() {
         </p>
       </div>
 
-      {/* креативные кнопки-«бриллианты маркиз», торчат из левого и правого краёв,
-          по золотому сечению (левый ниже, правый выше), с лёгким наклоном,
-          объём (градиент+фасеты+блик) и тихое постоянное сияние */}
-      <div className="hero-gems">
-        <svg className="gem-defs" width="0" height="0" aria-hidden>
-          <defs>
-            {/* корпус камня — глубокий объём, свет сверху-слева → тень снизу,
-                с ледяным намёком Tiffany вверху (почти незаметно) */}
-            <linearGradient id="gem-grad" x1="0" y1="0" x2="0.32" y2="1">
-              <stop offset="0" stopColor="#495863" />
-              <stop offset="0.44" stopColor="#181a1e" />
-              <stop offset="1" stopColor="#050608" />
-            </linearGradient>
-            {/* table-facet блик (верхняя площадка ловит свет), с мятным холодком */}
-            <linearGradient id="gem-shine" x1="0" y1="0" x2="0.1" y2="1">
-              <stop offset="0" stopColor="rgba(226,246,242,0.6)" />
-              <stop offset="1" stopColor="rgba(226,246,242,0)" />
-            </linearGradient>
-            {/* внутреннее свечение — свет проходит сквозь грани (мягкий объёмный) */}
-            <radialGradient id="gem-core" cx="0.44" cy="0.4" r="0.62">
-              <stop offset="0" stopColor="rgba(206,238,232,0.6)" />
-              <stop offset="0.6" stopColor="rgba(206,238,232,0.12)" />
-              <stop offset="1" stopColor="rgba(206,238,232,0)" />
-            </radialGradient>
-            {/* дисперсия — очень бледный Tiffany (5–10% насыщенности), скорее чувствуется */}
-            <linearGradient id="gem-iri" x1="0" y1="0.1" x2="1" y2="0.9">
-              <stop offset="0" stopColor="#d8f3ee" />
-              <stop offset="0.5" stopColor="#a9dcda" />
-              <stop offset="1" stopColor="#e9f4f0" />
-            </linearGradient>
-            {/* бегущий блик по граням */}
-            <linearGradient id="gem-glint" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor="rgba(255,255,255,0)" />
-              <stop offset="0.5" stopColor="rgba(233,249,245,0.9)" />
-              <stop offset="1" stopColor="rgba(255,255,255,0)" />
-            </linearGradient>
-            {/* контур огранки — чтобы блик не вылезал за камень */}
-            <clipPath id="gem-clip" clipPathUnits="userSpaceOnUse">
-              <polygon points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82" />
-            </clipPath>
-          </defs>
-        </svg>
-        <a href="#prices" className="gem gem--left" data-magnetic aria-label="Узнать стоимость">
-          <MarquiseGem />
-          <span className="gem-label">
-            Узнать
-            <br />
-            стоимость
-          </span>
-        </a>
-        <a href="#contact" className="gem gem--right" data-magnetic aria-label="Бесплатно обсудить проект">
-          <MarquiseGem />
-          <span className="gem-label">
-            Бесплатно
-            <br />
-            обсудить проект
-          </span>
-        </a>
-      </div>
-
-      {/* нижняя зона: ключевые фишки — вертикально, крупно, по золотому сечению */}
+      {/* нижняя зона: фишки (по золотому сечению) + основной CTA-pill */}
       <div className="hero-foot">
         <ul className="hero-feats" data-hero-fade>
           <li>Индивидуальный дизайн</li>
           <li>Пожизненная гарантия</li>
           <li>Запуск от&nbsp;5&nbsp;дней</li>
         </ul>
+        <a href="#prices" className="hero-cta" data-hero-fade data-magnetic>
+          <span>Узнать стоимость</span>
+        </a>
       </div>
     </section>
   );
 }
 
-/*
-  Огранка «маркиз» (marquise brilliant): заострённый овал (girdle), в центре —
-  ромбовидная площадка-table, от неё фасеты-лучи к рундисту и остриям + осевой
-  «киль». Сверху — тихо переливающийся слой света (дисперсия). Всё в одном
-  viewBox 240×100, растягивается под ссылку.
-*/
-function MarquiseGem() {
-  return (
-    <svg className="gem-cut" viewBox="0 0 240 100" preserveAspectRatio="none" aria-hidden>
-      {/* рундист (контур камня) — базовый градиент-объём */}
-      <polygon
-        className="gem-body"
-        points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
-      />
-      {/* РЕФРАКЦИЯ: грани разной яркости — стекло, где свет ломается.
-          светлые (свет ловят) — сверху-слева; тёмные — снизу-справа */}
-      <polygon className="gem-facet gem-facet--lt" points="0,50 60,18 44,50" />
-      <polygon className="gem-facet gem-facet--lt" points="60,18 120,30 44,50" />
-      <polygon className="gem-facet gem-facet--lt" points="60,18 120,10 120,30" />
-      <polygon className="gem-facet gem-facet--md" points="120,10 180,18 120,30" />
-      <polygon className="gem-facet gem-facet--dk" points="196,50 180,82 120,70" />
-      <polygon className="gem-facet gem-facet--dk" points="120,70 120,90 60,82" />
-      <polygon className="gem-facet gem-facet--dk" points="196,50 240,50 180,82" />
-      <polygon className="gem-facet gem-facet--md" points="180,18 240,50 196,50" />
-      {/* внутреннее свечение — свет сквозь грани */}
-      <ellipse className="gem-core" cx="112" cy="48" rx="78" ry="26" />
-      {/* площадка-table — самый яркий блик */}
-      <polygon className="gem-table" points="44,50 120,30 196,50 120,70" />
-      {/* фасетная сетка бриллиантовой огранки */}
-      <path
-        className="gem-facets"
-        d="M0,50 H240
-           M44,50 L120,30 L196,50 L120,70 Z
-           M120,30 L120,10 M120,70 L120,90
-           M120,30 L60,18 M120,30 L180,18
-           M120,70 L60,82 M120,70 L180,82
-           M44,50 L60,18 M44,50 L60,82
-           M196,50 L180,18 M196,50 L180,82"
-      />
-      {/* дисперсия — бледный Tiffany, тихо дышит (opacity) */}
-      <polygon
-        className="gem-iri"
-        points="0,50 60,18 120,10 180,18 240,50 180,82 120,90 60,82"
-      />
-      {/* редкий бегущий блик, обрезан контуром камня */}
-      <g clipPath="url(#gem-clip)">
-        <polygon className="gem-glint" points="-34,-24 2,-24 26,124 -10,124" />
-      </g>
-    </svg>
-  );
-}

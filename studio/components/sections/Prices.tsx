@@ -171,10 +171,9 @@ export default function Prices() {
       </header>
 
       <div className="price-grid">
-        {TIERS.map((t, i) => (
+        {TIERS.map((t) => (
           <article className="price-card" key={t.name} data-magnetic>
             <div className="price-inner">
-              <span className="price-idx">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="price-name">{t.name}</h3>
               <p className="price-desc">{t.desc}</p>
               <ul className="price-feats">

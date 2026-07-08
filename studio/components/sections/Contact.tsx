@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
@@ -22,11 +23,15 @@ export default function Contact() {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [about, setAbout] = useState("");
+  const [agreePd, setAgreePd] = useState(false);
+  const [agreeOffer, setAgreeOffer] = useState(false);
   const [state, setState] = useState<SendState>("idle");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "sending") return;
+    // 152-ФЗ: без обоих согласий заявку не отправляем
+    if (!agreePd || !agreeOffer) return;
     const now = new Date().toLocaleString("ru-RU", {
       timeZone: "Europe/Moscow",
       day: "2-digit",
@@ -42,6 +47,7 @@ export default function Contact() {
       `📞 Контакт: ${contact || "—"}`,
       about ? `📝 О проекте: ${about}` : "",
       `🕒 Время: ${now} (МСК)`,
+      "✅ Согласие на обработку ПД и оферту получено",
     ]
       .filter(Boolean)
       .join("\n");
@@ -57,6 +63,8 @@ export default function Contact() {
       setName("");
       setContact("");
       setAbout("");
+      setAgreePd(false);
+      setAgreeOffer(false);
     } catch {
       setState("error");
     }
@@ -142,12 +150,50 @@ export default function Contact() {
               onChange={(e) => setAbout(e.target.value)}
             />
           </div>
+          {/* согласия 152-ФЗ — без обеих галочек кнопка неактивна */}
+          <div className="contact-consents contact-field--wide">
+            <label className="consent">
+              <input
+                type="checkbox"
+                checked={agreePd}
+                onChange={(e) => setAgreePd(e.target.checked)}
+                required
+              />
+              <span>
+                Я даю{" "}
+                <Link href="/consent" target="_blank">
+                  согласие на обработку персональных данных
+                </Link>{" "}
+                и принимаю{" "}
+                <Link href="/policy" target="_blank">
+                  Политику конфиденциальности
+                </Link>
+                .
+              </span>
+            </label>
+            <label className="consent">
+              <input
+                type="checkbox"
+                checked={agreeOffer}
+                onChange={(e) => setAgreeOffer(e.target.checked)}
+                required
+              />
+              <span>
+                Я ознакомлен(а) и принимаю условия{" "}
+                <Link href="/offer" target="_blank">
+                  Публичной оферты
+                </Link>
+                .
+              </span>
+            </label>
+          </div>
+
           <button
             type="submit"
             className="btn btn--primary contact-submit"
             data-magnetic
             data-state={state}
-            disabled={state === "sending"}
+            disabled={state === "sending" || !agreePd || !agreeOffer}
           >
             <span className="btn-cta-label">
               {state === "sending"
@@ -195,6 +241,17 @@ export default function Contact() {
             AUREA — от точки до шедевра.
           </span>
         </div>
+
+        {/* правовые документы (152-ФЗ) */}
+        <nav className="contact-legal contact-row" aria-label="Правовые документы">
+          <Link href="/policy" target="_blank">Политика конфиденциальности</Link>
+          <Link href="/pd" target="_blank">Политика обработки ПД</Link>
+          <Link href="/offer" target="_blank">Публичная оферта</Link>
+          <Link href="/consent" target="_blank">Согласие на обработку ПД</Link>
+          <span className="contact-legal-ip">
+            ИП&nbsp;Горовой Кирилл Николаевич · ИНН&nbsp;613805463472 · ОГРНИП&nbsp;325619600032361
+          </span>
+        </nav>
       </div>
     </section>
   );

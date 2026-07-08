@@ -106,19 +106,22 @@ export default function Works() {
             scrub: 0.9,
           },
         });
-        // уходит в глубину так же «паровозиком», как остальные кейсы (scale 0.6,
-        // не 0.42 — раньше слишком резко/мелко), и растворяется позже и мягче
-        tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.5 }, 0)
-          .to(last, { scale: 0.6, yPercent: -3, ease: "power1.inOut", duration: 1 }, 0)
-          .to(shade, { opacity: 0.9, ease: "none", duration: 1 }, 0)
-          .to(last, { autoAlpha: 0, ease: "power1.in", duration: 0.3 }, 0.7);
-        // описание уходит ВМЕСТЕ с кейсом (синхронно), а не «вдогонку» долго —
-        // тот же тайминг, что и растворение кейса
+        // СНАЧАЛА уезжает вглубь тем же темпом, что и остальные (scale по всему
+        // ходу, картинка при этом ВИДНА — тень копится постепенно), и ТОЛЬКО в
+        // самом конце растворяется. Раньше на коротком хвосте тень чернила
+        // картинку рано, и кейс «схлопывался» до ухода вдаль.
+        tl.to(glow, { opacity: 1, ease: "power1.in", duration: 0.55 }, 0)
+          .to(last, { scale: 0.62, yPercent: -3, ease: "power1.in", duration: 1 }, 0)
+          // тень начинает копиться позже (с 35%) → картинка дольше читается, пока едет вдаль
+          .to(shade, { opacity: 1, ease: "none", duration: 0.65 }, 0.35)
+          // исчезает В КОНЦЕ, уже уехав вглубь
+          .to(last, { autoAlpha: 0, ease: "power1.in", duration: 0.25 }, 0.78);
+        // описание уходит вместе с кейсом — в самом конце
         if (lastDesc)
           tl.to(
             lastDesc,
-            { autoAlpha: 0, y: -30, scale: 0.9, ease: "power1.in", duration: 0.3 },
-            0.7
+            { autoAlpha: 0, y: -30, scale: 0.9, ease: "power1.in", duration: 0.25 },
+            0.78
           );
       }
 
