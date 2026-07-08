@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Manrope, Unbounded } from "next/font/google";
+import CookieConsent from "@/components/kit/CookieConsent";
 import "./globals.css";
 
 /*
@@ -59,7 +60,10 @@ export default function RootLayout({
       lang="ru"
       className={`${display.variable} ${body.variable} ${headline.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieConsent />
+      </body>
     </html>
   );
 }

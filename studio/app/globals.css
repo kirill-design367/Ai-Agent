@@ -139,7 +139,10 @@ body {
   margin: 0;
   width: 100%;
   max-width: 100%;
-  background: var(--bg-base);
+  /* ТЁМНЫЙ фон документа: сайт преимущественно тёмный, и раньше СВЕТЛЫЙ фон
+     body просвечивал сквозь суб-пиксельные щели между тёмными секциями —
+     появлялись тонкие белые линии на стыках. Тёмный фон их прячет. */
+  background: var(--bg-dark);
   color: var(--text-primary);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: var(--text-base);
@@ -2398,6 +2401,12 @@ main {
   text-wrap: balance;
   overflow-wrap: break-word;
 }
+/* СВЕТЛАЯ секция цен на тёмном фоне документа: перекрываем стыки на 1px, чтобы
+   тёмный фон body не давал тонкую линию по краям светлого блока */
+.prices {
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
 .price-grid {
   position: relative;
   z-index: 1;
@@ -3284,17 +3293,20 @@ main {
   will-change: transform;
   backface-visibility: hidden;
 }
-/* рваная (не прямая) вертикальная линия разрыва — зигзаг вокруг центра */
+/* рваная (не прямая) вертикальная линия разрыва — зигзаг вокруг центра.
+   Панели ПЕРЕКРЫВАЮТСЯ по зигзагу на ~8% (L до Z+4, R от Z−4), чтобы между ними
+   НЕ было суб-пиксельной щели, сквозь которую просвечивал тёмный FAQ тонкой
+   зигзаг-линией. */
 .faq-panel--l {
   clip-path: polygon(
-    0 0, 53% 0, 47% 9%, 54% 20%, 46% 31%, 53% 43%, 47% 54%,
-    54% 65%, 46% 77%, 53% 88%, 48% 100%, 0 100%
+    0 0, 54% 0, 49% 12%, 59% 25%, 49% 38%, 59% 50%,
+    49% 62%, 59% 75%, 49% 88%, 54% 100%, 0 100%
   );
 }
 .faq-panel--r {
   clip-path: polygon(
-    53% 0, 100% 0, 100% 100%, 48% 100%, 53% 88%, 46% 77%, 54% 65%,
-    47% 54%, 53% 43%, 46% 31%, 54% 20%, 47% 9%
+    46% 0, 100% 0, 100% 100%, 46% 100%, 41% 88%, 51% 75%,
+    41% 62%, 51% 50%, 41% 38%, 51% 25%, 41% 12%
   );
 }
 
@@ -3387,13 +3399,48 @@ main {
   line-height: 1.5;
   color: rgba(244, 242, 238, 0.68);
 }
+/* кастомный чекбокс — хорошо виден в НЕвыбранном состоянии на тёмном фоне
+   (рамка + лёгкая заливка), в выбранном — белый квадрат с тёмной галочкой */
 .consent input[type="checkbox"] {
   flex: 0 0 auto;
-  width: 1.15rem;
-  height: 1.15rem;
-  margin-top: 0.1em;
-  accent-color: var(--text-on-dark);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.45rem;
+  height: 1.45rem;
+  margin: 0.05em 0 0;
+  border: 1.5px solid rgba(244, 242, 238, 0.55);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s var(--ease-expo), border-color 0.2s var(--ease-expo);
+}
+.consent input[type="checkbox"]:hover {
+  border-color: rgba(244, 242, 238, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+}
+.consent input[type="checkbox"]::after {
+  content: "✓";
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #0a0a0b;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.18s var(--ease-expo), transform 0.18s var(--ease-expo);
+}
+.consent input[type="checkbox"]:checked {
+  background: var(--text-on-dark);
+  border-color: var(--text-on-dark);
+}
+.consent input[type="checkbox"]:checked::after {
+  opacity: 1;
+  transform: scale(1);
+}
+.consent input[type="checkbox"]:focus-visible {
+  outline: 2px solid rgba(226, 246, 242, 0.8);
+  outline-offset: 2px;
 }
 .consent a {
   color: rgba(244, 242, 238, 0.92);
@@ -3427,4 +3474,71 @@ main {
   flex-basis: 100%;
   color: rgba(244, 242, 238, 0.4);
   letter-spacing: 0.01em;
+}
+
+/* ── COOKIE-БАННЕР (152-ФЗ) — фиксирован снизу, тёмный, поверх всего */
+.cookie {
+  position: fixed;
+  left: clamp(0.8rem, 3vw, 1.6rem);
+  right: clamp(0.8rem, 3vw, 1.6rem);
+  bottom: clamp(0.8rem, 3vw, 1.6rem);
+  z-index: 9500;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(0.7rem, 2vw, 1.4rem);
+  padding: clamp(0.9rem, 2.4vw, 1.3rem) clamp(1rem, 2.6vw, 1.6rem);
+  border: 1px solid rgba(244, 242, 238, 0.16);
+  border-radius: var(--radius-lg);
+  background: rgba(16, 16, 18, 0.92);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  color: rgba(244, 242, 238, 0.82);
+}
+.cookie-text {
+  flex: 1 1 260px;
+  margin: 0;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  line-height: 1.5;
+}
+.cookie-text a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.cookie-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+}
+.cookie-btn {
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.3s var(--ease-expo), border-color 0.3s var(--ease-expo),
+    opacity 0.3s var(--ease-expo);
+  white-space: nowrap;
+}
+.cookie-btn--ghost {
+  background: transparent;
+  border-color: rgba(244, 242, 238, 0.28);
+  color: rgba(244, 242, 238, 0.8);
+}
+.cookie-btn--ghost:hover { border-color: rgba(244, 242, 238, 0.6); color: #fff; }
+.cookie-btn--solid {
+  background: var(--text-on-dark);
+  color: #0a0a0b;
+}
+.cookie-btn--solid:hover { opacity: 0.88; }
+@media (max-width: 560px) {
+  .cookie-actions { flex: 1 1 100%; }
+  .cookie-btn { flex: 1 1 auto; }
 }

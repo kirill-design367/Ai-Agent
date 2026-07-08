@@ -24,7 +24,7 @@ export default function Intro() {
         setLift(true);
         document.documentElement.classList.add("intro-done");
         window.dispatchEvent(new Event("aurea:revealed"));
-        window.setTimeout(() => setGone(true), 1200);
+        window.setTimeout(() => setGone(true), 600);
       };
 
       const vid = vidRef.current;
@@ -35,11 +35,14 @@ export default function Intro() {
         return;
       }
 
+      // прелоадер В 2 РАЗА БЫСТРЕЕ: проигрываем видео на удвоенной скорости (~2с)
+      vid.playbackRate = 2;
+
       // видео закончилось → уводим шторку
       vid.addEventListener("ended", finish, { once: true });
 
-      // fallback: если видео не воспроизвелось за 5 с — всё равно показываем сайт
-      const fallback = window.setTimeout(finish, 5000);
+      // fallback: если видео не воспроизвелось за 2.5 с — всё равно показываем сайт
+      const fallback = window.setTimeout(finish, 2500);
       vid.addEventListener("ended", () => clearTimeout(fallback), { once: true });
 
       vid.play().catch(() => finish());
