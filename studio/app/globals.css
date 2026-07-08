@@ -3172,3 +3172,126 @@ main {
   .bh-word { font-size: 0.8em !important; }
 }
 
+/* ============================================================================
+   ПЕРЕХОД 3 — LIGHT WIPE: заполнение экрана светом снизу вверх
+   ============================================================================ */
+.lightwipe {
+  position: relative;
+  height: 100svh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  /* тёмный — бесшовно продолжает секцию «Преимущества» */
+  background: var(--bg-dark);
+  z-index: 4;
+}
+.lightwipe-glow {
+  position: absolute;
+  left: 50%;
+  bottom: -30%;
+  width: 150vmax;
+  height: 150vmax;
+  margin-left: -75vmax;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #ffffff 0%,
+    #ffffff 42%,
+    rgba(255, 255, 255, 0.55) 62%,
+    rgba(255, 255, 255, 0) 78%
+  );
+  filter: blur(80px);
+  will-change: transform, opacity;
+  z-index: 1;
+}
+.lightwipe-solid {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-base);
+  opacity: 0;
+  will-change: opacity;
+  z-index: 2;
+}
+
+/* ============================================================================
+   ПЕРЕХОД 4 — SPLIT REVEAL: экран распахивается двумя рваными панелями
+   ============================================================================ */
+.splitreveal {
+  position: relative;
+  height: 100svh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  /* тёмный низ — бесшовно ведёт в тёмную секцию вопросов */
+  background: var(--bg-dark);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+}
+.sr-hint {
+  grid-area: 1 / 1;
+  z-index: 1;
+  padding: 0 1rem;
+  text-align: center;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.9rem, 6vw, 4.5rem);
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+  will-change: transform, opacity;
+}
+.sr-panel {
+  position: absolute;
+  inset: -2% -2%;
+  z-index: 2;
+  /* цвет прайсинга — будто рвётся сам экран цен */
+  background: var(--bg-base);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+/* рваная (не прямая) вертикальная линия разрыва — зигзаг вокруг центра */
+.sr-panel--l {
+  clip-path: polygon(
+    0 0, 53% 0, 47% 9%, 54% 20%, 46% 31%, 53% 43%, 47% 54%,
+    54% 65%, 46% 77%, 53% 88%, 48% 100%, 0 100%
+  );
+}
+.sr-panel--r {
+  clip-path: polygon(
+    53% 0, 100% 0, 100% 100%, 48% 100%, 53% 88%, 46% 77%, 54% 65%,
+    47% 54%, 53% 43%, 46% 31%, 54% 20%, 47% 9%
+  );
+}
+
+/* ============================================================================
+   ПЕРЕХОД 5 — TEXT MORPH: буквы рассыпаются и пересобираются
+   ============================================================================ */
+.textmorph {
+  position: relative;
+  height: 100svh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  background: var(--bg-dark);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 0 clamp(1.4rem, 6vw, 7rem);
+}
+.tm-from,
+.tm-to {
+  grid-area: 1 / 1;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2rem, 7vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+}
+.tm-from .char,
+.tm-to .char {
+  will-change: transform, opacity;
+}
+

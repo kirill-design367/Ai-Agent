@@ -8,9 +8,11 @@ import Works from "@/components/sections/Works";
 import Pain from "@/components/sections/Pain";
 import Process from "@/components/sections/Process";
 import Advantages from "@/components/sections/Advantages";
+import LightWipe from "@/components/sections/LightWipe";
 import Prices from "@/components/sections/Prices";
+import SplitReveal from "@/components/sections/SplitReveal";
 import Faq from "@/components/sections/Faq";
-import BlackHole from "@/components/sections/BlackHole";
+import TextMorph from "@/components/sections/TextMorph";
 import Reviews from "@/components/sections/Reviews";
 import Teleport from "@/components/sections/Teleport";
 import Contact from "@/components/sections/Contact";
@@ -40,9 +42,14 @@ export default function Home() {
         <Pain />
         <Process />
         <Advantages />
+        {/* T3 — заполнение светом */}
+        <LightWipe />
         <Prices />
+        {/* T4 — экран распахивается двумя панелями */}
+        <SplitReveal />
         <Faq />
-        <BlackHole />
+        {/* T5 — буквы рассыпаются и пересобираются */}
+        <TextMorph />
         <Reviews />
         <Teleport />
         <Contact />
