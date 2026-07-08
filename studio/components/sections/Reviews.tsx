@@ -47,39 +47,44 @@ export default function Reviews() {
 
       const driftTweens: gsap.core.Tween[] = [];
 
-      // ПЕРЕХОД 5 (часть 2): БЛОК «Отзывы» РОЖДАЕТСЯ ИЗ БУКВ. Реальный заголовок
-      // «Что говорят клиенты» собирается из разлетевшихся букв (продолжение
-      // рассыпавшегося последнего вопроса FAQ), следом слетаются карточки —
-      // весь блок «появляется из букв», без дублей-подписей поверх.
+      // ПЕРЕХОД 5: БЛОК «Отзывы» РОЖДАЕТСЯ ИЗ БУКВ. Экран ПИНИТСЯ, и реальный
+      // заголовок «Что говорят клиенты» СОБИРАЕТСЯ из разлетевшихся букв по
+      // скрабу — пиннинг «съедает» прокрутку, поэтому сборка видимая и
+      // управляемая (без пина проскакивала мгновенно = «нет анимации»).
       const titleEl = root.current!.querySelector<HTMLElement>(".reviews-title");
       if (titleEl) {
         const split = new SplitText(titleEl, { type: "chars" });
-        const isMobile = window.matchMedia("(max-width: 760px)").matches;
-        const spread = isMobile ? 200 : 380;
-        // СКРАБ (а не разовый play): буквы СЛЕТАЮТСЯ по мере входа в секцию —
-        // это и есть видимый переход между двумя тёмными блоками (иначе граница
-        // невидима и «перехода нет»). Reversible вверх/вниз.
-        gsap.fromTo(
-          split.chars,
-          {
-            x: () => gsap.utils.random(-spread, spread),
-            y: () => gsap.utils.random(-spread, spread),
-            rotation: () => gsap.utils.random(-80, 80),
-            autoAlpha: 0,
-          },
-          {
-            x: 0,
-            y: 0,
-            rotation: 0,
-            autoAlpha: 1,
-            ease: "power2.out",
-            stagger: { from: "random", each: 0.02 },
-            scrollTrigger: {
-              trigger: ".reviews",
-              start: "top 88%",
-              end: "top 42%",
-              scrub: 0.8,
-            },
+        const mm = gsap.matchMedia();
+        mm.add(
+          { isDesktop: "(min-width: 761px)", isMobile: "(max-width: 760px)" },
+          (self) => {
+            const isMobile = self.conditions?.isMobile;
+            const spread = isMobile ? 240 : 440;
+            const dist = isMobile ? 680 : 900;
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: root.current!,
+                start: "top top",
+                end: () => "+=" + dist,
+                pin: true,
+                scrub: 0.8,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+              },
+            });
+            tl.from(
+              split.chars,
+              {
+                x: () => gsap.utils.random(-spread, spread),
+                y: () => gsap.utils.random(-spread, spread),
+                rotation: () => gsap.utils.random(-90, 90),
+                autoAlpha: 0,
+                ease: "power2.out",
+                stagger: { from: "random", each: 0.03 },
+                duration: 1,
+              },
+              0
+            );
           }
         );
       }
