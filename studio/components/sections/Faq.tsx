@@ -2,19 +2,19 @@
 
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   FAQ — снимает последние возражения перед заявкой.
 
-  ПЕРЕХОД 4 (вход): поверх начала FAQ лежит «занавес» цвета прайса, поделённый
-  рваной вертикальной линией на две панели. Экран пинится, панели РАСПАХИВАЮТСЯ
-  в стороны — и из-под них открывается НАСТОЯЩИЙ заголовок «Что обычно
-  спрашивают» + верхние вопросы (никаких дублей-подписей).
+  ПЕРЕХОД 4 (вход): поверх начала FAQ лежит светлый «занавес» цвета прайса,
+  поделённый рваной вертикальной линией на две панели. Экран пинится, панели
+  РАСПАХИВАЮТСЯ в стороны — и из-под них открывается НАСТОЯЩИЙ заголовок «Что
+  обычно спрашивают» + верхние вопросы (никаких дублей-подписей).
 
-  ПЕРЕХОД 5 (выход, часть 1): последний вопрос списка при уходе секции наверх
-  РАССЫПАЕТСЯ по буквам (реальный блок, а не дубль) — и пересобирается уже в
-  заголовок «Отзывов» (см. Reviews.tsx).
+  ПЕРЕХОД 5 (выход) целиком отдан «Отзывам»: их реальный заголовок собирается из
+  разлетевшихся букв по скрабу (см. Reviews.tsx) — блок рождается из букв. Список
+  FAQ при этом остаётся целым (никаких пустых «съеденных» строк).
 
   Аккордеон на grid-template-rows (0fr→1fr): открытие/закрытие плавное и дешёвое.
 */
@@ -121,28 +121,6 @@ export default function Faq() {
             .to(".faq-panel--r", { xPercent: 100, rotate: 2, ease: "power2.in", duration: 1 }, 0);
         }
       );
-
-      // ── ПЕРЕХОД 5 (часть 1): последний вопрос РАССЫПАЕТСЯ при уходе секции.
-      const lastQ = root.current!.querySelector<HTMLElement>(
-        ".faq-item:last-child .faq-q-txt"
-      );
-      if (lastQ) {
-        const split = new SplitText(lastQ, { type: "chars" });
-        gsap.to(split.chars, {
-          x: () => gsap.utils.random(-150, 150),
-          y: () => gsap.utils.random(-90, 90),
-          rotation: () => gsap.utils.random(-80, 80),
-          autoAlpha: 0,
-          ease: "power1.in",
-          stagger: { from: "random", each: 0.01 },
-          scrollTrigger: {
-            trigger: ".faq-item:last-child",
-            start: "top 55%",
-            end: "top 8%",
-            scrub: 0.8,
-          },
-        });
-      }
 
       return () => ScrollTrigger.getAll().forEach((t) => t.kill());
     },

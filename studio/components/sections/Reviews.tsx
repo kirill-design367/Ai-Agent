@@ -56,20 +56,32 @@ export default function Reviews() {
         const split = new SplitText(titleEl, { type: "chars" });
         const isMobile = window.matchMedia("(max-width: 760px)").matches;
         const spread = isMobile ? 200 : 380;
-        gsap.from(split.chars, {
-          x: () => gsap.utils.random(-spread, spread),
-          y: () => gsap.utils.random(-spread, spread),
-          rotation: () => gsap.utils.random(-80, 80),
-          autoAlpha: 0,
-          ease: "power3.out",
-          duration: 0.9,
-          stagger: { from: "random", each: 0.02 },
-          scrollTrigger: {
-            trigger: ".reviews",
-            start: "top 74%",
-            toggleActions: "play none none reverse",
+        // СКРАБ (а не разовый play): буквы СЛЕТАЮТСЯ по мере входа в секцию —
+        // это и есть видимый переход между двумя тёмными блоками (иначе граница
+        // невидима и «перехода нет»). Reversible вверх/вниз.
+        gsap.fromTo(
+          split.chars,
+          {
+            x: () => gsap.utils.random(-spread, spread),
+            y: () => gsap.utils.random(-spread, spread),
+            rotation: () => gsap.utils.random(-80, 80),
+            autoAlpha: 0,
           },
-        });
+          {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            autoAlpha: 1,
+            ease: "power2.out",
+            stagger: { from: "random", each: 0.02 },
+            scrollTrigger: {
+              trigger: ".reviews",
+              start: "top 88%",
+              end: "top 42%",
+              scrub: 0.8,
+            },
+          }
+        );
       }
 
       gsap.utils.toArray<HTMLElement>(".rev-card").forEach((card, i) => {
