@@ -1746,34 +1746,35 @@ main {
    КРИТИЧНО: у трека ТЁМНЫЙ фон — секция .process светлая, и без фона при
    субпиксельном позиционировании sticky на кромках проглядывала светлая полоса
    (та самая «тонкая белая линия», мерцающая при скролле = «дрожание»). */
+/* ЗУМ-РАСТВОРЕНИЕ (отличается от cover-наезда Hero): трек задаёт длину прокрутки,
+   портал внутри липнет НАТИВНЫМ sticky (не GSAP-пин → не дрожит). Тёмная надпись
+   «Мы строим работу иначе» приближается (scale) и растворяется, открывая светлую
+   сцену «Как мы работаем» под ней. */
 .proc-enter-track {
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  height: 220vh;
   background: #070708;
 }
-/* портал-вход: тёмная завеса с надписью, сквозь которую проявляется блок.
-   sticky-пин (не ScrollTrigger pin); края перекрыты на 1px (top:-1px + 2px
-   высоты) — субпиксельные щели сверху/снизу гарантированно закрашены. */
 .proc-enter {
-  position: relative;
+  position: sticky;
+  top: 0;
   width: 100%;
-  /* БЕЗ ПИНА/СТОПОРА (это и давало дрожание) — два экрана в обычном потоке */
-  display: flex;
-  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
   background: #070708;
 }
 .proc-veil {
-  /* тёмный экран «Мы строим работу иначе» — идёт ПЕРВЫМ (order -1: в разметке
-     он после светлого), надпись плывёт параллаксом при прокрутке */
-  position: relative;
-  order: -1;
-  min-height: 100svh;
+  /* тёмный экран «Мы строим работу иначе» — СВЕРХУ (z2), приближается и тает */
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: grid;
   place-items: center;
   background: #070708;
   overflow: hidden;
-  will-change: transform;
+  will-change: opacity;
 }
 .proc-turn {
   margin: 0;
@@ -1794,9 +1795,10 @@ main {
   display: block;
 }
 .proc-intro {
-  /* светлый экран «Как мы работаем» — идёт ВТОРЫМ, обычный поток */
-  position: relative;
-  min-height: 100svh;
+  /* светлый экран «Как мы работаем» — БАЗА (z1), проявляется из-под тёмной завесы */
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   padding: 0 clamp(1.4rem, 6vw, 7rem);
   display: flex;
   flex-direction: column;
@@ -1805,6 +1807,7 @@ main {
   text-align: center;
   background: var(--bg-base);
   overflow: hidden;
+  will-change: transform;
 }
 .proc-questions {
   position: absolute;
@@ -2291,11 +2294,9 @@ main {
     font-size: 64vw;
   }
 
-  /* МОБАЙЛ — тот же параллакс без пина; экраны чуть ниже 100svh, чтобы переход
-     не был растянутым */
-  .proc-veil,
-  .proc-intro {
-    min-height: 92svh;
+  /* МОБАЙЛ — та же зум-растворка; трек чуть короче, чтобы переход не растягивался */
+  .proc-enter-track {
+    height: 190vh;
   }
   .proc-bigtitle {
     font-size: clamp(2rem, 11vw, 3.2rem);
@@ -2359,9 +2360,7 @@ main {
    БЛОК 7 — ЦЕНЫ: светлый, тёмные карточки с бегущим огоньком (StarBorder)
    ============================================================================ */
 .prices {
-  /* COVER: блок цен прилипает, следующий (Вопросы) наезжает поверх */
-  position: sticky;
-  top: 0;
+  position: relative;
   background: var(--bg-base);
   color: var(--text-primary);
   /* верхний отступ вернулся: портал-обёртка (100lvh) убрана, заголовку нужен воздух */
@@ -2723,9 +2722,7 @@ main {
    БЛОК 8 — FAQ: аккордеон, ответ собирается из разлетевшихся букв
    ============================================================================ */
 .faq {
-  /* COVER: FAQ прилипает, следующий блок наезжает поверх */
-  position: sticky;
-  top: 0;
+  position: relative;
   background: var(--bg-dark);
   padding: clamp(4.5rem, 11vh, 9rem) clamp(1.4rem, 6vw, 7rem) clamp(2.6rem, 6vh, 4.5rem);
 }
@@ -2843,9 +2840,7 @@ main {
    БЛОК 9 — ОТЗЫВЫ: парящие карточки-цитаты (черновые плейсхолдеры)
    ============================================================================ */
 .reviews {
-  /* COVER: отзывы прилипают, финал наезжает поверх */
-  position: sticky;
-  top: 0;
+  position: relative;
   background: var(--bg-sunken);
   padding: clamp(2.6rem, 6vh, 4.5rem) clamp(1.4rem, 6vw, 7rem) clamp(5rem, 12vh, 10rem);
 }

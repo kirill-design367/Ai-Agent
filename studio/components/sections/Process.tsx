@@ -75,58 +75,40 @@ export default function Process() {
     () => {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return; // оба экрана в обычном потоке — читаются как есть
+      if (reduce) {
+        gsap.set(".proc-veil", { autoAlpha: 0 }); // сразу показываем «Как мы работаем»
+        return;
+      }
 
-      // ПЕРЕХОД БЕЗ ПИННИНГА/СТОПОРА (что и давало дрожание): два экрана в
-      // обычном потоке — тёмный «Мы строим работу иначе», затем светлый «Как мы
-      // работаем». Премиальность даёт ПАРАЛЛАКС ГЛУБИНЫ, а не удержание экрана:
-      // надпись тёмного экрана плывёт медленнее прокрутки и мягко тает к выходу,
-      // на светлом — заголовок и рой вопросов въезжают со своей глубиной.
-      // Только transform/opacity на GPU, ничего не стопорится → не дрожит.
+      // ЗУМ-РАСТВОРЕНИЕ (отдельный, НЕ похожий на cover-наезд Hero): экран липнет
+      // НАТИВНЫМ sticky (не GSAP-пин → не борется со скроллом, не дрожит), а GSAP
+      // лишь скрабит дешёвые свойства — надпись «Мы строим работу иначе»
+      // ПРИБЛИЖАЕТСЯ (scale) и тёмная завеса РАСТВОРЯЕТСЯ, открывая светлую сцену
+      // «Как мы работаем» под ней (лёгкий доводочный зум).
+      gsap.set(".proc-veil", { autoAlpha: 1 });
+      gsap.set(".proc-turn", { transformOrigin: "50% 46%" });
 
-      // тёмный экран: надпись — параллакс (медленнее скролла) + затухание к концу
-      gsap.fromTo(
-        ".proc-turn",
-        { yPercent: -14 },
-        {
-          yPercent: 14,
-          ease: "none",
-          scrollTrigger: { trigger: ".proc-veil", start: "top bottom", end: "bottom top", scrub: 0.8 },
-        }
-      );
-      gsap.fromTo(
-        ".proc-turn",
-        { opacity: 1 },
-        {
-          opacity: 0.16,
-          ease: "power1.in",
-          scrollTrigger: { trigger: ".proc-veil", start: "center 60%", end: "bottom 20%", scrub: 0.8 },
-        }
-      );
-
-      // светлый экран: рой вопросов дрейфует со своей глубиной (один триггер)
-      gsap.fromTo(
-        ".proc-questions",
-        { yPercent: 10 },
-        {
-          yPercent: -10,
-          ease: "none",
-          scrollTrigger: { trigger: ".proc-intro", start: "top bottom", end: "bottom top", scrub: 1 },
-        }
-      );
-
-      // заголовок «Как мы работаем» рождается, когда светлый экран входит в кадр
-      gsap.fromTo(
-        ".proc-bigtitle",
-        { y: 54, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "expo.out",
-          scrollTrigger: { trigger: ".proc-intro", start: "top 72%" },
-        }
-      );
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".proc-enter-track",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.7,
+        },
+      });
+      tl
+        // надпись наезжает на зрителя
+        .fromTo(".proc-turn", { scale: 1, opacity: 1 }, { scale: 3.1, opacity: 0, ease: "power2.in", duration: 0.55 }, 0)
+        // тёмная завеса растворяется, открывая светлый экран
+        .to(".proc-veil", { autoAlpha: 0, ease: "power1.inOut", duration: 0.4 }, 0.28)
+        // светлая сцена мягко «доезжает» из глубины
+        .fromTo(".proc-intro", { scale: 1.12 }, { scale: 1, ease: "power1.out", duration: 0.5 }, 0.2)
+        // заголовок «Как мы работаем» рождается
+        .fromTo(".proc-bigtitle", { y: 48, opacity: 0 }, { y: 0, opacity: 1, ease: "expo.out", duration: 0.3 }, 0.42)
+        // рой вопросов слегка дрейфует по глубине
+        .fromTo(".proc-questions", { yPercent: 8 }, { yPercent: -6, ease: "none", duration: 1 }, 0)
+        // задержка — «Как мы работаем» держится полностью раскрытым
+        .to({}, { duration: 0.35 });
       // дрейф вопросов — ЖИВОЙ ВЕЗДЕ (и на мобиле): хаотично и эстетично,
       // transform-only твины на собственных GPU-слоях (will-change) — дёшево
       const qFloatTweens: gsap.core.Tween[] = [];
