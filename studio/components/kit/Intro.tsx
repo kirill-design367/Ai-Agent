@@ -1,51 +1,79 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { registerGsap } from "@/lib/gsap";
 import { asset } from "@/lib/asset";
 
 /*
-  INTRO — видео-прелоадер (4 с, H264, ~152KB).
-  Видео играет один раз по центру; по окончании шторка уходит вверх.
-  На десктопе видео уменьшено (не во весь экран), на мобиле — крупнее.
+  INTRO — короткий видео-прелоадер (макс ~1.5с) с растворением.
+  Показывается ТОЛЬКО при первом визите за сессию и НЕ показывается рекламному
+  трафику (есть utm_source) — там оффер виден мгновенно. Есть кнопка «Пропустить».
 */
+
+/** Пропускать интро: рекламный трафик (utm_source), повторный визит за сессию,
+ *  либо системная просьба уменьшить движение. SSR-безопасно. */
+export function shouldSkipIntro(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    if (new URLSearchParams(window.location.search).has("utm_source")) return true;
+    if (sessionStorage.getItem("aurea-intro-seen")) return true;
+  } catch {
+    /* приватный режим — просто покажем интро */
+  }
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export default function Intro() {
-  const root   = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
   const vidRef = useRef<HTMLVideoElement>(null);
   const [lift, setLift] = useState(false);
   const [gone, setGone] = useState(false);
+  const doneRef = useRef(false);
+
+  const finish = useCallback(() => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    document.documentElement.classList.add("intro-done");
+    try {
+      sessionStorage.setItem("aurea-intro-seen", "1");
+    } catch {
+      /* ignore */
+    }
+    window.dispatchEvent(new Event("aurea:revealed"));
+    setLift(true);
+    window.setTimeout(() => setGone(true), 520);
+  }, []);
 
   useGSAP(
     () => {
       registerGsap();
-
-      const finish = () => {
-        setLift(true);
+      // рекламный трафик / повтор / reduced-motion — сразу контент (без вспышки,
+      // т.к. layout-effect отрабатывает до пейнта)
+      if (shouldSkipIntro()) {
+        doneRef.current = true;
         document.documentElement.classList.add("intro-done");
+        try {
+          sessionStorage.setItem("aurea-intro-seen", "1");
+        } catch {
+          /* ignore */
+        }
         window.dispatchEvent(new Event("aurea:revealed"));
-        window.setTimeout(() => setGone(true), 600);
-      };
-
-      const vid = vidRef.current;
-      if (!vid) { finish(); return; }
-
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        finish();
+        setGone(true);
         return;
       }
 
-      // прелоадер В 2 РАЗА БЫСТРЕЕ: проигрываем видео на удвоенной скорости (~2с)
-      vid.playbackRate = 2;
-
-      // видео закончилось → уводим шторку
-      vid.addEventListener("ended", finish, { once: true });
-
-      // fallback: если видео не воспроизвелось за 2.5 с — всё равно показываем сайт
-      const fallback = window.setTimeout(finish, 2500);
-      vid.addEventListener("ended", () => clearTimeout(fallback), { once: true });
-
-      vid.play().catch(() => finish());
+      // короткое интро: жёсткий потолок 1.5с (что раньше — конец видео / потолок)
+      const cap = window.setTimeout(finish, 1500);
+      const vid = vidRef.current;
+      if (vid) {
+        vid.playbackRate = 2.6; // ускоряем сборку логотипа
+        vid.addEventListener("ended", finish, { once: true });
+        vid.play().catch(finish);
+      } else {
+        finish();
+      }
+      return () => clearTimeout(cap);
     },
     { scope: root }
   );
@@ -64,6 +92,9 @@ export default function Intro() {
         preload="auto"
         aria-hidden
       />
+      <button type="button" className="intro-skip" onClick={finish}>
+        Пропустить
+      </button>
     </div>
   );
 }

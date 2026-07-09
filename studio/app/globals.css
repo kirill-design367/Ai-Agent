@@ -1383,15 +1383,37 @@ main {
   opacity: 0;
   transform: scale(1.06);
   filter: blur(9px);
-  transition: opacity 1.05s var(--ease-expo), transform 1.2s var(--ease-expo),
-    filter 1.05s var(--ease-expo);
+  /* быстрый уход (≈0.5с) — Hero открывается почти сразу, LCP не тянется */
+  transition: opacity 0.5s var(--ease-expo), transform 0.55s var(--ease-expo),
+    filter 0.5s var(--ease-expo);
   pointer-events: none;
 }
 /* видео истаивает чуть раньше фона — «сначала растворяется знак» */
 .intro[data-lift="true"] .intro-video {
   opacity: 0;
   transform: scale(1.04);
-  transition: opacity 0.8s var(--ease-expo), transform 1s var(--ease-expo);
+  transition: opacity 0.38s var(--ease-expo), transform 0.5s var(--ease-expo);
+}
+/* кнопка «Пропустить» — ненавязчивый угол */
+.intro-skip {
+  position: absolute;
+  right: clamp(1rem, 4vw, 2.2rem);
+  bottom: clamp(1rem, 4vw, 2.2rem);
+  z-index: 2;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.3s var(--ease-expo), border-color 0.3s var(--ease-expo);
+}
+.intro-skip:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
 }
 .intro-video {
   transition: opacity 0.6s var(--ease-expo);

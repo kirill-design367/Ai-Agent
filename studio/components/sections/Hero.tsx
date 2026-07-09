@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
+import { shouldSkipIntro } from "@/components/kit/Intro";
 
 const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
   ssr: false,
@@ -41,13 +42,17 @@ export default function Hero() {
       registerGsap();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const fades = gsap.utils.toArray<HTMLElement>("[data-hero-fade]");
-      const split = new SplitText(headline.current!, { type: "words,chars" });
-      const subSplit = new SplitText(sub.current!, { type: "words" });
 
-      if (reduce) {
-        gsap.set([split.chars, subSplit.words, fades], { clearProps: "all" });
+      // МГНОВЕННЫЙ ОФФЕР для рекламного трафика / повторного визита / reduced:
+      // заголовок НЕ сплитим и НЕ прячем — остаётся серверным текстом (быстрый
+      // LCP, не ждёт JS-анимации). Показываем сразу вспомогательные элементы.
+      if (reduce || shouldSkipIntro()) {
+        gsap.set(fades, { opacity: 1, y: 0 });
         return;
       }
+
+      const split = new SplitText(headline.current!, { type: "words,chars" });
+      const subSplit = new SplitText(sub.current!, { type: "words" });
 
       // умеренный «стильный хаос» — как было раньше (не слишком разлетается)
       gsap.set(split.chars, {
@@ -87,8 +92,9 @@ export default function Hero() {
           );
       };
 
-      if (document.documentElement.classList.contains("intro-done")) play();
-      else window.addEventListener("aurea:revealed", play, { once: true });
+      // Играем СРАЗУ (не ждём конца интро): короткое интро всё равно поверх, и к
+      // моменту его ухода заголовок уже собран → LCP не тянется до конца интро.
+      play();
     },
     { scope: root }
   );
