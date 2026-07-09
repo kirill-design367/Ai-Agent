@@ -1551,22 +1551,45 @@ main {
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  /* СТАТИЧНЫЙ блик по рамке (без бесконечной анимации угла conic-gradient —
-     она перерисовывала кадр за кадром на fixed-элементе → перф-хит/CLS) */
-  background: conic-gradient(
-    from 130deg,
-    transparent 0deg,
-    transparent 290deg,
-    rgba(244, 242, 238, 0.9) 332deg,
-    rgba(255, 255, 255, 1) 344deg,
-    transparent 360deg
-  );
+  overflow: hidden;
+  /* маска-«рамка»: показываем только 1.5px контур */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
   pointer-events: none;
   z-index: 1;
+}
+/* БЕГУЩИЙ СВЕТ по контуру — вращаем большой conic-градиент через transform
+   (rotate = композитор, без покадрового repaint угла как раньше), маска рамки
+   показывает только контур → блик едет по периметру кнопки. */
+.msg-fab-ring::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 280%;
+  aspect-ratio: 1 / 1;
+  translate: -50% -50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 288deg,
+    rgba(244, 242, 238, 0.85) 330deg,
+    #ffffff 344deg,
+    transparent 360deg
+  );
+  animation: fabSpin 4.6s linear infinite;
+  will-change: transform;
+}
+@keyframes fabSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msg-fab-ring::before {
+    animation: none;
+  }
 }
 
 /* — Portfolio case hover zoom (tactility, III.7.10) */
@@ -1685,7 +1708,9 @@ main {
   max-width: 13ch;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.7rem, 10.5vw, 10.5rem);
+  /* меньше: длинные слова («РАЗВАЛИВАЕТСЯ») помещаются в паддинг-контейнер и
+     не упираются/не вылезают за правый край */
+  font-size: clamp(2.4rem, 7.6vw, 7.4rem);
   line-height: 0.9;
   letter-spacing: -0.025em;
   text-transform: uppercase;
@@ -1784,7 +1809,9 @@ main {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   overflow: hidden;
-  background: #070708;
+  /* тон совпадает с --bg-dark (фон документа и соседних тёмных секций) —
+     иначе на стыке с «Болью» была тонкая ступенька-линия */
+  background: var(--bg-dark);
   display: grid;
   place-items: center;
 }
@@ -2271,7 +2298,8 @@ main {
     padding: 0 1.3rem;
   }
   .pain-big {
-    font-size: clamp(1.6rem, 8.6vw, 2.7rem);
+    /* меньше — «РАЗВАЛИВАЕТСЯ» и на телефоне не упирается в правый край */
+    font-size: clamp(1.5rem, 7vw, 2.3rem);
     max-width: 100%;
     line-height: 0.96;
   }
@@ -2398,11 +2426,32 @@ main {
   text-wrap: balance;
   overflow-wrap: break-word;
 }
-/* СВЕТЛАЯ секция цен на тёмном фоне документа: перекрываем стыки на 1px, чтобы
-   тёмный фон body не давал тонкую линию по краям светлого блока */
+/* СВЕТЛАЯ секция цен на тёмном фоне документа: её светлый фон должен ЗАКРЫВАТЬ
+   суб-пиксельные щели по краям (иначе тёмный body просвечивает тонкой линией).
+   z-index поднимает прайс над соседями, а псевдо-полосы сверху/снизу гарантированно
+   закрашивают стык светлым на 2px. */
 .prices {
+  position: relative;
+  z-index: 1;
   margin-top: -1px;
   margin-bottom: -1px;
+}
+.prices::before,
+.prices::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--bg-base);
+  z-index: 2;
+  pointer-events: none;
+}
+.prices::before {
+  top: -1px;
+}
+.prices::after {
+  bottom: -1px;
 }
 .price-grid {
   position: relative;
@@ -2951,7 +3000,9 @@ main {
   margin: clamp(1rem, 3vh, 2rem) 0 0;
   font-family: var(--font-headline), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(2.9rem, 10vw, 9rem);
+  /* меньше: «РАССКАЖИТЕ» одной строкой помещается в колонку и не упирается в
+     правый край на десктопе */
+  font-size: clamp(2.6rem, 7.4vw, 7rem);
   line-height: 0.92;
   letter-spacing: -0.03em;
   text-transform: uppercase;

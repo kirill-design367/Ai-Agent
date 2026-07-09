@@ -40,12 +40,23 @@ export default function Contact() {
       hour: "2-digit",
       minute: "2-digit",
     });
+    // UTM-метки из URL (реклама Avito ADS и др.) — чтобы видеть источник заявки
+    const params = new URLSearchParams(window.location.search);
+    const utmPairs = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]
+      .map((k) => {
+        const v = params.get(k);
+        return v ? `${k.replace("utm_", "")}: ${v}` : null;
+      })
+      .filter(Boolean);
+    const source = utmPairs.length ? utmPairs.join(", ") : "прямой заход / без метки";
+
     const text = [
       "🔔 Новая заявка с сайта AUREA",
       "",
       `👤 Имя: ${name || "—"}`,
       `📞 Контакт: ${contact || "—"}`,
       about ? `📝 О проекте: ${about}` : "",
+      `📊 Источник: ${source}`,
       `🕒 Время: ${now} (МСК)`,
       "✅ Согласие на обработку ПД и оферту получено",
     ]

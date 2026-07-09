@@ -106,60 +106,7 @@ export default function Advantages() {
         });
       }
 
-      // ВЕНОМ-БЛОБ: «?» стекает амёбой вниз сквозь ответы — ядро + хвост с лагом,
-      // гуи-фильтр (см. <filter id="adv-goo">) сплавляет кружки в одну каплю
-      const venomEl = root.current!.querySelector<HTMLElement>(".adv-venom");
-      const blobCore = root.current!.querySelector<HTMLElement>(".adv-blob-core");
-      const blobTail1 = root.current!.querySelector<HTMLElement>(".adv-blob-tail-1");
-      const blobTail2 = root.current!.querySelector<HTMLElement>(".adv-blob-tail-2");
-      const blobTail3 = root.current!.querySelector<HTMLElement>(".adv-blob-tail-3");
-      const blobGlow = root.current!.querySelector<HTMLElement>(".adv-blob-glow");
-      let onVenomRefresh: (() => void) | null = null;
-      if (venomEl && blobCore) {
-        // высоту трека кэшируем и пересчитываем только на ресайзе —
-        // движение капли идёт через transform: translateY (компоновка на GPU,
-        // без layout-reflow, в отличие от анимации top)
-        let trackH = venomEl.offsetHeight;
-        onVenomRefresh = () => {
-          trackH = venomEl.offsetHeight;
-        };
-        ScrollTrigger.addEventListener("refreshInit", onVenomRefresh);
-
-        const quickY = (el: HTMLElement | null) =>
-          el ? gsap.quickSetter(el, "y", "px") : () => {};
-        const setCore = quickY(blobCore);
-        const setTail1 = quickY(blobTail1);
-        const setTail2 = quickY(blobTail2);
-        const setTail3 = quickY(blobTail3);
-        const setGlow = quickY(blobGlow);
-
-        ScrollTrigger.create({
-          trigger: ".adv-list",
-          start: "top 72%",
-          end: "bottom 82%",
-          scrub: 0.6,
-          onUpdate: (self) => {
-            const p = self.progress;
-            setCore(p * trackH);
-            setTail1(Math.max(0, p - 0.025) * trackH);
-            setTail2(Math.max(0, p - 0.05) * trackH);
-            setTail3(Math.max(0, p - 0.078) * trackH);
-            setGlow(p * trackH);
-          },
-        });
-        // живое «дыхание» капли — лёгкая пульсация ядра
-        idleTweens.push(
-          gsap.to(blobCore, {
-            scale: 1.18,
-            duration: 0.9,
-            ease: "sine.inOut",
-            repeat: -1,
-            yoyo: true,
-          })
-        );
-      }
-
-      // ответы проявляются; номер загорается и заголовок «дёргается» — блоб его захватил
+      // ответы проявляются; номер загорается и заголовок «дёргается» на входе
       gsap.utils.toArray<HTMLElement>(".adv-item").forEach((item, i) => {
         gsap.fromTo(
           item,
@@ -217,7 +164,6 @@ export default function Advantages() {
 
       return () => {
         ScrollTrigger.getAll().forEach((t) => t.kill());
-        if (onVenomRefresh) ScrollTrigger.removeEventListener("refreshInit", onVenomRefresh);
       };
     },
     { scope: root }
@@ -253,27 +199,6 @@ export default function Advantages() {
       </div>
 
       <div className="adv-list">
-        {/* веном-блоб: «?» стекает амёбой вниз и захватывает каждый заголовок */}
-        <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
-          <filter id="adv-goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10"
-            />
-          </filter>
-        </svg>
-        <span className="adv-venom" aria-hidden>
-          <span className="adv-blob-glow" />
-          <span className="adv-blob-goo">
-            <span className="adv-blob-tail adv-blob-tail-3" />
-            <span className="adv-blob-tail adv-blob-tail-2" />
-            <span className="adv-blob-tail adv-blob-tail-1" />
-            <span className="adv-blob-core" />
-          </span>
-        </span>
-
         {ADV.map((a, i) => (
           <article className="adv-item" data-i={i} key={a.t}>
             <span className="adv-num">{String(i + 1).padStart(2, "0")}</span>
