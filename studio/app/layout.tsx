@@ -13,7 +13,8 @@ import "./globals.css";
 // Веса подрезаны под реальное использование — меньше блокирующих ресурсов.
 const display = Playfair_Display({
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600"],
+  // 600 не использовался — убран (меньше блокирующих шрифт-файлов)
+  weight: ["400", "500"],
   variable: "--font-display",
   display: "swap",
 });

@@ -1546,18 +1546,15 @@ main {
 }
 /* тихая премиальная линия-свет, непрерывно обходящая контур кнопки.
    Тонкое кольцо через маску, бегущий блик — через анимируемый угол conic-gradient. */
-@property --fab-a {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
 .msg-fab-ring {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
+  /* СТАТИЧНЫЙ блик по рамке (без бесконечной анимации угла conic-gradient —
+     она перерисовывала кадр за кадром на fixed-элементе → перф-хит/CLS) */
   background: conic-gradient(
-    from var(--fab-a),
+    from 130deg,
     transparent 0deg,
     transparent 290deg,
     rgba(244, 242, 238, 0.9) 332deg,
@@ -1568,19 +1565,8 @@ main {
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
-  animation: fabRing 4.6s linear infinite;
   pointer-events: none;
   z-index: 1;
-}
-@keyframes fabRing {
-  to {
-    --fab-a: 360deg;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .msg-fab-ring {
-    animation: none;
-  }
 }
 
 /* — Portfolio case hover zoom (tactility, III.7.10) */
@@ -1801,7 +1787,18 @@ main {
   background: #070708;
   display: grid;
   place-items: center;
-  will-change: background-color;
+}
+/* СВЕТ заливает сцену через opacity композируемого слоя (а НЕ анимацией
+   background-color — та перерисовывала кадр за кадром и шла «не плавно») */
+.proc-flash {
+  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #f4f3f0;
+  opacity: 0;
+  will-change: opacity;
+  pointer-events: none;
 }
 .proc-turn {
   grid-area: 1 / 1;

@@ -19,27 +19,22 @@ export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const headline = useRef<HTMLHeadingElement>(null);
   const sub = useRef<HTMLParagraphElement>(null);
-  // WebGL флюид-курсор: на десктопе — полное качество (мышь), на тач-устройствах —
-  // реагирует на касание, но в СНИЖЕННОМ разрешении (щадим GPU/батарею).
+  // WebGL флюид-курсор — ТОЛЬКО десктоп (мышь). На мобиле НЕ грузим three/R3F
+  // вовсе: это снимает тяжёлые задачи основного потока (TBT) и ускоряет загрузку
+  // там, где перф важнее всего. Эффект — тонкий фон-курсор, на тач и так не нужен.
   const [fluid, setFluid] = useState(false);
-  const [touchFluid, setTouchFluid] = useState(false);
   useEffect(() => {
     const fine =
       window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
       window.innerWidth > 900;
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
-    if (!fine && !coarse) return;
-    setTouchFluid(!fine && coarse);
+    if (!fine) return;
     // отложить тяжёлую WebGL-инициализацию на простой → не раздувает TBT при загрузке
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
       .requestIdleCallback;
     const t = ric ? ric(() => setFluid(true)) : window.setTimeout(() => setFluid(true), 1200);
     return () => clearTimeout(t as number);
   }, []);
-  // облегчённые параметры для мобилы: меньше разрешение симуляции/краски
-  const fluidProps = touchFluid
-    ? { SIM_RESOLUTION: 64, DYE_RESOLUTION: 512, CAPTURE_RESOLUTION: 256, PRESSURE_ITERATIONS: 12 }
-    : {};
+  const fluidProps = {};
 
   useGSAP(
     () => {

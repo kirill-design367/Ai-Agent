@@ -72,7 +72,7 @@ export default function Process() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce) {
         gsap.set(".proc-turn", { autoAlpha: 0 });
-        gsap.set(".proc-scene", { backgroundColor: "#f4f3f0" });
+        gsap.set(".proc-flash", { opacity: 1 });
         gsap.set(".proc-q", {
           xPercent: -50,
           yPercent: -50,
@@ -127,11 +127,11 @@ export default function Process() {
             },
           });
 
-          // фон: чёрный → белый плавным скрабом, без реза
+          // свет заливает сцену: композируемый opacity-слой (плавно, без repaint)
           tl.fromTo(
-            ".proc-scene",
-            { backgroundColor: "#070708" },
-            { backgroundColor: "#f4f3f0", ease: "none", duration: 1 },
+            ".proc-flash",
+            { opacity: 0 },
+            { opacity: 1, ease: "none", duration: 1 },
             0
           );
           // «Мы строим работу иначе» уходит (растворяется + лёгкий зум)
@@ -256,6 +256,7 @@ export default function Process() {
     <section id="process" className="process" ref={root}>
       {/* ПЕРЕХОД 2 — пиннящаяся сцена: фон чёрный→белый, вопросы сыплются */}
       <div className="proc-scene">
+        <div className="proc-flash" aria-hidden />
         <div className="proc-questions" aria-hidden>
           {QUESTIONS.map((q, i) => (
             <span
