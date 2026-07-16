@@ -38,8 +38,13 @@ const relatedLink = z.object({
  */
 const base = z.object({
   title: z.string().min(1),
-  // Meta (§6.1): title ≤ ~60, description ≤ 160. Предупреждения — в проверке ниже.
-  metaTitle: z.string().min(1).max(65),
+  // Meta (§6.1): title ≤ ~55 с брендом, description ≤ 160.
+  // Бренд в title ОБЯЗАТЕЛЕН (правка владельца): «… | AUREA» / «— AUREA».
+  metaTitle: z
+    .string()
+    .min(1)
+    .max(65)
+    .refine((s) => /AUREA/.test(s), "metaTitle обязан содержать бренд «AUREA»"),
   metaDescription: z.string().min(1).max(170),
   datePublished: isoDate,
   dateModified: isoDate,
@@ -90,9 +95,16 @@ const solutionStep = z.object({
 export const nicheSchema = base.extend({
   type: z.literal("niche"),
   h1: z.string().min(1), // «Создание сайтов для {ниша}»
-  // К какому тарифу привязана цена ниши — из него тянем priceFrom/termFrom/расшифровку.
+  // Тариф-основа ниши — из него по умолчанию берём цену/срок/расшифровку.
   service: z.enum(["landing", "korporativnyi-sait", "internet-magazin"]),
-  priceNote: z.string().optional(), // нишевое уточнение к цене
+  // Переопределение цены ниши. ПРАВИЛО: показанная цена не должна противоречить
+  // составу решения на этой же странице (напр. если решение строится вокруг
+  // калькулятора-модуля, «от» отражает вариант с ним, а priceNote разводит варианты).
+  priceFrom: z.number().int().positive().optional(), // переопределяет priceFrom тарифа
+  priceNote: z.string().optional(), // разведение вариантов цены (база vs с модулем)
+  // Нишевая таблица «что влияет на цену». Если задана — используется вместо тарифной.
+  // Первая строка = ключевой модуль ниши (напр. калькулятор).
+  priceFactors: z.array(priceFactor).optional(),
   lead: z.array(z.string().min(1)).min(1), // прямой ответ: что получает бизнес, срок, цена (§7.1)
   painPoints: z.array(painPoint).min(3).max(4), // специфичные боли ниши (§4.3)
   solutionSteps: z.array(solutionStep).min(1), // структура решения
