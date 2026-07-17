@@ -7,8 +7,9 @@
 #   sudo DEPLOY_PUBKEY="ssh-ed25519 AAAA...публичный-ключ-Actions" bash bootstrap.sh
 set -euo pipefail
 
-DEPLOY_USER=deploy
-APP_DIR=/opt/aurea
+# безопасные дефолты (можно переопределить окружением), обязательный ключ — с :?
+: "${DEPLOY_USER:=deploy}"
+: "${APP_DIR:=/opt/aurea}"
 
 [ "$(id -u)" = 0 ] || { echo "Нужен root: sudo bash bootstrap.sh"; exit 1; }
 : "${DEPLOY_PUBKEY:?Передай публичный ключ для деплоя: DEPLOY_PUBKEY=\"ssh-ed25519 ...\"}"
