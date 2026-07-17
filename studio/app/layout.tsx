@@ -29,6 +29,9 @@ const body = Manrope({
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
   display: "swap",
+  // Manrope — тело/подзаголовки, не LCP-элемент. Не преload'им, чтобы освободить
+  // канал под Unbounded (крупный заголовок = LCP). adjustFontFallback держит CLS 0.
+  preload: false,
 });
 
 /*

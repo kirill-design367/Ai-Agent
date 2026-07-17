@@ -4041,3 +4041,37 @@ main {
 .pg-case-col ul { list-style: none; display: grid; gap: 12px; }
 .pg-case-col li { color: var(--text-secondary); line-height: 1.6; padding-left: 18px; position: relative; }
 .pg-case-col li::before { content: "—"; position: absolute; left: 0; color: var(--gold); }
+
+/* ─── ЛЁГКАЯ ГЛАВНАЯ (light tier / SSR) ─────────────────────────────────── */
+.home-lite-hero {
+  padding-top: calc(var(--header-h, 72px) + clamp(36px, 7vw, 88px));
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+.home-lite-h1 {
+  font-family: var(--font-headline), sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.5rem, 1rem + 7vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin-top: 18px;
+}
+.home-lite-sub {
+  margin-top: clamp(20px, 3vw, 34px);
+  max-width: 58ch;
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.35rem);
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.home-lite-feats {
+  display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 28px; list-style: none;
+}
+.home-lite-feats li {
+  position: relative; padding-left: 20px; color: var(--text-primary); font-weight: 500;
+}
+.home-lite-feats li::before {
+  content: ""; position: absolute; left: 0; top: 50%; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--gold); transform: translateY(-50%);
+}
+.home-lite-actions {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(30px, 4vw, 44px);
+}
