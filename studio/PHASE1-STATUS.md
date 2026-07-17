@@ -15,7 +15,7 @@
 | /uslugi/korporativnyi-sait/ | ✅ | ✅ | готов | published | 0 |
 | /uslugi/landing/ | ✅ | ✅ | готов | published | 0 |
 | /uslugi/podderzhka/ | ✅ | ✅ | готов | published | 1 |
-| /dlya-biznesa/avto-iz-korei/ | ✅ | ✅ | готов | published | 5 |
+| /dlya-biznesa/avto-iz-korei/ | ✅ | ✅ | готов | published | 2 |
 | /dlya-biznesa/fitnes/ | ✅ | ✅ | черновик | draft | 23 |
 | /dlya-biznesa/fotografy/ | ✅ | ✅ | черновик | draft | 23 |
 | /dlya-biznesa/mebel-na-zakaz/ | ✅ | ✅ | готов | published | 5 |
@@ -24,11 +24,11 @@
 | /dlya-biznesa/stomatologiya/ | ✅ | ✅ | черновик | draft | 23 |
 | /dlya-biznesa/stroitelstvo-remont/ | ✅ | ✅ | черновик | draft | 23 |
 | /dlya-biznesa/yuristy/ | ✅ | ✅ | черновик | draft | 23 |
-| /keisy/anna-rykovskaya/ | ✅ | ✅ | готов | published | 1 |
+| /keisy/anna-rykovskaya/ | ✅ | ✅ | готов | published | 2 |
 | /keisy/aristide/ | ✅ | ✅ | готов | published | 1 |
 | /keisy/dream-doll/ | ✅ | ✅ | готов | published | 1 |
 | /keisy/garden-eight/ | ✅ | ✅ | готов | published | 1 |
-| /keisy/nasledie/ | ✅ | ✅ | готов | published | 3 |
+| /keisy/nasledie/ | ✅ | ✅ | готов | published | 2 |
 | /keisy/step-into-web3/ | ✅ | ✅ | готов | published | 1 |
 | /keisy/volume-after-dark/ | ✅ | ✅ | готов | published | 1 |
 | /blog/sait-dlya-avto-iz-korei-doverie/ | ✅ | ✅ | готов | published | 1 |
@@ -39,7 +39,7 @@
 | /offer/ | — | ✅ | — | published | — |
 | /consent/ | — | ✅ | — | published | — |
 
-**Итого:** 28 опубликовано, 6 черновик; маркеров TODO(владелец) в контенте: 166.
+**Итого:** 28 опубликовано, 6 черновик; маркеров TODO(владелец) в контенте: 163.
 
 Легенда: Файл ✅ есть / — не требуется (статическая страница) / ❌ нет.
 Шаблон — роут-компонент. Текст: готов (published) / черновик (draft).
