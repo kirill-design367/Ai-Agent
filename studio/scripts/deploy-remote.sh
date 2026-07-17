@@ -62,7 +62,8 @@ echo "== текущий (откатный) образ: ${PREV_IMAGE:-<нет>} =
 if [ -n "$NEW_IMAGE" ]; then
   echo "== deploy CI/CD → $NEW_IMAGE =="
   set_env IMAGE "$NEW_IMAGE"
-  docker compose pull web
+  # тянем все сервисы из GHCR (web + nginx + certbot-зеркала) — docker.io не трогаем
+  docker compose pull
   docker compose up -d
 else
   echo "== deploy fallback → сборка на сервере (нужен swap) =="

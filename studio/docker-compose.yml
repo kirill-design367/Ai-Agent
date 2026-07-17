@@ -31,7 +31,9 @@ services:
       start_period: 25s
 
   nginx:
-    image: nginx:1.27-alpine
+    # Базовый образ зеркалируется в GHCR (сервер в РФ ловит 429 от docker.io).
+    # Переопределить на аварийный docker.io: NGINX_IMAGE=nginx:1.27-alpine в .env.
+    image: ${NGINX_IMAGE:-ghcr.io/kirill-design367/aurea-nginx:1.27-alpine}
     container_name: aurea-nginx
     restart: unless-stopped
     depends_on:
@@ -50,7 +52,9 @@ services:
 
   # Авто-продление сертификата (каждые 12ч). Первичный выпуск — разово в DEPLOY.md.
   certbot:
-    image: certbot/certbot
+    # Тоже из GHCR-зеркала: авто-продление каждые 12ч работает на уже скачанном
+    # образе и docker.io не трогает. Аварийно: CERTBOT_IMAGE=certbot/certbot в .env.
+    image: ${CERTBOT_IMAGE:-ghcr.io/kirill-design367/aurea-certbot:latest}
     container_name: aurea-certbot
     restart: unless-stopped
     volumes:

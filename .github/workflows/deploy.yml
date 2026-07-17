@@ -8,8 +8,15 @@ name: Deploy AUREA (VPS)
 #   SSH_HOST   — IP/домен сервера           (напр. 104.171.137.47)
 #   SSH_USER   — пользователь деплоя         (deploy — создаётся bootstrap.sh)
 #   SSH_KEY    — приватный ключ этого пользователя (ed25519, целиком)
-#   GHCR_TOKEN — PAT с правом read:packages  (сервер тянет образ из ghcr.io)
+#   GHCR_TOKEN — PAT с правом read:packages  (сервер тянет образы из ghcr.io)
+# Опционально (если раннер начнёт ловить 429 от docker.io при зеркалировании):
+#   DOCKERHUB_USER, DOCKERHUB_TOKEN — вход в Docker Hub только внутри Actions.
 # Публичный ключ к SSH_KEY передаётся в bootstrap.sh как DEPLOY_PUBKEY.
+#
+# Почему зеркалируем nginx/certbot в GHCR: сервер в РФ (Timeweb MSK) ловит
+# 429 Too Many Requests при анонимном pull с docker.io. Поэтому базовые образы
+# копируются в GHCR В Actions (там лимитов нет), а сервер тянет ВСЁ из одного
+# реестра — ghcr.io, которым мы управляем. docker.io на сервере не участвует.
 
 on:
   push:
@@ -23,6 +30,7 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/aurea-web
+  DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
 
 jobs:
   build:
@@ -45,11 +53,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Опциональный вход в Docker Hub — только если заданы секреты. Поднимает
+      # лимиты pull для раннера (сервера это не касается).
+      - name: Login to Docker Hub (optional)
+        if: ${{ env.DOCKERHUB_USER != '' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Compute image tags
         id: meta
         run: |
           IMG="${REGISTRY,,}/${IMAGE_NAME,,}"
+          OWNER="${{ github.repository_owner }}"; OWNER="${OWNER,,}"
           echo "IMG=${IMG}" >> "$GITHUB_ENV"
+          echo "OWNER=${OWNER}" >> "$GITHUB_ENV"
           echo "image=${IMG}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Build & push image
@@ -62,6 +81,18 @@ jobs:
             ${{ env.IMG }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Зеркалируем базовые образы в GHCR (обход лимитов docker.io на сервере).
+      # imagetools копирует манифест registry→registry, без выкачивания на раннер,
+      # с сохранением мультиарх. Держим свои теги — сервер тянет только их.
+      - name: Mirror nginx & certbot to GHCR
+        run: |
+          docker buildx imagetools create \
+            --tag ghcr.io/${OWNER}/aurea-nginx:1.27-alpine \
+            docker.io/library/nginx:1.27-alpine
+          docker buildx imagetools create \
+            --tag ghcr.io/${OWNER}/aurea-certbot:latest \
+            docker.io/certbot/certbot:latest
 
   deploy:
     needs: build
