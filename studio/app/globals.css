@@ -4097,3 +4097,28 @@ main {
 .pg-updated time {
   color: rgba(244, 242, 238, 0.74);
 }
+
+/* ─── КЕЙС: атрибуция replica + галерея ─────────────────────────────────── */
+.pg-case-attr {
+  margin-top: 20px;
+  max-width: 74ch;
+  color: rgba(244, 242, 238, 0.74);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  border-left: 2px solid var(--gold);
+  padding-left: 16px;
+}
+.pg-case-attr b { color: var(--text-primary); font-weight: 600; }
+.pg-case-attr a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.pg-case-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.pg-case-gallery img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  display: block;
+}

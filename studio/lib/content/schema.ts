@@ -117,10 +117,18 @@ export const nicheSchema = base.extend({
 // ── КЕЙС (case) ────────────────────────────────────────────────────────────
 // Честный бейдж типа кейса (Ф2). Бизнес-цифры — только за флагом metricsConfirmed.
 
-export const caseSchema = base.extend({
-  type: z.literal("case"),
-  caseType: z.enum(["own-product", "client", "concept"]),
-  url: z.string().optional(), // ссылка на живой сайт (если разрешено)
+export const caseSchema = base
+  .extend({
+    type: z.literal("case"),
+    caseType: z.enum(["own-product", "client", "concept"]),
+    // Происхождение работы (честность): original — своя/клиентская работа;
+    // replica — воссозданная чужая работа (техническая: вёрстка/анимации/перф).
+    origin: z.enum(["original", "replica"]).default("original"),
+    // Для replica — атрибуция автору оригинала (обязательна).
+    originalName: z.string().optional(),
+    originalAuthor: z.string().optional(),
+    originalUrl: z.string().optional(),
+    url: z.string().optional(), // ссылка на живой сайт (если разрешено)
   siteType: z.string().min(1), // «Интернет-витрина», «Лендинг»…
   term: z.string().min(1), // срок реализации
   task: z.array(z.string().min(1)).min(1), // задача
@@ -135,6 +143,9 @@ export const caseSchema = base.extend({
   serviceSlug: z.string().optional(), // «хотите похожий сайт» → услуга
   nicheSlug: z.string().optional(), // → ниша
 });
+// Примечание: для replica атрибуция желательна (originalName/Author/Url). Пока
+// автор оригинала не уточнён — шаблон показывает общую атрибуцию без ссылки
+// (см. CONTENT-TODO P1). Жёстко не требуем, чтобы не блокировать публикацию.
 
 // ── СТАТЬЯ (article) ───────────────────────────────────────────────────────
 // Контентная страница: видимый автор + Article/Person-разметка (§8.1).

@@ -22,6 +22,8 @@ const CASE_BADGE: Record<string, string> = {
   client: "Клиентский проект",
   concept: "Концепт-проект",
 };
+const badgeFor = (doc: { origin: string; caseType: string }) =>
+  doc.origin === "replica" ? "Воссозданная работа" : CASE_BADGE[doc.caseType];
 
 export async function generateMetadata({
   params,
@@ -62,10 +64,35 @@ export default async function CasePage({
 
       <section className="pg-hero">
         <div className="pg-wrap">
-          <span className="pg-case-badge">{CASE_BADGE[doc.caseType]}</span>
+          <span className="pg-case-badge">{badgeFor(doc)}</span>
           <h1 className="pg-hero-h1" style={{ marginTop: 20 }}>
             {doc.title}
           </h1>
+
+          {/* Атрибуция для воссозданной работы (честно, без оправданий). */}
+          {doc.origin === "replica" && (
+            <p className="pg-case-attr">
+              {doc.originalName ? (
+                <>
+                  Оригинал: <b>{doc.originalName}</b>
+                  {doc.originalAuthor ? ` — ${doc.originalAuthor}` : ""}.{" "}
+                </>
+              ) : (
+                <>По&nbsp;мотивам стороннего дизайна. </>
+              )}
+              Воссоздано в&nbsp;AUREA как техническая работа: вёрстка, анимации,
+              производительность. Дизайн-концепция принадлежит авторам оригинала.
+              {doc.originalUrl && (
+                <>
+                  {" "}
+                  <a href={doc.originalUrl} target="_blank" rel="nofollow noopener">
+                    Оригинал →
+                  </a>
+                </>
+              )}
+            </p>
+          )}
+
           <div className="pg-hero-chips">
             <span className="pg-chip">
               <span className="pg-chip-l">Тип</span>
@@ -133,6 +160,22 @@ export default async function CasePage({
                   <div className="pg-case-metric-v">{m.value}</div>
                   <div className="pg-case-metric-l">{m.label}</div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {doc.gallery.length > 0 && (
+        <section className="pg-case-sec" style={{ paddingTop: 0 }}>
+          <div className="pg-wrap">
+            <h2 className="pg-h2">Галерея</h2>
+            <div className="pg-case-gallery">
+              {doc.gallery.map((src, i) => (
+                <Reveal key={i} delay={(i % 3) * 60}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={`${doc.title} — экран ${i + 1}`} loading="lazy" />
+                </Reveal>
               ))}
             </div>
           </div>

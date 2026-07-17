@@ -21,6 +21,8 @@ const BADGE: Record<string, string> = {
   client: "Клиентский",
   concept: "Концепт",
 };
+const kickerFor = (c: { origin: string; caseType: string }) =>
+  c.origin === "replica" ? "Воссоздано" : BADGE[c.caseType];
 
 export default function KeisyHub() {
   const crumbs = [
@@ -29,7 +31,7 @@ export default function KeisyHub() {
   ];
   const cards: HubCard[] = getAllCases().map((c) => ({
     href: `/keisy/${c.slug}/`,
-    kicker: BADGE[c.caseType],
+    kicker: kickerFor(c),
     title: c.title,
     desc: c.metaDescription,
     meta: [c.siteType, c.term],

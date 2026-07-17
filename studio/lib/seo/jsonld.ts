@@ -120,19 +120,32 @@ export function nicheServiceLd(doc: Loaded<NicheDoc>, priceFrom: number): Json {
   };
 }
 
-/** CreativeWork для кейса (§6.2). */
+/** CreativeWork для кейса (§6.2). Для replica — AUREA автор реализации (не дизайна). */
 export function caseLd(doc: Loaded<CaseDoc>): Json {
+  const isReplica = doc.origin === "replica";
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
     name: doc.title,
     headline: doc.title,
-    about: doc.siteType,
+    // для replica атрибутируем именно техническую реализацию, не авторство дизайна
+    about: isReplica ? "Техническая реализация: вёрстка, анимации, производительность" : doc.siteType,
     dateCreated: doc.datePublished,
     dateModified: doc.dateModified,
     creator: { "@id": SITE.org.id },
     url: doc.url,
     image: doc.cover ? `${SITE.url}${doc.cover}` : undefined,
+    // ссылка на оригинал, по мотивам которого сделана техническая работа
+    ...(isReplica && (doc.originalUrl || doc.originalName)
+      ? {
+          isBasedOn: {
+            "@type": "CreativeWork",
+            name: doc.originalName,
+            ...(doc.originalAuthor ? { creator: doc.originalAuthor } : {}),
+            ...(doc.originalUrl ? { url: doc.originalUrl } : {}),
+          },
+        }
+      : {}),
   };
 }
 
