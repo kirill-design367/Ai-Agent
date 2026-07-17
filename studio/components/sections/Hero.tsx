@@ -6,6 +6,9 @@ import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 import { shouldSkipIntro } from "@/components/kit/Intro";
 import { isHeavyCapable } from "@/lib/deviceTier";
+import { HERO } from "@/lib/homeContent";
+
+const HL_CLASS = ["hl-a", "hl-b", "hl-c", "hl-d"];
 
 const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
   ssr: false,
@@ -123,26 +126,24 @@ export default function Hero() {
       {/* заголовок + подзаголовок */}
       <div className="hero-mid">
         <h1 className="hero-headline" ref={headline}>
-          <span className="hl-line hl-a">Первое</span>
-          <span className="hl-line hl-b">впечатление</span>
-          <span className="hl-line hl-c">невозможно</span>
-          <span className="hl-line hl-d">повторить</span>
+          {HERO.headline.map((w, i) => (
+            <span className={`hl-line ${HL_CLASS[i] ?? ""}`} key={w}>
+              {w}
+            </span>
+          ))}
         </h1>
 
         <p className="hero-sub" ref={sub}>
-          <span className="hs-line hs-l1">Современные сайты для&nbsp;бизнеса.</span>{" "}
-          <span className="hs-line hs-l2">Личная ответственность за&nbsp;каждый проект,</span>{" "}
-          <span className="hs-line hs-l3">внимание к&nbsp;деталям</span>{" "}
-          <span className="hs-line hs-l4">и&nbsp;решения, которые помогают привлекать клиентов.</span>
+          {HERO.subtitle}
         </p>
       </div>
 
       {/* нижняя зона: фишки (без сроков в hero — §2.5) + основной CTA-pill */}
       <div className="hero-foot">
         <ul className="hero-feats" data-hero-fade>
-          <li>Индивидуальный дизайн</li>
-          <li>Чистый код, не&nbsp;конструктор</li>
-          <li>Пожизненная гарантия</li>
+          {HERO.feats.map((f) => (
+            <li key={f}>{f}</li>
+          ))}
         </ul>
         <a href="#prices" className="hero-cta" data-hero-fade data-magnetic>
           <span>Узнать стоимость</span>

@@ -3,45 +3,15 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger, SplitText, registerGsap } from "@/lib/gsap";
+import { TIERS } from "@/lib/homeContent";
 
 /*
   ЦЕНЫ — отвечает на «Сколько стоит и не разведут ли меня?».
 
   Вход без пиннинга: заголовок мягко всплывает и проявляется, следом карточки
-  выезжают снизу (ощущение, что цены «лежали под» предыдущим блоком). На фоне —
-  невесомо парящие знаки ₽. Тёмные карточки с бегущим огоньком по рамке;
-  рекомендуемый тариф крупнее. Никаких резких смен — нативный скролл, не дрожит.
+  выезжают снизу. Тарифы берутся из единого источника lib/homeContent (паритет
+  с лёгкой главной и услугами; §2.6 — честные сроки от 3/7/14 дней).
 */
-const TIERS = [
-  {
-    name: "Лендинг",
-    pre: "от",
-    num: "30 000",
-    cur: "₽",
-    time: "1–3 дня",
-    desc: "Одностраничный сайт-история с формой заявок.",
-    feats: ["Уникальный дизайн", "Адаптив под телефон", "Анимации", "Аналитика"],
-  },
-  {
-    name: "Сайт / портфолио",
-    pre: "от",
-    num: "60 000",
-    cur: "₽",
-    time: "3–5 дней",
-    desc: "3–6 разделов: услуги, кейсы, блог или галерея.",
-    feats: ["Всё из лендинга", "Многостраничность", "SEO-фундамент", "CMS по желанию"],
-    rec: true,
-  },
-  {
-    name: "Магазин / сложный",
-    pre: "от",
-    num: "120 000",
-    cur: "₽",
-    time: "от 6 дней",
-    desc: "Каталог, корзина, оплата и интеграции.",
-    feats: ["Всё из портфолио", "Каталог и корзина", "Онлайн-оплата", "Интеграции"],
-  },
-];
 
 /* невесомо парящие ₽ на фоне блока цен (как рой вопросов в «Как мы работаем»,
    только знаки рубля). x/y — %, s — размер, o — прозрачность. */
@@ -190,10 +160,10 @@ export default function Prices() {
                 <span className="price-buy-info">
                   <span className="price-buy-label">цена вопроса</span>
                   <span className="price-buy-sum">
-                    <b className="price-num" data-val={t.num.replace(/\s/g, "")}>
-                      {t.num}
+                    <b className="price-num" data-val={t.from}>
+                      {t.from.toLocaleString("ru-RU")}
                     </b>
-                    <i className="price-cur">{t.cur}</i>
+                    <i className="price-cur">₽</i>
                   </span>
                 </span>
                 <span className="price-buy-arrow" aria-hidden>

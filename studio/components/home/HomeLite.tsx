@@ -8,6 +8,7 @@ import Testimonials from "@/components/pg/Testimonials";
 import Cta from "@/components/pg/Cta";
 import Contact from "@/components/sections/Contact";
 import { SITE } from "@/lib/seo/site";
+import { HERO } from "@/lib/homeContent";
 
 /*
   ЛЁГКАЯ ГЛАВНАЯ (SSR, лёгкий тир + серверная разметка для всех). Весь смысловой
@@ -47,21 +48,17 @@ export default function HomeLite() {
       {/* HERO — голос §2, заголовок = LCP из HTML */}
       <section className="pg-hero home-lite-hero">
         <div className="pg-wrap">
-          <p className="pg-hero-kicker">AUREA — авторская студия разработки сайтов</p>
+          <p className="pg-hero-kicker">{HERO.kicker}</p>
           <h1 className="home-lite-h1">
-            Первое впечатление
+            {HERO.headline.slice(0, 2).join(" ")}
             <br />
-            невозможно повторить
+            {HERO.headline.slice(2).join(" ")}
           </h1>
-          <p className="home-lite-sub">
-            Современные сайты для&nbsp;бизнеса. Личная ответственность за&nbsp;каждый
-            проект, внимание к&nbsp;деталям и&nbsp;решения, которые помогают привлекать
-            клиентов.
-          </p>
+          <p className="home-lite-sub">{HERO.subtitle}</p>
           <ul className="home-lite-feats">
-            <li>Индивидуальный дизайн</li>
-            <li>Чистый код, не&nbsp;конструктор</li>
-            <li>Пожизненная гарантия</li>
+            {HERO.feats.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
           </ul>
           <div className="home-lite-actions">
             <Link href="/uslugi/" className="pg-btn pg-btn--primary" data-magnetic>

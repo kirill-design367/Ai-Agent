@@ -5,6 +5,8 @@
   "description": "AUREA Studio Design System — cinematic, scroll-driven, R3F-powered website engine.",
   "scripts": {
     "dev": "next dev",
+    "check:parity": "node --experimental-strip-types scripts/check-parity.mjs",
+    "prebuild": "npm run check:parity",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
