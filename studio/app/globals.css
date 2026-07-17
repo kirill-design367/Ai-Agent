@@ -4086,3 +4086,10 @@ main {
 .home-lite-actions {
   display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(30px, 4vw, 44px);
 }
+
+/* ─── a11y: контраст смысловых мелких подписей до AA ─────────────────────── */
+.pg-chip-l,
+.site-footer-h,
+.site-footer-sign {
+  color: rgba(244, 242, 238, 0.74);
+}
