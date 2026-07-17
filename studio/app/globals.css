@@ -4090,6 +4090,10 @@ main {
 /* ─── a11y: контраст смысловых мелких подписей до AA ─────────────────────── */
 .pg-chip-l,
 .site-footer-h,
-.site-footer-sign {
+.site-footer-sign,
+.site-footer-legal,
+.site-footer-legal span,
+.pg-updated,
+.pg-updated time {
   color: rgba(244, 242, 238, 0.74);
 }
