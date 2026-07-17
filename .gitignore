@@ -1,5 +1,14 @@
-# Секреты и личные данные
+# Секреты и личные данные (только в GitHub Secrets, не в репозитории)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_ed25519*
+id_rsa*
 data/clients.csv
 leads/*.csv
 

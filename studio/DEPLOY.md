@@ -1,137 +1,268 @@
-# Деплой AUREA — Timeweb Cloud (Node + nginx)
+# Деплой AUREA — VPS (Docker) + автодеплой через GitHub Actions
 
-**Сервер (утверждён):** Timeweb Cloud, регион Москва, Ubuntu LTS,
-2 vCPU / 4 ГБ RAM / 50 ГБ NVMe, бэкапы включены.
+Сайт крутится в Docker на VPS: **Next.js (standalone)** за **nginx** (TLS, кэш
+статики, единая политика trailing slash, gzip), сертификат — **Let's Encrypt** с
+авто-продлением. Прод-домен для canonical/OG/JSON-LD — в `lib/seo/site.ts`
+(`SITE.url`). GitHub Pages остаётся только аварийным fallback (в самом конце).
 
-Next.js работает в Node-режиме (`output: standalone`) за nginx: TLS, кэш статики,
-единая политика trailing slash (301), gzip. GH Pages — только аварийный fallback
-(в конце). Прод-домен для canonical/OG/JSON-LD — в `lib/seo/site.ts` (`SITE.url`).
+**Идея:** после первичной настройки владелец **не заходит в терминал**. Правка
+контента → `git push` в `main` → GitHub Actions сам собирает образ, публикует его
+и выкатывает на сервер с проверкой здоровья и авто-откатом.
 
-Артефакты деплоя в репозитории: `Dockerfile`, `docker-compose.yml`,
-`deploy/nginx.conf`, этот файл.
+Артефакты в репозитории (каталог `studio/`):
+
+| Файл | Роль |
+|---|---|
+| `Dockerfile` | образ приложения (multi-stage, standalone) |
+| `docker-compose.yml` | стек: `web` + `nginx` + `certbot` (авто-SSL) |
+| `deploy/nginx.http.conf` | nginx до SSL (проверка по IP + ACME) |
+| `deploy/nginx.https.conf` | nginx после SSL (HTTPS, www→apex, редиректы) |
+| `scripts/bootstrap.sh` | разовая подготовка чистого сервера |
+| `scripts/deploy-remote.sh` | серверный деплой релиза (health-check + откат) |
+| `.env.example` | пример `.env` сервера (без секретов) |
+| `.github/workflows/deploy.yml` | CI/CD: сборка → GHCR → SSH-деплой |
+
+> **Два пути доставки образа.** Основной — **CI/CD**: образ собирается в Actions
+> (не на 4 ГБ сервере — иначе OOM) и лежит в **GHCR** (`ghcr.io`), сервер только
+> `pull`. Запасной — **fallback**: если из РФ `ghcr.io` недоступен, сервер сам
+> собирает образ (есть swap). Переключение — в разделе **В**.
 
 ---
 
-## ⚠️ Риск OOM при сборке (4 ГБ RAM + three.js)
+## ⚠️ Безопасность — прочитать первым
 
-`next build` с three.js/R3F на 4 ГБ может упасть по памяти. Два пути — выбрать один:
+- **root-пароль засветился в переписке.** Первый шаг раздела **А** — сменить его
+  и перейти на SSH-ключи (bootstrap отключает пароли и root-логин совсем).
+- **Никаких паролей, ключей и сертификатов в репозитории.** Всё чувствительное —
+  только в **GitHub Secrets** и на сервере. `.gitignore` закрывает `.env*`, `*.pem`,
+  `*.key`, `*.crt`, `id_ed25519*`, `id_rsa*`.
+- Сайт слушает наружу только **80/443** (через nginx). Порт приложения 3000 —
+  внутренний (`expose`, не `ports`).
 
-### Путь A (рекомендуется): собрать образ вне сервера, привезти артефакт
-Собирается на машине с ≥8 ГБ (локально или в CI), на сервер приезжает готовый образ.
+## ⚠️ Регион сервера — проверить до переключения DNS
+
+Для §2.4 (поведенческие факторы Яндекса) критична низкая задержка из РФ. Сервер
+должен быть в России.
 
 ```bash
-# на билд-машине:
-cd studio && docker build -t aurea-web:latest .
-docker save aurea-web:latest | gzip > aurea-web.tgz
-scp aurea-web.tgz root@<server>:/opt/aurea/
-# на сервере:
-docker load < /opt/aurea/aurea-web.tgz
-# docker-compose.yml → у сервиса web заменить `build: .` на `image: aurea-web:latest`
+curl -s https://ipinfo.io/104.171.137.47 | grep -E '"country"|"city"|"region"'
+# ожидаем "country": "RU" и московский регион
+```
+
+Если регион **не RU** — деплой откладываем и переносим сервер, DNS не трогаем.
+(Утверждено: Timeweb Cloud **MSK-1**, Москва, `104.171.137.47`.)
+
+---
+
+# А. Первичная настройка (~30 минут, один раз)
+
+Терминал нужен только здесь. Дальше — только `git push`.
+
+### А0. Сменить root-пароль (он скомпрометирован)
+Зайдите под root (по паролю, последний раз) и сразу смените его:
+```bash
+ssh root@104.171.137.47
+passwd            # задать новый длинный пароль
+```
+
+### А1. Завести ключ деплоя (на своём компьютере)
+GitHub Actions будет ходить на сервер этим ключом. Сгенерируйте пару **без пароля**
+(нужна для неинтерактивного CI):
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/aurea_deploy -N "" -C "aurea-actions"
+cat ~/.ssh/aurea_deploy.pub     # ПУБЛИЧНЫЙ — пойдёт на сервер
+cat ~/.ssh/aurea_deploy         # ПРИВАТНЫЙ — пойдёт в GitHub Secret SSH_KEY
+```
+
+### А2. Подготовить сервер одним скриптом
+Скопируйте `bootstrap.sh` на сервер и запустите, передав **публичный** ключ из А1:
+```bash
+scp studio/scripts/bootstrap.sh root@104.171.137.47:/root/
+ssh root@104.171.137.47
+sudo DEPLOY_PUBKEY="$(cat <<'KEY'
+ssh-ed25519 AAAA...ВЕСЬ_ПУБЛИЧНЫЙ_КЛЮЧ_ИЗ_A1... aurea-actions
+KEY
+)" bash /root/bootstrap.sh
+```
+Скрипт идемпотентный (можно перезапускать). Он ставит Docker, swap 4 ГБ, firewall
+(22/80/443), fail2ban, создаёт пользователя **`deploy`** с этим ключом, каталог
+**`/opt/aurea`**, и **отключает пароли и root-логин по SSH**.
+
+Проверьте, что заходите новым пользователем по ключу (в новом окне, root ещё не рвём):
+```bash
+ssh -i ~/.ssh/aurea_deploy deploy@104.171.137.47 'docker --version && ls -ld /opt/aurea'
+```
+
+### А3. Склонировать репозиторий на сервер
+```bash
+ssh -i ~/.ssh/aurea_deploy deploy@104.171.137.47
+git clone https://github.com/kirill-design367/ai-agent.git /opt/aurea
+cd /opt/aurea/studio
+cp .env.example .env            # NGINX_CONF уже = http (проверка по IP)
+```
+
+### А4. Прописать GitHub Secrets
+GitHub → репозиторий → **Settings → Secrets and variables → Actions → New secret**:
+
+| Secret | Значение |
+|---|---|
+| `SSH_HOST` | `104.171.137.47` |
+| `SSH_USER` | `deploy` |
+| `SSH_KEY` | приватный ключ целиком (`~/.ssh/aurea_deploy`, из А1) |
+| `GHCR_TOKEN` | PAT c правом **`read:packages`** (сервер тянет образ из GHCR) |
+
+`GHCR_TOKEN`: GitHub → **Settings → Developer settings → Personal access tokens →
+Tokens (classic)** → создать с областью `read:packages`. Сборку/публикацию в Actions
+делает встроенный `GITHUB_TOKEN` — отдельно его заводить не нужно.
+
+> Убедитесь, что пакет `aurea-web` в GHCR доступен серверу: после первого билда
+> откройте пакет в GitHub и при необходимости в его настройках дайте доступ
+> (или держите приватным — тогда `GHCR_TOKEN` обязателен, он уже прописан).
+
+### А5. Первый деплой
+Слейте рабочую ветку в `main` (workflow слушает `main`) — либо запустите вручную:
+GitHub → **Actions → Deploy AUREA (VPS) → Run workflow**.
+
+Actions соберёт образ, положит в GHCR и выкатит на сервер. В конце `deploy-remote.sh`
+прогоняет health-check (до 90 с) и при провале откатывается сам.
+
+### А6. Проверка ПО IP (DNS ещё на Pages — не трогаем)
+```bash
+curl -I http://104.171.137.47/                      # 200
+curl -sS http://104.171.137.47/ | grep -o '<title>[^<]*</title>'
+curl -sS http://104.171.137.47/keisy/nasledie/ | grep -o '<title>[^<]*</title>'
+```
+Открылось, отдаёт `<title>` и контент → идём переключать домен.
+
+### А7. Переключить DNS на сервер
+У регистратора домена `aureadesign.ru` (TTL уже понижен до 1 ч):
+- **удалить** 4 A-записи Pages (`@ → 185.199.108–111.153`) и `CNAME www`;
+- **создать**: `A @ → 104.171.137.47` и `A www → 104.171.137.47`.
+
+Дождаться распространения:
+```bash
+dig +short aureadesign.ru        # = 104.171.137.47
+dig +short www.aureadesign.ru    # = 104.171.137.47
+```
+
+### А8. Выпустить SSL и включить HTTPS
+Когда DNS указывает на сервер (порт 80 отвечает через nginx с ACME):
+```bash
+ssh -i ~/.ssh/aurea_deploy deploy@104.171.137.47
+cd /opt/aurea/studio
+# разовый выпуск сертификата (webroot; nginx уже отдаёт /.well-known/)
+docker compose run --rm --entrypoint "certbot certonly \
+  --webroot -w /var/www/certbot \
+  -d aureadesign.ru -d www.aureadesign.ru \
+  --agree-tos -m kirill0061@mail.ru --no-eff-email" certbot
+# переключить nginx на HTTPS-конфиг и перезапустить
+sed -i 's#^NGINX_CONF=.*#NGINX_CONF=./deploy/nginx.https.conf#' .env
 docker compose up -d
-```
-(Либо через приватный registry: `docker push` / `docker pull`.)
-
-### Путь B: собирать на сервере, добавив swap
-```bash
-sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile
-sudo mkswap /swapfile && sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab   # включать при перезагрузке
-free -h   # проверить, что swap виден
-```
-После этого обычный `docker compose up -d --build` проходит. Сборка медленнее,
-но памяти хватает. Dockerfile уже поднимает лимит heap Node на билде.
-
----
-
-## Чеклист деплоя
-
-### Шаг 1 — Сервер
-- Создать VPS (параметры выше), зайти по SSH.
-- Docker + Compose: `curl -fsSL https://get.docker.com | sh`.
-- Открыть порты 80 и 443 (firewall Timeweb / `ufw allow 80,443/tcp`).
-- Выбрать путь сборки A или B (см. выше); для B — включить swap.
-
-### Шаг 2 — Домен
-- A-записи `aureadesign.ru` и `www.aureadesign.ru` → IP сервера.
-- Дождаться распространения DNS: `dig +short aureadesign.ru` = IP сервера.
-
-### Шаг 3 — SSL (Let's Encrypt, один раз)
-Порт 80 должен быть свободен (контейнеры ещё не подняты):
-```bash
-sudo apt install certbot -y
-sudo certbot certonly --standalone -d aureadesign.ru -d www.aureadesign.ru \
-  --agree-tos -m kirill0061@mail.ru --no-eff-email
-```
-Сертификаты: `/etc/letsencrypt/live/aureadesign.ru/`. Nginx монтирует `/etc/letsencrypt`.
-
-### Шаг 4 — Первый деплой
-```bash
-git clone <repo> /opt/aurea && cd /opt/aurea/studio
-docker compose up -d --build          # путь B; для пути A см. выше
-docker compose ps                     # web + nginx, healthcheck healthy
 ```
 Проверка:
 ```bash
-curl -I https://aureadesign.ru/                       # 200
-curl -I https://www.aureadesign.ru/                   # 301 → apex
-curl -I https://aureadesign.ru/uslugi/landing         # 308 → /uslugi/landing/ (trailing slash)
-curl -sS https://aureadesign.ru/keisy/nasledie/ | grep -o '<title>.*</title>'
+curl -I https://aureadesign.ru/                     # 200
+curl -I https://www.aureadesign.ru/                 # 301 → apex
+curl -I http://aureadesign.ru/                      # 301 → https
+curl -I https://aureadesign.ru/uslugi/landing       # 308 → /uslugi/landing/
+```
+Продление certbot делает сам (контейнер `certbot`, цикл каждые 12 ч; nginx
+перечитывает сертификат каждые 6 ч) — вмешательство не требуется.
+
+**Готово.** Дальше — раздел **Б**.
+
+---
+
+# Б. Ежедневно — без терминала
+
+Изменить контент = отредактировать файл в `studio/content/**` (`.mdx`) или в коде,
+закоммитить и запушить в `main`:
+
+```
+правка → git commit → git push       →  сайт обновился сам
 ```
 
-### Шаг 5 — Обновление
+Что происходит после `push` в `main`:
+1. GitHub Actions собирает Docker-образ (в облаке, не на сервере).
+2. Публикует его в GHCR (теги `:<sha>` и `:latest`).
+3. По SSH заходит на сервер, `docker compose pull` + `up -d`.
+4. Health-check `/` (до 90 с). **200 → готово. Не 200 → авто-откат** на прошлый
+   рабочий образ, сайт остаётся жив.
+
+Смотреть ход: GitHub → **Actions**. Зелёная галочка = сайт обновлён.
+
+Добавить страницу (услуга/ниша/кейс/статья) — это тоже правка контента: новый
+`.mdx` в нужной папке `content/**` + `push`. На билде прогоняются проверки
+паритета (`check:parity`) и генерация OG (`gen:og`); при расхождении билд падает
+в Actions, до сервера ничего не доедет.
+
+---
+
+# В. Аварийные ситуации
+
+### В1. Откатиться на прошлую версию
+Авто-откат уже срабатывает при неудачном health-check. Ручной откат:
 ```bash
+ssh -i ~/.ssh/aurea_deploy deploy@104.171.137.47
+cd /opt/aurea/studio
+cat .env | grep -E 'IMAGE|PREV_IMAGE'          # PREV_IMAGE — последний рабочий
+sed -i "s#^IMAGE=.*#IMAGE=$(grep '^PREV_IMAGE=' .env | cut -d= -f2-)#" .env
+docker compose pull web && docker compose up -d
+```
+Либо укажите любой прошлый тег из GHCR (история — в разделе Packages репозитория):
+```bash
+bash scripts/deploy-remote.sh ghcr.io/kirill-design367/aurea-web:<нужный-sha>
+```
+
+### В2. Actions не достучался до сервера (ghcr.io недоступен из РФ / SSH лёг)
+Переключиться на **fallback — сборку на сервере** (нужен swap, он поднят bootstrap'ом):
+```bash
+ssh -i ~/.ssh/aurea_deploy deploy@104.171.137.47
 cd /opt/aurea && git pull && cd studio
-docker compose up -d --build          # пересборка + бесшовный рестарт (путь B)
-docker image prune -f
+sed -i 's#^IMAGE=.*#IMAGE=#' .env              # очистить IMAGE → соберётся aurea-web:local
+bash scripts/deploy-remote.sh                  # без аргумента = локальная сборка + health-check
 ```
-Правка/добавление страницы = правка файла в `content/**` + `git pull` + пересборка.
-Кода не требует (README «как добавить страницу»). На билде прогоняются проверки
-паритета (`check:parity`) и генерация OG (`gen:og`).
+Вернуться на CI/CD-путь: просто снова запушить в `main` (или Run workflow) —
+`deploy-remote.sh` с образом из GHCR перезапишет `IMAGE` в `.env`.
 
-### Шаг 6 — Откат (rollback)
+### В3. Логи и статус
 ```bash
-cd /opt/aurea
-git log --oneline -5                  # найти рабочий коммит
-git checkout <хороший-хеш>
-cd studio && docker compose up -d --build
-# вернуться на ветку: git checkout claude/studio-design-system-lh4w78
-```
-Путь A: держать предыдущий образ (`aurea-web:previous`) и переключить `image:` обратно.
-На уровне инфраструктуры — снапшоты/бэкапы Timeweb (включены) как последний рубеж.
-
----
-
-## Автопродление сертификата
-certbot ставит systemd-таймер. Хук перезагрузки nginx в контейнере:
-```bash
-sudo certbot renew --dry-run
-echo 'docker exec aurea-nginx nginx -s reload' | sudo tee \
-  /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
-sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+cd /opt/aurea/studio
+docker compose ps                 # web + nginx + certbot, healthcheck
+docker compose logs -f web        # приложение (Next)
+docker compose logs -f nginx      # nginx / TLS
+docker compose logs certbot       # продление сертификата
 ```
 
-## Логи и диагностика
+### В4. Перезапуск / место на диске
 ```bash
-docker compose logs -f web            # Next
-docker compose logs -f nginx          # nginx
-docker compose ps                     # статус + healthcheck
+docker compose restart            # мягкий рестарт
+docker compose up -d --force-recreate
+docker system df && docker image prune -f   # почистить старые образы
+free -h                           # проверить swap, если тяжёлый билд (fallback)
+```
+
+### В5. Сертификат: ручная проверка/продление
+```bash
+docker compose run --rm --entrypoint "certbot renew --dry-run" certbot
+docker exec aurea-nginx nginx -s reload      # перечитать после продления
 ```
 
 ---
 
-## Проверка после деплоя (обязательно)
+## Проверка после деплоя (обязательно, на живом HTTPS)
 
-### 1. Серверный рендер (без JS) — критично для Яндекса
+### 1. Серверный рендер без JS — критично для Яндекса
 ```bash
 for u in / /uslugi/korporativnyi-sait/ /dlya-biznesa/avto-iz-korei/ /keisy/nasledie/; do
   echo "== $u =="; curl -sS "https://aureadesign.ru$u" \
     | grep -oE '<title>[^<]*</title>|application/ld\+json' | head -3
 done
 ```
-Каждый URL должен вернуть `<title>`, текст, `<h1>` и блоки `application/ld+json`.
+Каждый URL → `<title>`, текст, `<h1>`, блоки `application/ld+json`.
 
 ### 2. Core Web Vitals — [PageSpeed Insights](https://pagespeed.web.dev/) (mobile)
-Прогреть ISR (открыть URL 1–2 раза), затем прогнать mobile по четырём шаблонам:
+Прогреть URL (открыть 1–2 раза), затем mobile по четырём шаблонам:
 
 | URL | Приёмка (mobile) |
 |---|---|
@@ -140,31 +271,28 @@ done
 | `/dlya-biznesa/avto-iz-korei/` | то же |
 | `/keisy/nasledie/` | то же |
 
-Если по живому URL цель не достигнута — резать вес three.js-сцены (полигоны,
-текстуры, постпроцессинг), а не отменять её.
+Не дотягивает по живому URL → резать вес three.js-сцены (полигоны, текстуры,
+постпроцессинг), а не отменять её.
 
 ### 3. INP — только полевые замеры (§10, п.9)
-Лабораторный TBT ≈ 0 принят как прокси, но **INP < 200 ms считается выполненным
-только по полевым данным** (CrUX / Яндекс.Метрика Web Vitals) на живом сайте.
-Особое внимание — **десктопный кинематографический тир** (тяжёлые GSAP/WebGL):
-после накопления поля (2–4 недели) свериться в PageSpeed (раздел «Данные
-о реальных пользователях») и в отчёте Метрики; при INP > 200 ms на десктопе —
-дефёрить/облегчать анимации героя и переходов.
+Лабораторный TBT ≈ 0 принят как прокси, но **INP < 200 ms засчитывается только по
+полю** (CrUX / Яндекс.Метрика Web Vitals). Особое внимание — десктопный
+кинематографический тир (тяжёлые GSAP/WebGL): через 2–4 недели поля свериться в
+PageSpeed и в Метрике; при INP > 200 ms на десктопе — дефёрить/облегчать анимации.
 
 ### 4. Поисковые системы
-- **Яндекс.Вебмастер** (webmaster.yandex.ru): добавить и подтвердить
-  `aureadesign.ru`, отправить sitemap `https://aureadesign.ru/sitemap.xml`.
-- **Google Search Console** (search.google.com/search-console): добавить ресурс
-  (домен или URL-префикс), подтвердить, отправить тот же sitemap.
-- Проверить `https://aureadesign.ru/robots.txt` (открыт, ссылка на sitemap).
-- Валидировать разметку: [validator.schema.org](https://validator.schema.org/)
-  по 2–3 URL (Organization/Service/FAQPage/CreativeWork/Article без ошибок).
+- **Яндекс.Вебмастер** (webmaster.yandex.ru): подтвердить `aureadesign.ru`,
+  отправить `https://aureadesign.ru/sitemap.xml`. Регион по §2.4 **не задаём**.
+- **Google Search Console**: добавить ресурс, подтвердить, тот же sitemap.
+- `https://aureadesign.ru/robots.txt` — открыт, ссылается на sitemap.
+- [validator.schema.org](https://validator.schema.org/) по 2–3 URL
+  (Organization/Service/FAQPage/CreativeWork/Article без ошибок).
 
 ---
 
 ## Аварийный fallback — GitHub Pages (статика)
-Если VPS недоступен. Ограничения: без ISR, `next/image` без оптимизации,
-редиректы не работают.
+Если VPS недоступен целиком. Ограничения: без ISR, `next/image` без оптимизации,
+серверные редиректы не работают.
 ```bash
 NEXT_OUTPUT=export NEXT_PUBLIC_BASE_PATH=/Ai-Agent npm run build   # → out/
 ```

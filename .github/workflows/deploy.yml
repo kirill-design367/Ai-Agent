@@ -1,0 +1,85 @@
+name: Deploy AUREA (VPS)
+
+# Автодеплой прод-сайта: сборка образа В GitHub Actions (не на 4 ГБ сервере — иначе OOM),
+# публикация в GHCR, деплой по SSH с health-check и авто-откатом.
+# Триггеры: push в main + ручной запуск (Actions → Run workflow).
+#
+# Нужные секреты репозитория (Settings → Secrets and variables → Actions):
+#   SSH_HOST   — IP/домен сервера           (напр. 104.171.137.47)
+#   SSH_USER   — пользователь деплоя         (deploy — создаётся bootstrap.sh)
+#   SSH_KEY    — приватный ключ этого пользователя (ed25519, целиком)
+#   GHCR_TOKEN — PAT с правом read:packages  (сервер тянет образ из ghcr.io)
+# Публичный ключ к SSH_KEY передаётся в bootstrap.sh как DEPLOY_PUBKEY.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/aurea-web
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image tags
+        id: meta
+        run: |
+          IMG="${REGISTRY,,}/${IMAGE_NAME,,}"
+          echo "IMG=${IMG}" >> "$GITHUB_ENV"
+          echo "image=${IMG}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./studio                 # Dockerfile + код приложения — в studio/
+          push: true
+          tags: |
+            ${{ env.IMG }}:${{ github.sha }}
+            ${{ env.IMG }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH (pull + health-check + auto-rollback)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd /opt/aurea
+            git fetch --all --prune
+            git checkout main
+            git reset --hard origin/main
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            cd studio
+            bash scripts/deploy-remote.sh "${{ needs.build.outputs.image }}"
