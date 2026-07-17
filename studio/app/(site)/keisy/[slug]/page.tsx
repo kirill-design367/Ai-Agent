@@ -91,15 +91,15 @@ export default async function CasePage({
       <section className="pg-case-sec">
         <div className="pg-wrap pg-case-cols">
           <Reveal className="pg-case-col">
-            <h3 className="pg-h3">Задача</h3>
+            <h2 className="pg-h3">Задача</h2>
             <ul>{doc.task.map((t, i) => <li key={i}>{t}</li>)}</ul>
           </Reveal>
           <Reveal className="pg-case-col" delay={60}>
-            <h3 className="pg-h3">Решение</h3>
+            <h2 className="pg-h3">Решение</h2>
             <ul>{doc.solution.map((t, i) => <li key={i}>{t}</li>)}</ul>
           </Reveal>
           <Reveal className="pg-case-col" delay={120}>
-            <h3 className="pg-h3">Результат</h3>
+            <h2 className="pg-h3">Результат</h2>
             <ul>{doc.result.map((t, i) => <li key={i}>{t}</li>)}</ul>
           </Reveal>
         </div>

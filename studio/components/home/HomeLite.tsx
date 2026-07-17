@@ -43,7 +43,7 @@ export default function HomeLite() {
     }));
 
   return (
-    <div className="site theme-dark home-lite">
+    <main id="content" className="site theme-dark home-lite">
       {/* HERO — голос §2, заголовок = LCP из HTML */}
       <section className="pg-hero home-lite-hero">
         <div className="pg-wrap">
@@ -110,6 +110,6 @@ export default function HomeLite() {
       <FounderBlock />
       <Contact />
       <Cta title="Готовы начать?" text={`Отвечу лично, обычно в течение пары часов. ${SITE.contacts.email}`} />
-    </div>
+    </main>
   );
 }

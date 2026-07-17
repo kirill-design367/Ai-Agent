@@ -3813,7 +3813,18 @@ main {
 .site-footer-sign { color: var(--text-tertiary); margin-top: 16px; font-style: italic; font-family: var(--font-display); }
 .site-footer-col { display: flex; flex-direction: column; gap: 12px; }
 .site-footer-h { color: var(--text-tertiary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
-.site-footer-col a { color: var(--text-secondary); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+.site-footer-col a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  /* достаточный тач-таргет (a11y target-size ≥24px) */
+  padding: 5px 0;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+}
 .site-footer-col a:hover { color: var(--text-primary); }
 .site-footer-legal {
   max-width: 1200px; margin: clamp(32px,4vw,56px) auto 0; padding: 24px clamp(20px,5vw,64px) 0;
