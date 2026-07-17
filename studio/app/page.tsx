@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import HomeLite from "@/components/home/HomeLite";
 import HomeUpgrade from "@/components/home/HomeUpgrade";
+import { buildMetadata } from "@/lib/seo/meta";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Разработка сайтов под ключ для бизнеса — студия AUREA",
+  description:
+    "Авторская студия AUREA: современные сайты для бизнеса на чистом коде. " +
+    "Личная ответственность за каждый проект, пожизненная гарантия.",
+  path: "/",
+});
 
 /*
   ГЛАВНАЯ — расслоена по тиру устройства (§1).

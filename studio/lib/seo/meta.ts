@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE, canonical } from "./site";
+import { ogKey } from "./ogKey";
 
 /*
   Единый построитель Metadata (§6.1, §6.4, §6.7). Self-referencing canonical,
@@ -9,19 +10,15 @@ export function buildMetadata(opts: {
   title: string; // metaTitle — с брендом (обязательно)
   description: string;
   path: string; // внутренний путь без домена
-  ogImage?: string; // абсолютный или /путь; по умолчанию — дефолтный шаблон
   type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
   noindex?: boolean;
 }): Metadata {
   const url = canonical(opts.path);
-  const img = opts.ogImage
-    ? opts.ogImage.startsWith("http")
-      ? opts.ogImage
-      : `${SITE.url}${opts.ogImage}`
-    : `${SITE.url}/og/default.png`;
-
+  // Статический OG-файл, сгенерированный на билде satori/sharp (§6.7):
+  // /og/{ogKey}.png. Один ключ для меты и генератора → не разъедутся.
+  const img = `${SITE.url}/og/${ogKey(opts.path)}.png`;
   return {
     title: opts.title,
     description: opts.description,

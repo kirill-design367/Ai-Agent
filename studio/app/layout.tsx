@@ -3,6 +3,7 @@ import { Playfair_Display, Manrope, Unbounded } from "next/font/google";
 import CookieConsent from "@/components/kit/CookieConsent";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationLd } from "@/lib/seo/jsonld";
+import { SITE } from "@/lib/seo/site";
 import "./globals.css";
 
 /*
@@ -46,9 +47,9 @@ const headline = Unbounded({
 });
 
 export const metadata: Metadata = {
-  title: "Сайт за 1–5 дней — красивый, быстрый, продающий",
-  description:
-    "Уникальный дизайн на чистом коде. Без шаблонов, без посредников, с пожизненной гарантией. От 30 000 ₽.",
+  metadataBase: new URL(SITE.url),
+  title: "Разработка сайтов под ключ для бизнеса — студия AUREA",
+  description: SITE.description,
 };
 
 export const viewport: Viewport = {

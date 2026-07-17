@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "check:parity": "node --experimental-strip-types scripts/check-parity.mjs",
-    "prebuild": "npm run check:parity",
+    "gen:og": "node --experimental-strip-types scripts/gen-og.mjs",
+    "prebuild": "npm run check:parity && npm run gen:og",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -31,6 +32,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.171.0",
+    "satori": "^0.28.0",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
   }

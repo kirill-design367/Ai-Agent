@@ -7,6 +7,9 @@
 /.next/
 /out/
 
+# сгенерированные на билде OG-изображения (scripts/gen-og.mjs, prebuild)
+/public/og/
+
 # production
 /build
 
