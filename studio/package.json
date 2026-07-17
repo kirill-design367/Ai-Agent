@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "next dev",
     "check:parity": "node --experimental-strip-types scripts/check-parity.mjs",
+    "check:content": "node scripts/check-content-leaks.mjs",
     "gen:og": "node --experimental-strip-types scripts/gen-og.mjs",
     "audit": "node --experimental-strip-types scripts/audit-phase1.mjs",
-    "prebuild": "npm run check:parity && npm run gen:og",
+    "prebuild": "npm run check:parity && npm run check:content && npm run gen:og",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

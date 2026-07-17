@@ -18,17 +18,12 @@ const NAV = [
 ];
 
 function Logo() {
+  // Читаемый вордмарк AUREA. Знак «точка» (мотив «от точки до шедевра») —
+  // акцентная точка после слова; финальную фирменную монограмму задаёт концепт.
   return (
     <span className="site-logo" aria-label="AUREA">
-      <svg viewBox="0 0 22 26" aria-hidden className="site-logo-a">
-        <path d="M11 2 L20 24 L16.3 24 L11 10 L5.7 24 L2 24 Z" fill="currentColor" />
-        <circle cx="11" cy="19.2" r="2" fill="currentColor" />
-      </svg>
-      <span className="site-logo-txt">URE</span>
-      <svg viewBox="0 0 22 26" aria-hidden className="site-logo-a">
-        <path d="M11 2 L20 24 L16.3 24 L11 10 L5.7 24 L2 24 Z" fill="currentColor" />
-        <circle cx="11" cy="19.2" r="2" fill="currentColor" />
-      </svg>
+      AURE<span className="site-logo-seed">A</span>
+      <span className="site-logo-dot" aria-hidden />
     </span>
   );
 }

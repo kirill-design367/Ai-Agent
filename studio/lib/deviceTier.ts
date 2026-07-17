@@ -16,21 +16,28 @@ type NavClass = Navigator & {
 export function isHeavyCapable(): boolean {
   if (typeof window === "undefined") return false;
   try {
+    // Явные сигналы пользователя — единственные жёсткие opt-out'ы.
+    // reduce-motion уважаем как доступность; saveData — как осознанный выбор.
+    // (Богатую вёрстку под reduce-motion с приглушённым движением даёт сам
+    //  кинематограф — «упрощать в Lite» его задача не входит.)
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return false;
-    if (window.innerWidth < 1024) return false;
-
     const nav = navigator as NavClass;
     if (nav.connection?.saveData) return false;
-    const et = nav.connection?.effectiveType;
-    if (et && !/4g/.test(et)) return false; // 2g/3g/slow-2g → лёгкий тир
-    if (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency < 4) return false;
 
-    return true;
+    // «Это десктоп с мышью» — большой экран + точный указатель + hover.
+    // Дальше НЕ судим десктоп по сетевым/CPU-эвристикам: effectiveType/ядра —
+    // предохранитель для слабых МОБИЛЬНЫХ, а на десктопе он бил мимо (Chrome на
+    // первой тяжёлой загрузке с РФ-VPS часто оценивает связь как 3g → терял
+    // кинематограф на способной машине). Тяжёлое грузится lazy, прелоадер
+    // перекрывает подмену — задержка сети не повод отдавать статичный Lite.
+    return (
+      window.innerWidth >= 1024 &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    );
   } catch {
-    // если Network Information API недоступен (Safari/Firefox) — не наказываем
-    // десктоп: проверок экрана/указателя выше достаточно.
-    return window.innerWidth >= 1024 &&
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    return (
+      window.innerWidth >= 1024 &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    );
   }
 }

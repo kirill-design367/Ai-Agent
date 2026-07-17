@@ -3736,9 +3736,9 @@ main {
 }
 /* на главной, пока герой в вьюпорте — скрыт (fade, только opacity → без сдвига) */
 .site-header-brand.is-hidden { opacity: 0; pointer-events: none; }
-.site-logo { display: inline-flex; align-items: center; gap: 2px; font-family: var(--font-headline); font-weight: 800; }
-.site-logo-a { width: 15px; height: 18px; display: block; }
-.site-logo-txt { font-size: 1.05rem; letter-spacing: 0.04em; }
+.site-logo { display: inline-flex; align-items: baseline; font-family: var(--font-headline); font-weight: 800; font-size: 1.12rem; letter-spacing: 0.14em; text-indent: 0.14em; }
+.site-logo-seed { position: relative; }
+.site-logo-dot { align-self: center; width: 4px; height: 4px; margin-left: 3px; border-radius: 50%; background: currentColor; display: inline-block; }
 .site-nav {
   display: flex;
   align-items: center;
