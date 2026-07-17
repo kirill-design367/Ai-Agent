@@ -15,7 +15,6 @@ export const metadata: Metadata = buildMetadata({
     "Сайты под конкретную сферу: мебель на заказ, пригон авто из Кореи, салоны " +
     "красоты и другие. Решаем боли ниши, а не делаем универсальный шаблон.",
   path: "/dlya-biznesa",
-  ogImage: "/og/dlya-biznesa.png",
 });
 
 export default function NicheHub() {

@@ -15,7 +15,6 @@ export const metadata: Metadata = buildMetadata({
     "Разбираем, как сайт помогает бизнесу продавать: цены, доверие, структура. " +
     "Из практики студии AUREA, без воды.",
   path: "/blog",
-  ogImage: "/og/blog.png",
 });
 
 export default function BlogHub() {

@@ -5,6 +5,7 @@ import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, registerGsap } from "@/lib/gsap";
 import { shouldSkipIntro } from "@/components/kit/Intro";
+import { isHeavyCapable } from "@/lib/deviceTier";
 
 const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
   ssr: false,
@@ -12,56 +13,58 @@ const SplashCursor = dynamic(() => import("@/components/kit/SplashCursor"), {
 
 /*
   HERO — отвечает на «Вы делаете то, что мне нужно?».
-  Живой фон: флюид-курсор + ОГРОМНАЯ полупрозрачная «А» с точкой (знак бренда)
-  вместо тонких линий. Сверху — логотип AUREA. Заголовок собирается из хаоса,
-  смещён влево; подзаголовок встаёт следом. Кнопки «вырезаются из фона» на ховере.
+
+  Расслоение (§1): LCP-элемент — текстовый заголовок из HTML/CSS, виден без JS.
+  Three.js-сцена (флюид) НЕ участвует в LCP: монтируется после idle (уже после
+  LCP), проявляется плавно; контейнер сцены заранее full-bleed → CLS = 0.
+  Тиринг по способности устройства (isHeavyCapable):
+    - способный (desktop, 4g, ядра, не save-data/reduced) — полная WebGL-сцена;
+    - иначе — статичный CSS-постер той же сцены (аврора-градиент), без JS.
+  Голос §2: подзаголовок «Современные сайты для бизнеса…», без сроков в hero (§2.5).
 */
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const headline = useRef<HTMLHeadingElement>(null);
   const sub = useRef<HTMLParagraphElement>(null);
-  // WebGL флюид-курсор — ТОЛЬКО десктоп (мышь). На мобиле НЕ грузим three/R3F
-  // вовсе: это снимает тяжёлые задачи основного потока (TBT) и ускоряет загрузку
-  // там, где перф важнее всего. Эффект — тонкий фон-курсор, на тач и так не нужен.
+  // Полная three.js-сцена — только «способный» тир. Монтируется ПОСЛЕ LCP/idle.
   const [fluid, setFluid] = useState(false);
   useEffect(() => {
-    const fine =
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-      window.innerWidth > 900;
-    if (!fine) return;
-    // отложить тяжёлую WebGL-инициализацию на простой → не раздувает TBT при загрузке
-    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
-      .requestIdleCallback;
-    const t = ric ? ric(() => setFluid(true)) : window.setTimeout(() => setFluid(true), 1200);
-    return () => clearTimeout(t as number);
+    if (!isHeavyCapable()) return; // лёгкий тир — остаётся CSS-постер, без WebGL
+    let cancelled = false;
+    const mount = () => !cancelled && setFluid(true);
+    // idle гарантированно наступает после LCP (заголовок красится сразу из HTML)
+    const ric = (window as unknown as {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    }).requestIdleCallback;
+    const id = ric ? ric(mount, { timeout: 2500 }) : window.setTimeout(mount, 1500);
+    return () => {
+      cancelled = true;
+      if (!ric) clearTimeout(id as number);
+    };
   }, []);
-  const fluidProps = {};
 
   useGSAP(
     () => {
       registerGsap();
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const fades = gsap.utils.toArray<HTMLElement>("[data-hero-fade]");
 
-      // МГНОВЕННЫЙ ОФФЕР для рекламного трафика / повторного визита / reduced:
-      // заголовок НЕ сплитим и НЕ прячем — остаётся серверным текстом (быстрый
-      // LCP, не ждёт JS-анимации). Показываем сразу вспомогательные элементы.
-      if (reduce || shouldSkipIntro()) {
+      // МГНОВЕННЫЙ ОФФЕР: на лёгком тире / повторном визите / рекламном трафике
+      // заголовок НЕ сплитим и НЕ прячем — остаётся серверным текстом (LCP без JS).
+      if (shouldSkipIntro()) {
         gsap.set(fades, { opacity: 1, y: 0 });
         return;
       }
 
+      // Способный тир, первый визит — «стильный хаос» заголовка (десктоп-впечатление).
       const split = new SplitText(headline.current!, { type: "words,chars" });
       const subSplit = new SplitText(sub.current!, { type: "words" });
 
-      // умеренный «стильный хаос» — как было раньше (не слишком разлетается)
       gsap.set(split.chars, {
         x: () => gsap.utils.random(-22, 22),
         y: () => gsap.utils.random(-24, 24),
         rotation: () => gsap.utils.random(-12, 12),
         opacity: 0,
       });
-      // подзаголовок — похожая лёгкая сборка из хаоса по словам
       gsap.set(subSplit.words, {
         x: () => gsap.utils.random(-16, 16),
         y: () => gsap.utils.random(-14, 18),
@@ -69,39 +72,38 @@ export default function Hero() {
       });
       gsap.set(fades, { opacity: 0, y: 24 });
 
-      const play = () => {
-        const tl = gsap.timeline();
-        tl.to(split.chars, {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          opacity: 1,
-          duration: 1.4,
-          ease: "expo.out",
-          stagger: { each: 0.016, from: "random" },
-        })
-          .to(
-            subSplit.words,
-            { x: 0, y: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.035 },
-            "-=0.85"
-          )
-          .to(
-            fades,
-            { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
-            "-=0.7"
-          );
-      };
-
-      // Играем СРАЗУ (не ждём конца интро): короткое интро всё равно поверх, и к
-      // моменту его ухода заголовок уже собран → LCP не тянется до конца интро.
-      play();
+      const tl = gsap.timeline();
+      tl.to(split.chars, {
+        x: 0,
+        y: 0,
+        rotation: 0,
+        opacity: 1,
+        duration: 1.4,
+        ease: "expo.out",
+        stagger: { each: 0.016, from: "random" },
+      })
+        .to(
+          subSplit.words,
+          { x: 0, y: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.035 },
+          "-=0.85"
+        )
+        .to(
+          fades,
+          { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
+          "-=0.7"
+        );
     },
     { scope: root }
   );
 
   return (
     <section id="hero" className="theme-dark hero" ref={root}>
-      <div className="hero-fluid">{fluid && <SplashCursor {...fluidProps} />}</div>
+      {/* Фон-сцена: CSS-постер (аврора) всегда; WebGL-флюид проявляется поверх
+          на способном тире после LCP. Контейнер full-bleed заранее → CLS 0. */}
+      <div className={`hero-fluid${fluid ? " is-live" : ""}`} aria-hidden>
+        <div className="hero-poster" />
+        {fluid && <SplashCursor />}
+      </div>
 
       {/* логотип AUREA — стилизованные «A» (треугольник + точка), как в знаке бренда */}
       <header className="hero-top">
@@ -128,19 +130,19 @@ export default function Hero() {
         </h1>
 
         <p className="hero-sub" ref={sub}>
-          <span className="hs-line hs-l1">Поэтому мы&nbsp;создаём сайты, которые</span>{" "}
-          <span className="hs-line hs-l2">вызывают доверие с&nbsp;первых секунд</span>{" "}
-          <span className="hs-line hs-l3">и&nbsp;помогают превращать</span>{" "}
-          <span className="hs-line hs-l4">посетителей в&nbsp;клиентов.</span>
+          <span className="hs-line hs-l1">Современные сайты для&nbsp;бизнеса.</span>{" "}
+          <span className="hs-line hs-l2">Личная ответственность за&nbsp;каждый проект,</span>{" "}
+          <span className="hs-line hs-l3">внимание к&nbsp;деталям</span>{" "}
+          <span className="hs-line hs-l4">и&nbsp;решения, которые помогают привлекать клиентов.</span>
         </p>
       </div>
 
-      {/* нижняя зона: фишки (по золотому сечению) + основной CTA-pill */}
+      {/* нижняя зона: фишки (без сроков в hero — §2.5) + основной CTA-pill */}
       <div className="hero-foot">
         <ul className="hero-feats" data-hero-fade>
           <li>Индивидуальный дизайн</li>
+          <li>Чистый код, не&nbsp;конструктор</li>
           <li>Пожизненная гарантия</li>
-          <li>Запуск от&nbsp;5&nbsp;дней</li>
         </ul>
         <a href="#prices" className="hero-cta" data-hero-fade data-magnetic>
           <span>Узнать стоимость</span>
@@ -149,4 +151,3 @@ export default function Hero() {
     </section>
   );
 }
-

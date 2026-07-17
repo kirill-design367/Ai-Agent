@@ -1,6 +1,7 @@
 import SmoothScroll from "@/components/kit/SmoothScroll";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
+import FounderBlock from "@/components/pg/FounderBlock";
 import MagneticTargets from "@/components/kit/MagneticTargets";
 import GrainOverlay from "@/components/kit/GrainOverlay";
 import Intro from "@/components/kit/Intro";
@@ -58,8 +59,10 @@ export default function Home() {
         <Contact />
       </main>
 
-      {/* общий подвал с навигацией по новым разделам */}
+      {/* §2.3: блок основателя (монограмма, модель работы «напрямую с основателем»).
+          Стоит после формы, чтобы не разрывать кинематографические переходы T1–T5. */}
       <div className="theme-dark">
+        <FounderBlock />
         <SiteFooter />
       </div>
     </SmoothScroll>

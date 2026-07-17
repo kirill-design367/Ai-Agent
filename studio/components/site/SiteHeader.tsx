@@ -35,11 +35,18 @@ function Logo() {
 
 export default function SiteHeader() {
   const pathname = usePathname();
+  const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
+  // На главной шапочный логотип скрыт, пока герой в вьюпорте (§6): у героя свой
+  // крупный знак. Появляется при скролле за пределы героя — fade, без layout shift.
+  const [pastHero, setPastHero] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24);
+      setPastHero(window.scrollY > window.innerHeight * 0.82);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -51,7 +58,12 @@ export default function SiteHeader() {
   return (
     <header className={`site-header${scrolled ? " is-scrolled" : ""}${open ? " is-open" : ""}`}>
       <div className="site-header-in">
-        <Link href="/" className="site-header-brand" aria-label="AUREA — на главную">
+        <Link
+          href="/"
+          className={`site-header-brand${isHome && !pastHero ? " is-hidden" : ""}`}
+          aria-label="AUREA — на главную"
+          tabIndex={isHome && !pastHero ? -1 : undefined}
+        >
           <Logo />
         </Link>
 

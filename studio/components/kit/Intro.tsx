@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { registerGsap } from "@/lib/gsap";
 import { asset } from "@/lib/asset";
+import { isHeavyCapable } from "@/lib/deviceTier";
 
 /*
   INTRO — короткий видео-прелоадер (макс ~1.5с) с растворением.
@@ -21,7 +22,9 @@ export function shouldSkipIntro(): boolean {
   } catch {
     /* приватный режим — просто покажем интро */
   }
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Лёгкий тир (мобильные, слабое железо, save-data, reduced-motion) — без интро:
+  // герой виден мгновенно, LCP не ждёт видео-прелоадер (§1а/§1б, бюджет главной).
+  return !isHeavyCapable();
 }
 
 export default function Intro() {

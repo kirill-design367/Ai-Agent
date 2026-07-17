@@ -36,7 +36,6 @@ export async function generateMetadata({
     title: doc.metaTitle,
     description: doc.metaDescription,
     path: `/dlya-biznesa/${doc.slug}`,
-    ogImage: `/og/niche-${doc.slug}.png`,
     modifiedTime: doc.dateModified,
   });
 }

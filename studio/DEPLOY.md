@@ -80,6 +80,33 @@ docker compose logs -f nginx          # логи nginx
 docker compose ps                     # статус + healthcheck
 ```
 
+## 7. Проверка Core Web Vitals после деплоя
+
+Локальные цифры Lighthouse на dev-VM — гипотеза; приёмка — по живому URL через
+[PageSpeed Insights](https://pagespeed.web.dev/) (mobile), после прогрева ISR-кэша
+(открыть каждый URL 1–2 раза перед замером).
+
+**Прогнать (mobile):**
+
+| URL | Что это |
+|---|---|
+| `https://aureadesign.ru/` | главная (тир сцены зависит от устройства) |
+| `https://aureadesign.ru/uslugi/korporativnyi-sait/` | шаблон услуги |
+| `https://aureadesign.ru/dlya-biznesa/avto-iz-korei/` | шаблон ниши |
+| `https://aureadesign.ru/keisy/nasledie/` | шаблон кейса |
+
+**Приёмка (mobile):**
+
+- Услуга / ниша / кейс: **Performance ≥ 90, SEO ≥ 95, Accessibility ≥ 95,
+  LCP < 2.5 s, CLS < 0.1, INP < 200 ms.**
+- Главная: **Performance ≥ 85, LCP < 2.5 s, CLS < 0.1** (тяжёлый тир сцены — только
+  на способном desktop; mobile получает лёгкий тир).
+- Проверить, что `curl -s <URL>` (без JS) возвращает `<title>`, `<h1>`, текст и
+  блоки `application/ld+json` — критично для Яндекса.
+
+Если по живому URL цель не достигнута — резать вес three.js-сцены (полигоны,
+текстуры, постпроцессинг), а не отменять её.
+
 ---
 
 ## Аварийный fallback — GitHub Pages (статика)

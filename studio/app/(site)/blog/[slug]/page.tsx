@@ -29,7 +29,6 @@ export async function generateMetadata({
     title: doc.metaTitle,
     description: doc.metaDescription,
     path: `/blog/${doc.slug}`,
-    ogImage: `/og/article-${doc.slug}.png`,
     type: "article",
     publishedTime: doc.datePublished,
     modifiedTime: doc.dateModified,

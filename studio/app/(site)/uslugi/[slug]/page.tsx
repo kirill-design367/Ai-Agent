@@ -33,7 +33,6 @@ export async function generateMetadata({
     title: doc.metaTitle,
     description: doc.metaDescription,
     path: `/uslugi/${doc.slug}`,
-    ogImage: `/og/service-${doc.slug}.png`,
     modifiedTime: doc.dateModified,
   });
 }

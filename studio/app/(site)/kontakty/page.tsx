@@ -11,7 +11,6 @@ export const metadata: Metadata = buildMetadata({
     "Расскажите про бизнес и задачу — отвечу лично, обычно в течение пары часов. " +
     "Telegram, WhatsApp, почта. Форма заявки с уведомлением в Telegram.",
   path: "/kontakty",
-  ogImage: "/og/kontakty.png",
 });
 
 export default function Kontakty() {

@@ -19,6 +19,9 @@ const display = Playfair_Display({
   weight: ["400", "500"],
   variable: "--font-display",
   display: "swap",
+  // Playfair — декоративный (цитаты/insight), не LCP-элемент. Не преload'им,
+  // чтобы не конкурировать за канал с Unbounded (заголовки = LCP).
+  preload: false,
 });
 
 const body = Manrope({

@@ -20,7 +20,7 @@ export default function SolutionSteps({
         <ol className="pg-steps-list">
           {items.map((s, i) => (
             <Reveal as="li" className="pg-step" key={i} delay={i * 50}>
-              <span className="pg-step-num">{String(i + 1).padStart(2, "0")}</span>
+              <span className="pg-step-num" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
               <div className="pg-step-body">
                 <h3 className="pg-h3">{s.title}</h3>
                 <p>{s.text}</p>

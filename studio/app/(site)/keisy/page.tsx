@@ -14,7 +14,6 @@ export const metadata: Metadata = buildMetadata({
     "Работы студии AUREA: собственный бренд «Наследие» и концепт-проекты. " +
     "Честные бейджи типа проекта, технические показатели без выдуманных цифр.",
   path: "/keisy",
-  ogImage: "/og/keisy.png",
 });
 
 const BADGE: Record<string, string> = {

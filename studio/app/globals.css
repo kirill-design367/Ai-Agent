@@ -764,7 +764,27 @@ body {
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: 0.9;
+}
+/* Статичный постер сцены (лёгкий тир + фон под флюидом на способном тире).
+   Тот же визуальный язык — мягкое свечение в тёмной сцене, а не «пустой чёрный». */
+.hero-poster {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 92% at 78% 16%, rgba(201, 165, 91, 0.1), transparent 58%),
+    radial-gradient(96% 84% at 18% 96%, rgba(244, 242, 238, 0.06), transparent 54%),
+    radial-gradient(70% 60% at 50% 40%, rgba(244, 242, 238, 0.03), transparent 70%);
+}
+/* WebGL-флюид проявляется плавно после монтирования (§1а, fade-in, без CLS). */
+.hero-fluid > div {
+  animation: heroFluidIn 1.2s var(--ease-expo) both;
+}
+@keyframes heroFluidIn {
+  from { opacity: 0; }
+  to { opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-fluid > div { animation: none; opacity: 0.9; }
 }
 
 
@@ -1376,6 +1396,13 @@ main {
   transform: scale(1);
   filter: blur(0);
   will-change: opacity, transform, filter;
+}
+/* ТИРИНГ ИНТРО В SSR (§1): на лёгком тире (мобильные, грубый указатель, узкий
+   экран, reduced-motion) прелоадер НЕ красится вовсе — заголовок героя виден
+   мгновенно и становится LCP без ожидания JS. Совпадает с isHeavyCapable. */
+@media (max-width: 1023px), (hover: none), (pointer: coarse),
+  (prefers-reduced-motion: reduce) {
+  .intro { display: none !important; }
 }
 /* не шторка вверх, а мягкое растворение: логотип и чёрный фон истаивают,
    слегка приближаясь и размываясь → под ними уже стоит Hero */
@@ -3700,7 +3727,15 @@ main {
   align-items: center;
   gap: clamp(16px, 3vw, 40px);
 }
-.site-header-brand { color: var(--text-primary); text-decoration: none; display: inline-flex; }
+.site-header-brand {
+  color: var(--text-primary);
+  text-decoration: none;
+  display: inline-flex;
+  opacity: 1;
+  transition: opacity 0.4s var(--ease-expo);
+}
+/* на главной, пока герой в вьюпорте — скрыт (fade, только opacity → без сдвига) */
+.site-header-brand.is-hidden { opacity: 0; pointer-events: none; }
 .site-logo { display: inline-flex; align-items: center; gap: 2px; font-family: var(--font-headline); font-weight: 800; }
 .site-logo-a { width: 15px; height: 18px; display: block; }
 .site-logo-txt { font-size: 1.05rem; letter-spacing: 0.04em; }

@@ -35,7 +35,6 @@ export async function generateMetadata({
     title: doc.metaTitle,
     description: doc.metaDescription,
     path: `/keisy/${doc.slug}`,
-    ogImage: `/og/case-${doc.slug}.png`,
     type: "article",
     modifiedTime: doc.dateModified,
   });

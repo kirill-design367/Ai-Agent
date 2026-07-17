@@ -16,7 +16,6 @@ export const metadata: Metadata = buildMetadata({
     "Лендинги, корпоративные сайты, интернет-магазины и поддержка. Чистый код, " +
     "индивидуальный дизайн, пожизненная гарантия. Цены и сроки — по каждой услуге.",
   path: "/uslugi",
-  ogImage: "/og/uslugi.png",
 });
 
 export default function UslugiHub() {
