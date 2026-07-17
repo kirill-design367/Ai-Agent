@@ -74,7 +74,7 @@ export function faqLd(faq: { q: string; a: string }[]): Json | null {
   };
 }
 
-/** Service + Offer для страницы услуги (§6.2). Цена в RUB. */
+/** Service + Offer для страницы услуги (§6.2). Цена в RUB. Offer — если есть цена. */
 export function serviceLd(doc: Loaded<ServiceDoc>): Json {
   return {
     "@context": "https://schema.org",
@@ -85,16 +85,20 @@ export function serviceLd(doc: Loaded<ServiceDoc>): Json {
     provider: { "@id": SITE.org.id },
     areaServed: "RU",
     url: canonical(`/uslugi/${doc.slug}`),
-    offers: {
-      "@type": "Offer",
-      price: doc.priceFrom,
-      priceCurrency: "RUB",
-      priceSpecification: {
-        "@type": "PriceSpecification",
-        minPrice: doc.priceFrom,
-        priceCurrency: "RUB",
-      },
-    },
+    ...(doc.priceFrom
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: doc.priceFrom,
+            priceCurrency: "RUB",
+            priceSpecification: {
+              "@type": "PriceSpecification",
+              minPrice: doc.priceFrom,
+              priceCurrency: "RUB",
+            },
+          },
+        }
+      : {}),
   };
 }
 
@@ -122,7 +126,7 @@ export function caseLd(doc: Loaded<CaseDoc>): Json {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
     name: doc.title,
-    headline: doc.h1 ?? doc.title,
+    headline: doc.title,
     about: doc.siteType,
     dateCreated: doc.datePublished,
     dateModified: doc.dateModified,

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Manrope, Unbounded } from "next/font/google";
 import CookieConsent from "@/components/kit/CookieConsent";
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationLd } from "@/lib/seo/jsonld";
 import "./globals.css";
 
 /*
@@ -62,6 +64,13 @@ export default function RootLayout({
       className={`${display.variable} ${body.variable} ${headline.variable}`}
     >
       <body>
+        {/* Класс .js навешивается синхронно → CSS может прятать [data-reveal]
+            только при включённом JS. Без JS весь контент виден сразу (§5.4). */}
+        <script
+          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
+        />
+        {/* Organization — глобально на всех страницах (§6.2) */}
+        <JsonLd data={[organizationLd()]} />
         {children}
         <CookieConsent />
       </body>

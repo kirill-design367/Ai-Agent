@@ -69,11 +69,12 @@ export const serviceSchema = base.extend({
   type: z.literal("service"),
   h1: z.string().min(1),
   // «от N ₽» + «от N дней» — цифры выполнимы в худшем реалистичном случае (§2.6).
-  priceFrom: z.number().int().positive(),
-  termFrom: z.string().min(1), // «от 3 дней»
+  // Необязательны: услуга-поддержка не тарифицируется «от N».
+  priceFrom: z.number().int().positive().optional(),
+  termFrom: z.string().optional(), // «от 3 дней»
   lead: z.array(z.string().min(1)).min(1), // прямой ответ в первых абзацах (§7.1)
-  includes: z.array(z.string().min(1)).min(1), // «что входит в базовую стоимость»
-  priceFactors: z.array(priceFactor).min(1), // «что влияет на итоговую цену»
+  includes: z.array(z.string().min(1)).default([]), // «что входит в базовую стоимость»
+  priceFactors: z.array(priceFactor).default([]), // «что влияет на итоговую цену»
   insight: z.string().optional(), // уникальный вывод из практики (§7.6)
   faq: z.array(faqItem).default([]),
 });
