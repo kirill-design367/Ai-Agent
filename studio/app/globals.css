@@ -4122,3 +4122,18 @@ main {
   border: 1px solid var(--border-soft);
   display: block;
 }
+
+/* ─── ОТЗЫВЫ (за флагом showTestimonials) ───────────────────────────────── */
+.pg-tst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.pg-tst-card {
+  border: 1px solid var(--border-soft); border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 36px); background: rgba(255,255,255,0.015);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.pg-tst-card blockquote {
+  font-family: var(--font-display), serif; font-size: 1.2rem; line-height: 1.5;
+  color: var(--text-primary);
+}
+.pg-tst-author { display: flex; flex-direction: column; gap: 2px; }
+.pg-tst-author { font-weight: 600; color: var(--text-primary); }
+.pg-tst-author span { color: var(--gold); font-size: 0.88rem; font-weight: 500; }

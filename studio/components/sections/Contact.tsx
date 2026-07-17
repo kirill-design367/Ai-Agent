@@ -17,9 +17,10 @@ const TG_CHAT = "6303245443";
 
 type SendState = "idle" | "sending" | "sent" | "error";
 
-export default function Contact() {
+export default function Contact({ titleTag = "h2" }: { titleTag?: "h1" | "h2" } = {}) {
   const root = useRef<HTMLElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
+  const TitleTag = titleTag;
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [about, setAbout] = useState("");
@@ -114,10 +115,10 @@ export default function Contact() {
   return (
     <section id="contact" className="theme-dark contact" ref={root}>
       <div className="contact-inner">
-        <h2 className="contact-title" ref={title}>
+        <TitleTag className="contact-title" ref={title}>
           Расскажите
           <br />о проекте
-        </h2>
+        </TitleTag>
 
         <p className="contact-sub contact-row">
           Идея, сроки, бюджет — в&nbsp;двух словах. Дальше придумаю я. Отвечаю

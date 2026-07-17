@@ -22,7 +22,7 @@ export default function Kontakty() {
     <>
       <JsonLd data={[breadcrumbLd(crumbs)]} />
       <Breadcrumbs items={crumbs} />
-      <Contact />
+      <Contact titleTag="h1" />
     </>
   );
 }
