@@ -45,33 +45,48 @@ export default function HomeLite() {
 
   return (
     <main id="content" className="site theme-dark home-lite">
-      {/* HERO — голос §2, заголовок = LCP из HTML */}
-      <section className="pg-hero home-lite-hero">
-        <div className="pg-wrap">
-          <p className="pg-hero-kicker">{HERO.kicker}</p>
-          <h1 className="home-lite-h1">
+      {/* HERO-МАНИФЕСТ. Композиция по φ, √φ-тип, тёплый свет. Точка = «семя»
+          в начале заголовка (§1.2 — поведение/исток, не орнамент): из неё
+          в кинематографическом слое разворачивается заголовок; в Lite её роль
+          играют светопятно и композиция. Заголовок = LCP из первичного HTML. */}
+      <section className="hero-m theme-dark">
+        <div className="hero-m-glow" aria-hidden />
+        <div className="hero-m-inner">
+          <p className="hero-m-label">{HERO.kicker}</p>
+          <h1 className="hero-m-h1">
+            <span className="hero-m-seed" aria-hidden />
             {HERO.headline.slice(0, 2).join(" ")}
             <br />
             {HERO.headline.slice(2).join(" ")}
           </h1>
-          <p className="home-lite-sub">{HERO.subtitle}</p>
-          <ul className="home-lite-feats">
-            {HERO.feats.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-          <div className="home-lite-actions">
-            <Link href="/uslugi/" className="pg-btn pg-btn--primary" data-magnetic>
-              Услуги и цены
-            </Link>
-            <Link href="/kontakty/" className="pg-btn pg-btn--ghost" data-magnetic>
-              Обсудить проект
-            </Link>
+          <div className="hero-m-aside">
+            <p className="hero-m-lead">{HERO.subtitle}</p>
+            <ul className="hero-m-feats">
+              {HERO.feats.map((f, i) => (
+                <li key={f}>
+                  <span className="hero-m-feat-n">{String(i + 1).padStart(2, "0")}</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="hero-m-actions">
+              <Link href="/uslugi/" className="btn-unfold" data-magnetic>
+                <span>Услуги и цены</span>
+              </Link>
+              <Link href="/kontakty/" className="btn-line" data-magnetic>
+                Обсудить проект
+              </Link>
+            </div>
+          </div>
+          <div className="hero-m-meta" aria-hidden>
+            <span>AUREA</span>
+            <span>МОСКВА · РФ</span>
+            <span>ОТ&nbsp;ТОЧКИ ДО&nbsp;ШЕДЕВРА</span>
           </div>
         </div>
       </section>
 
-      {/* Модель работы §2 */}
+      {/* Модель работы §2 — тихая зона */}
       <section className="pg-insight">
         <div className="pg-wrap">
           <blockquote className="pg-insight-q">

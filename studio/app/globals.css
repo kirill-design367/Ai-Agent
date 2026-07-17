@@ -37,9 +37,9 @@
   --fs-4: clamp(2.1rem, 1.5rem + 2.6vw, 2.618rem);   /* 42 H2 */
   --fs-5: clamp(2.5rem, 1.6rem + 3.9vw, 3.33rem);    /* 53 H1 внутр. */
   --fs-6: clamp(2.9rem, 1.5rem + 6vw, 4.236rem);     /* 68 крупный H1 */
-  --fs-7: clamp(3.2rem, 1.2rem + 8.5vw, 5.388rem);   /* 86 дисплей */
-  --fs-8: clamp(3.6rem, 0.9rem + 11.5vw, 6.854rem);  /* 110 hero-дисплей */
-  --fs-9: clamp(4rem, 0.5rem + 15vw, 8.719rem);      /* 139 hero-манифест */
+  --fs-7: clamp(2rem, 0.4rem + 6.5vw, 5.388rem);     /* 86 дисплей (мобайл ~32) */
+  --fs-8: clamp(2.4rem, 0.4rem + 8vw, 6.854rem);     /* 110 hero-дисплей (~38) */
+  --fs-9: clamp(2.6rem, 0.4rem + 9.5vw, 6.9rem);     /* hero-манифест: ~43 (390) → 110 (десктоп), 2 строки по 2 слова влезают */
 
   /* Трекинг по кеглю и line-height */
   --tr-display: -0.03em;
@@ -4228,3 +4228,150 @@ main {
 .pg-tst-author { display: flex; flex-direction: column; gap: 2px; }
 .pg-tst-author { font-weight: 600; color: var(--text-primary); }
 .pg-tst-author span { color: var(--gold); font-size: 0.88rem; font-weight: 500; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   HERO-МАНИФЕСТ (редизайн 2026). φ-композиция, √φ-тип, тёплый свет.
+   Тёмная тёплая база; акцент = температура света, без hue (§1.1).
+   ═══════════════════════════════════════════════════════════════════ */
+.hero-m {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: clip;
+  background: var(--bg-dark);
+  padding: calc(var(--sp-8) + 2rem) 0 var(--sp-6);
+}
+/* единый источник тёплого света — даёт глубину без краски */
+.hero-m-glow {
+  position: absolute;
+  left: -6%; top: 30%;
+  width: min(70vw, 780px); aspect-ratio: 1;
+  transform: translateY(-40%);
+  background: radial-gradient(circle at center,
+    rgba(236, 229, 216, 0.10), rgba(236, 229, 216, 0.035) 34%, transparent 64%);
+  pointer-events: none;
+}
+.hero-m-inner {
+  position: relative; z-index: 1;
+  width: min(92vw, 1360px); margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "label" "h1" "aside" "meta";
+  row-gap: var(--sp-5);
+}
+/* grid-дети должны сжиматься ниже своего контента (иначе длинные слова/лейбл
+   распирают трек и обрезаются overflow:clip секции) */
+.hero-m-inner > * { min-width: 0; }
+.hero-m-label {
+  grid-area: label;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.hero-m-h1 {
+  grid-area: h1;
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-9);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tr-display);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0;
+}
+/* Статическая точка-«семя» убрана (в Lite читалась бы как случайный буллет,
+   §1.2). «Точка» живёт в motion-слое: прелоадер и разворот заголовка (JS). */
+.hero-m-seed { display: none; }
+.hero-m-aside { grid-area: aside; max-width: 46ch; }
+.hero-m-lead {
+  font-size: var(--fs-2);
+  line-height: var(--lh-lead);
+  letter-spacing: var(--tr-head);
+  color: var(--text-primary);
+  margin: 0 0 var(--sp-5);
+  text-wrap: balance;
+}
+.hero-m-feats { list-style: none; margin: 0 0 var(--sp-5); padding: 0; display: grid; gap: var(--sp-2); }
+.hero-m-feats li { display: flex; align-items: baseline; gap: var(--sp-3); font-size: var(--fs-1); color: var(--text-primary); }
+.hero-m-feat-n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  flex: none;
+  padding-top: 0.15em;
+}
+.hero-m-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+/* кнопка-разворот: тёплый свет разворачивается заливкой слева на hover */
+.btn-unfold {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center;
+  padding: 0.95em 1.7em;
+  border: 1px solid rgba(244, 242, 238, 0.28);
+  border-radius: 2px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: var(--fs-0); font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: color var(--dur-base) var(--ease-unfold), border-color var(--dur-base) var(--ease-unfold);
+}
+.btn-unfold > span { position: relative; z-index: 1; }
+.btn-unfold::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: #f3ece0;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform var(--dur-slow) var(--ease-unfold);
+}
+.btn-unfold:hover { color: #0a0a0b; border-color: #f3ece0; }
+.btn-unfold:hover::before { transform: scaleX(1); }
+/* текстовая ссылка с вычерчиваемым подчёркиванием */
+.btn-line {
+  position: relative; color: var(--text-primary); text-decoration: none;
+  font-size: var(--fs-0); font-weight: 500; padding-bottom: 2px;
+}
+.btn-line::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%;
+  background: var(--text-primary); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-unfold);
+}
+.btn-line:hover::after { transform: scaleX(1); }
+.hero-m-meta {
+  grid-area: meta;
+  display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-5);
+  padding-top: var(--sp-3);
+  border-top: 1px solid rgba(244, 242, 238, 0.12);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.hero-m-meta span:last-child { margin-left: auto; }
+
+/* Десктоп: φ-асимметрия — заголовок в большой доле, aside в меньшей, ниже */
+@media (min-width: 900px) {
+  /* Гигантский заголовок — во всю ширину (длинные русские слова не влезают в
+     колонку φ и бьются об aside). aside уходит НИЖЕ, в правую (меньшую) долю φ —
+     асимметрия сохранена, коллизии нет. */
+  .hero-m-inner {
+    grid-template-columns: var(--phi-major) var(--phi-minor);
+    grid-template-areas:
+      "label label"
+      "h1    h1"
+      ".     aside"
+      "meta  meta";
+    column-gap: var(--sp-6);
+  }
+  .hero-m-h1 { margin-bottom: var(--sp-2); }
+  .hero-m-aside { justify-self: start; padding-top: var(--sp-2); }
+  .hero-m-meta { margin-top: var(--sp-6); }
+}
+@media (max-width: 899px) {
+  .hero-m-meta span:last-child { margin-left: 0; width: 100%; }
+}
