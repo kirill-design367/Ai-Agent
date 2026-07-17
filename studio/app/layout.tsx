@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Manrope, Unbounded } from "next/font/google";
 import CookieConsent from "@/components/kit/CookieConsent";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationLd } from "@/lib/seo/jsonld";
@@ -7,44 +6,14 @@ import { SITE } from "@/lib/seo/site";
 import "./globals.css";
 
 /*
-  Type pair (Bible I.9.1 / IV.2.2). Cyrillic is the FIRST filter (IV.2.1):
-  both faces ship real, drawn cyrillic — no latin-premium-with-fallback.
-  - Display: Playfair Display (expressive antiqua, has cyrillic) — the "voice".
-  - Body/UI: Manrope (clean grotesk, excellent cyrillic) — clarity.
-  Swap these for licensed type.today / CSTM faces when budget allows.
+  Типосистема (§5): Onest (дисплей+текст) + Martian Mono (микро-лейблы).
+  Self-host: @font-face + unicode-range subset'ы в globals.css, файлы в
+  /public/fonts. Не next/font/google — тот тянет шрифт с gstatic на билде
+  (хрупко за прокси/в CI); next/font/local не умеет unicode-range для одного
+  переменного семейства из нескольких subset-файлов. Onest — переменный
+  (wght 100–900) одним файлом на subset. Preload — только кириллический subset
+  Onest (LCP-заголовок русский) + латиница (слово AUREA, цифры цен).
 */
-// Веса подрезаны под реальное использование — меньше блокирующих ресурсов.
-const display = Playfair_Display({
-  subsets: ["latin", "cyrillic"],
-  // 600 не использовался — убран (меньше блокирующих шрифт-файлов)
-  weight: ["400", "500"],
-  variable: "--font-display",
-  display: "swap",
-  // Playfair — декоративный (цитаты/insight), не LCP-элемент. Не преload'им,
-  // чтобы не конкурировать за канал с Unbounded (заголовки = LCP).
-  preload: false,
-});
-
-const body = Manrope({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-body",
-  display: "swap",
-  // Manrope — тело/подзаголовки, не LCP-элемент. Не преload'им, чтобы освободить
-  // канал под Unbounded (крупный заголовок = LCP). adjustFontFallback держит CLS 0.
-  preload: false,
-});
-
-/*
-  Headline face — Unbounded (Gogol's geometric display, ships full cyrillic).
-  Circular, characterful, distinctly "designed". Used для крупных заголовков.
-*/
-const headline = Unbounded({
-  subsets: ["latin", "cyrillic"],
-  weight: ["600", "700", "800"],
-  variable: "--font-headline",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -66,10 +35,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="ru"
-      className={`${display.variable} ${body.variable} ${headline.variable}`}
-    >
+    <html lang="ru">
+      <head>
+        {/* Preload только LCP-начертаний Onest (кириллица — заголовок, латиница — AUREA/цифры) */}
+        <link rel="preload" href="/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/onest-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
+      </head>
       <body>
         {/* Класс .js навешивается синхронно → CSS может прятать [data-reveal]
             только при включённом JS. Без JS весь контент виден сразу (§5.4). */}
