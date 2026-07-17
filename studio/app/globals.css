@@ -27,8 +27,10 @@
   --accent: #121214;
   --accent-ink: #f7f6f3;
   --accent-soft: rgba(18, 18, 20, 0.12);
-  /* Aurea = "golden" — the origin point's warm accent (used sparingly). */
-  --gold: #c9a55b;
+  /* §1.1: золото УБРАНО как цвет. aurum = СВЕТ, а не краска. Это температура
+     света — едва тёплый bone/off-white на краях форм и в бликах, НЕ жёлтый.
+     (имя --gold временно сохранено как алиас; переименуется в --warm в φ-токенах) */
+  --gold: #ece5d8;
 
   /* — Semantic (muted, never #FF0000 — IV.8.5) */
   --success: #4a7c59;
