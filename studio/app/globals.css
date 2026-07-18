@@ -19,12 +19,16 @@
 @font-face { font-family: "Martian Mono"; font-style: normal; font-weight: 500; font-display: swap;
   src: url("/fonts/martian-latin-500.woff2") format("woff2");
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2122,U+2212,U+FEFF,U+FFFD; }
+/* Метрико-подогнанный фолбэк Onest: пока грузится веб-шрифт, системный занимает
+   почти ту же высоту/ширину → своп не двигает лэйаут (CLS ≈ 0 даже на троттлинге). */
+@font-face { font-family: "Onest-fb"; src: local("Arial"), local("Helvetica Neue"), local("sans-serif");
+  size-adjust: 104%; ascent-override: 93%; descent-override: 23%; line-gap-override: 0%; }
 
 :root {
   /* Роли (§5): характер добывается масштабом/трекингом, не сменой семейства. */
-  --font-display: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Onest", "Onest-fb", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-headline: var(--font-display);
-  --font-body: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Onest", "Onest-fb", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* ── ТИПО-ШКАЛА на √φ (r=1.272); шаг n и n+2 = φ (1.618). База 16px. (§3/TYPOGRAPHY.md)
@@ -4501,7 +4505,8 @@ main {
 .pg-btn { position: relative; display: inline-flex; align-items: center; gap: 0.6em;
   font-size: var(--fs-0); font-weight: 600; text-decoration: none; border-radius: 2px;
   padding: 0.95em 1.7em; overflow: hidden; }
-.pg-btn--primary { color: var(--text-primary); border: 1px solid rgba(244,242,238,0.28);
+.pg-btn--primary { color: var(--text-primary); background: transparent;
+  border: 1px solid rgba(244,242,238,0.28);
   transition: color var(--dur-base) var(--ease-unfold), border-color var(--dur-base) var(--ease-unfold); }
 .pg-btn--primary > * { position: relative; z-index: 1; }
 .pg-btn--primary::before { content:""; position:absolute; inset:0; z-index:0; background:#f3ece0;
@@ -4609,3 +4614,14 @@ main {
 .pg-prose h3 { font-size: var(--fs-2); margin: var(--sp-4) 0 var(--sp-2); }
 .pg-prose ul, .pg-prose ol { display: grid; gap: var(--sp-2); padding-left: 1.2em; color: var(--text-primary); }
 .pg-prose a { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(244,242,238,0.4); }
+
+/* 404 — «точка потерялась» */
+.nf { min-height: 100svh; display: flex; align-items: center; padding: var(--sp-8) 0; position: relative; overflow: clip; }
+.nf-inner { width: min(92vw, 1360px); margin: 0 auto; }
+.nf-label { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--text-secondary); margin: 0 0 var(--sp-4); }
+.nf-h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-8); line-height: var(--lh-display); letter-spacing: var(--tr-display); text-transform: uppercase; color: var(--text-primary); margin: 0 0 var(--sp-5); }
+.nf-dot { display: inline-block; width: 0.14em; height: 0.14em; border-radius: 50%; background: #f3ece0; box-shadow: 0 0 1em 0.2em rgba(236,229,216,0.5); margin-left: 0.08em; vertical-align: 0.15em; animation: nf-drift 3.2s var(--ease-move) infinite alternate; }
+@keyframes nf-drift { to { transform: translate(0.5em, -0.35em); opacity: 0.4; } }
+.nf-text { max-width: 52ch; font-size: var(--fs-1); line-height: var(--lh-body); color: var(--text-secondary); margin: 0 0 var(--sp-6); }
+.nf-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+@media (prefers-reduced-motion: reduce) { .nf-dot { animation: none; } }
