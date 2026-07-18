@@ -4625,3 +4625,61 @@ main {
 .nf-text { max-width: 52ch; font-size: var(--fs-1); line-height: var(--lh-body); color: var(--text-secondary); margin: 0 0 var(--sp-6); }
 .nf-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
 @media (prefers-reduced-motion: reduce) { .nf-dot { animation: none; } }
+
+/* ═══════════════ ГЛУБИНА: grain + тёплый свет (§6) ═══════════════ */
+.atmos { display: contents; }
+/* Тёплые световые поля ЗА контентом (видны сквозь прозрачные секции) */
+.atmos-light {
+  position: fixed; inset: -25%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 20% 26%, rgba(236,229,216,0.055), transparent 72%),
+    radial-gradient(42% 40% at 84% 78%, rgba(236,229,216,0.04), transparent 72%),
+    radial-gradient(60% 50% at 50% 120%, rgba(120,110,150,0.04), transparent 70%);
+  transform: translate3d(0, calc(var(--sy, 0) * -0.02px), 0);
+  will-change: transform;
+}
+/* Film-grain НАД контентом — тонкая фактура на всём (soft-light) */
+.atmos-grain {
+  position: fixed; inset: 0; z-index: 90; pointer-events: none;
+  opacity: 0.4; mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+/* База документа — тёплое пространство, чтобы свет был не по-плоскому чёрным */
+body, .site { background:
+  radial-gradient(120% 80% at 50% -10%, #121014 0%, #0a0a0b 46%),
+  #0a0a0b; }
+/* Секции-герои прозрачны → сквозь них виден свет базы (не плоская заливка) */
+.hero-m { background: transparent; }
+
+/* ═══════════════ КИНЕТИЧЕСКИЙ ЗАГОЛОВОК-ГЕРОЙ (§2) ═══════════════ */
+/* Каждое слово выезжает из маски снизу, stagger, AUREA-ease. CSS-анимация на
+   загрузке — текст в DOM сразу, LCP не страдает (жест виден в первые ~1s). */
+/* margin-right держит межсловный пробел (space внутри маски обрезается overflow) */
+.hm-word { display: inline-block; overflow: hidden; vertical-align: top;
+  margin-right: 0.26em; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.hm-word-in { display: inline-block; transform: translateY(112%);
+  animation: hmUp 0.9s var(--ease-unfold) both;
+  animation-delay: calc(var(--i, 0) * 0.085s + 0.15s); }
+@keyframes hmUp { to { transform: translateY(0); } }
+/* лейбл/aside/meta героя мягко проявляются следом */
+.hero-m-label { animation: hmFade 0.7s var(--ease-unfold) both; animation-delay: 0.05s; }
+.hero-m-aside { animation: hmFade 0.9s var(--ease-unfold) both; animation-delay: 0.5s; }
+.hero-m-meta { animation: hmFade 0.9s var(--ease-unfold) both; animation-delay: 0.65s; }
+@keyframes hmFade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hm-word-in { transform: none; animation: none; }
+  .hero-m-label, .hero-m-aside, .hero-m-meta { animation: none; opacity: 1; transform: none; }
+}
+
+/* Скролл-подсказка героя — заполняет «воздух» осмысленно, тонкая линия «стекает» */
+.hero-m-scroll { position: absolute; left: 0; bottom: 8.5rem; display: flex; align-items: center; gap: var(--sp-3);
+  animation: hmFade 0.9s var(--ease-unfold) both; animation-delay: 0.8s; }
+.hero-m-scroll-l { font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: var(--tr-label);
+  text-transform: uppercase; color: var(--text-secondary); }
+.hero-m-scroll-line { position: relative; width: 1px; height: 54px; background: rgba(244,242,238,0.16); overflow: hidden; }
+.hero-m-scroll-line i { position: absolute; left: 0; top: 0; width: 100%; height: 40%;
+  background: linear-gradient(180deg, transparent, #f3ece0); animation: hmScroll 2.2s var(--ease-move) infinite; }
+@keyframes hmScroll { 0% { transform: translateY(-100%); } 60%,100% { transform: translateY(250%); } }
+@media (max-width: 899px) { .hero-m-scroll { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-m-scroll { animation: none; } .hero-m-scroll-line i { animation: none; opacity: 0.4; } }

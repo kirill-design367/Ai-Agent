@@ -53,11 +53,16 @@ export default function HomeLite() {
         <div className="hero-m-glow" aria-hidden />
         <div className="hero-m-inner">
           <p className="hero-m-label">{HERO.kicker}</p>
-          <h1 className="hero-m-h1">
-            <span className="hero-m-seed" aria-hidden />
-            {HERO.headline.slice(0, 2).join(" ")}
-            <br />
-            {HERO.headline.slice(2).join(" ")}
+          {/* Кинетический заголовок: каждое слово выезжает из маски снизу со
+              stagger (CSS-анимация на загрузке → LCP не страдает, текст в DOM). */}
+          <h1 className="hero-m-h1" aria-label={HERO.headline.join(" ")}>
+            {HERO.headline.map((w, i) => (
+              <span className="hm-word" key={i} aria-hidden>
+                <span className="hm-word-in" style={{ ["--i" as string]: i }}>
+                  {w}
+                </span>{" "}
+              </span>
+            ))}
           </h1>
           <div className="hero-m-aside">
             <p className="hero-m-lead">{HERO.subtitle}</p>
@@ -83,6 +88,10 @@ export default function HomeLite() {
             <span>МОСКВА · РФ</span>
             <span>ОТ&nbsp;ТОЧКИ ДО&nbsp;ШЕДЕВРА</span>
           </div>
+          <span className="hero-m-scroll" aria-hidden>
+            <span className="hero-m-scroll-l">листайте</span>
+            <span className="hero-m-scroll-line"><i /></span>
+          </span>
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import CookieConsent from "@/components/kit/CookieConsent";
+import Atmosphere from "@/components/kit/Atmosphere";
 import SiteMotion from "@/components/kit/SiteMotion";
 import PageTransition from "@/components/kit/PageTransition";
 import CustomCursor from "@/components/kit/CustomCursor";
@@ -52,6 +53,7 @@ export default function RootLayout({
         />
         {/* Organization — глобально на всех страницах (§6.2) */}
         <JsonLd data={[organizationLd()]} />
+        <Atmosphere />
         {children}
         {/* Слой движения — надстройка поверх одной структуры (§арх) */}
         <SiteMotion />
