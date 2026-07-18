@@ -1,0 +1,15 @@
+import { chromium } from "playwright-core";
+const bin="/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell";
+const b=await chromium.launch({executablePath:bin,args:["--no-sandbox"]});
+const p=await b.newPage({viewport:{width:1440,height:900}});
+await p.goto("http://127.0.0.1:3100/keisy/",{waitUntil:"networkidle"});
+await p.evaluate(()=>{const r=document.querySelector('.idx-row');r.scrollIntoView({block:'center'})});
+await p.waitForTimeout(400);
+const row=await p.$(".idx-row");
+const box=await row.boundingBox();
+await p.mouse.move(box.x+80, box.y+box.height/2);
+await p.waitForTimeout(700);
+const op=await p.evaluate(()=>{const m=document.querySelector('.idx-row:hover .idx-media')||document.querySelector('.idx-media');return {op:getComputedStyle(m).opacity, hovered:!!document.querySelector('.idx-row:hover')};});
+console.log(JSON.stringify(op));
+await p.screenshot({path:"/tmp/shots/v4-keisy-hover2.png"});
+await b.close();

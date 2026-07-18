@@ -4894,9 +4894,12 @@ body, .site {
 /* ── 1. UNBOUNDED-ДИСПЛЕЙ: масштаб + тугой трекинг (OBYS-скелет) ────────────── */
 .hero-m-h1 {
   font-family: var(--font-display); font-weight: 800; text-transform: none;
-  font-size: clamp(2.5rem, 1rem + 9.4vw, 8.8rem); line-height: 0.93; letter-spacing: -0.025em;
+  /* Unbounded — широкий гротеск: коэффициент занижен, чтобы длинные русские
+     слова («впечатление») не вылезали за край на 390px. Десктоп остаётся крупным. */
+  font-size: clamp(1.7rem, 0.2rem + 7.2vw, 8.4rem); line-height: 0.94; letter-spacing: -0.03em;
 }
-.hero-m-h1 .hm-word { margin-right: 0.24em; padding-bottom: 0.1em; margin-bottom: -0.08em; }
+.hero-m-h1 .hm-word { margin-right: 0.22em; padding-bottom: 0.1em; margin-bottom: -0.08em; }
+@media (max-width: 420px) { .hero-m-h1 { letter-spacing: -0.04em; } }
 .pg-hero-h1 {
   font-family: var(--font-display); font-weight: 700; text-transform: none;
   font-size: clamp(2.1rem, 1rem + 6.4vw, 5.4rem); line-height: 0.98; letter-spacing: -0.025em; max-width: 17ch;
