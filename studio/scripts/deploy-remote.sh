@@ -120,7 +120,13 @@ fi
 # скрипта перехвачены trap on_err ВЫШЕ и до этой ветки не доходят. Дальше правим
 # сами — снимаем ERR-trap, чтобы штатные сбои отката (|| true) не сбивали логику.
 trap - ERR
-echo "✗ Health-check ПРОВАЛЕН: сайт не ответил за $((HEALTH_TRIES * HEALTH_GAP))s — выполняю откат."
+echo "✗ Health-check ПРОВАЛЕН: сайт не ответил за $((HEALTH_TRIES * HEALTH_GAP))s."
+echo "──────── ЛОГИ ПЕРЕД ОТКАТОМ (видны в GitHub Actions) ────────"
+echo "### docker compose ps"; docker compose ps || true
+echo "### web (последние 50 строк)"; docker compose logs --tail=50 web 2>&1 || true
+echo "### nginx (последние 30 строк)"; docker compose logs --tail=30 nginx 2>&1 || true
+echo "─────────────────────────────────────────────────────────────"
+echo "Выполняю откат."
 if [ -n "$NEW_IMAGE" ] && [ -n "$PREV_IMAGE" ] && [ "$PREV_IMAGE" != "$NEW_IMAGE" ]; then
   set_env IMAGE "$PREV_IMAGE"
   docker compose pull web || true

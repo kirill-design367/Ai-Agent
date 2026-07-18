@@ -19,6 +19,12 @@ services:
       - PORT=3000
     expose:
       - "3000"                            # наружу не публикуем — только через nginx
+    volumes:
+      # Персистентный кэш next/image (optimized) + ISR: переживает передеплой —
+      # картинки не переоптимизируются каждый раз (важно с приходом реальных
+      # изображений из IMAGE-BRIEF). Свежий named volume наследует владельца
+      # nextjs из образа (в Dockerfile каталог создан и chown'нут) → без EACCES.
+      - next-cache:/app/.next/cache
     healthcheck:
       test:
         - CMD
@@ -66,3 +72,4 @@ services:
 volumes:
   certbot-conf:
   certbot-www:
+  next-cache:

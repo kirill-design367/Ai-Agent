@@ -29,10 +29,18 @@ ENV PORT=3000
 # непривилегированный пользователь (Debian)
 RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m -s /usr/sbin/nologin nextjs
 
-# standalone тянет минимальный набор node_modules внутрь себя
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+# standalone тянет минимальный набор node_modules внутрь себя.
+# --chown: файлы принадлежат nextjs, иначе /app/.next оказывается root-owned и
+# процесс под nextjs не может писать рантайм-кэш next/image / ISR (EACCES).
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public ./public
+
+# Рантайм-кэш next/image (optimized images) и ISR пишутся в /app/.next/cache.
+# Создаём каталог заранее и отдаём владельца nextjs — тогда (а) нет EACCES на
+# mkdir, (б) смонтированный named volume наследует владельца nextjs при первом
+# монтировании (Docker копирует права из образа в свежий volume).
+RUN mkdir -p /app/.next/cache/images && chown -R nextjs:nodejs /app/.next
 
 USER nextjs
 EXPOSE 3000
