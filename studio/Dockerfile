@@ -26,6 +26,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# КРИТИЧНО: standalone server.js слушает process.env.HOSTNAME. Docker по умолчанию
+# кладёт в HOSTNAME id контейнера → приложение биндится на внешний IP контейнера,
+# а НЕ на loopback → healthcheck на 127.0.0.1:3000 отвергается → unhealthy навсегда.
+# 0.0.0.0 слушает и loopback (healthcheck), и внешний интерфейс (nginx web:3000).
+ENV HOSTNAME=0.0.0.0
 # непривилегированный пользователь (Debian)
 RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m -s /usr/sbin/nologin nextjs
 

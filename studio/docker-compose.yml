@@ -17,6 +17,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      # Явно перекрываем HOSTNAME (Docker кладёт сюда id контейнера) → standalone
+      # server.js биндится на 0.0.0.0: и loopback (healthcheck 127.0.0.1), и внешний
+      # интерфейс (nginx web:3000). Без этого — вечный unhealthy.
+      - HOSTNAME=0.0.0.0
     expose:
       - "3000"                            # наружу не публикуем — только через nginx
     volumes:
@@ -31,10 +35,10 @@ services:
         - node
         - -e
         - "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-      interval: 30s
+      interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 25s
+      retries: 5
+      start_period: 30s
 
   nginx:
     # Базовый образ зеркалируется в GHCR (сервер в РФ ловит 429 от docker.io).
