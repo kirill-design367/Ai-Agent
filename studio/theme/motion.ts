@@ -47,9 +47,8 @@ export const prefersReducedMotion = () =>
   чтобы в твинах писать ease: "aurea-unfold". Без CustomEase — тихий no-op,
   используйте встроенные (expo.out ≈ unfold) как запас.
 */
-export function registerAureaEases(gsap: {
-  registerPlugin?: (...p: unknown[]) => void;
-}): void {
+type GsapLike = { registerPlugin?: (...args: never[]) => void };
+export function registerAureaEases(gsap: GsapLike): void {
   if (typeof window === "undefined") return;
   try {
     // динамический импорт, чтобы не тянуть плагин там, где он не нужен
@@ -59,7 +58,7 @@ export function registerAureaEases(gsap: {
     } };
     const CustomEase = mod.CustomEase;
     if (!CustomEase) return;
-    gsap.registerPlugin?.(CustomEase);
+    gsap.registerPlugin?.(CustomEase as never);
     CustomEase.create("aurea-unfold", bezierPath(EASE.unfold));
     CustomEase.create("aurea-fold", bezierPath(EASE.fold));
     CustomEase.create("aurea-move", bezierPath(EASE.move));

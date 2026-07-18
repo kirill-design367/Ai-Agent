@@ -4375,3 +4375,72 @@ main {
 @media (max-width: 899px) {
   .hero-m-meta span:last-child { margin-left: 0; width: 100%; }
 }
+
+/* ═══════════════ MOTION-СЛОЙ (надстройка над одной структурой) ═══════════════ */
+
+/* Проявление по скроллу «разворот» — прячем только то, что ниже сгиба (SiteMotion) */
+.js .rv { opacity: 0; transform: translateY(22px); transition:
+  opacity var(--dur-slow) var(--ease-unfold), transform var(--dur-slow) var(--ease-unfold); }
+.js .rv.is-in { opacity: 1; transform: none; }
+/* маска строк заголовка-героя (SplitText) — строки выезжают из-под обреза */
+.hm-line { overflow: hidden; padding-bottom: 0.04em; }
+@media (prefers-reduced-motion: reduce) {
+  .js .rv { opacity: 1; transform: none; transition: none; }
+}
+
+/* Прелоадер — точка тёплого света разворачивается (§1.4) */
+.preloader {
+  position: fixed; inset: 0; z-index: 200;
+  background: #060607;
+  display: grid; place-items: center;
+  will-change: opacity;
+}
+.pl-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #f3ece0;
+  box-shadow: 0 0 24px 6px rgba(236, 229, 216, 0.7);
+  transform: translate(-50%, -50%) scale(0.06);
+  will-change: transform, opacity;
+}
+:root[data-preloading] { overflow: hidden; }
+
+/* Переход между страницами — «разворот из точки» (clip-path) */
+.pt {
+  position: fixed; inset: 0; z-index: 150;
+  background:
+    radial-gradient(120% 120% at 50% 50%, #17140f 0%, #0a0a0b 70%);
+  clip-path: circle(0% at 50% 50%);
+  pointer-events: none;
+}
+.pt::after { /* тёплая световая кромка разворота */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(236,229,216,0.08), transparent 60%);
+}
+
+/* Курсор — воплощение точки (тёплый свет), реагирует на интерактив */
+.cursor-halo {
+  position: fixed; top: 0; left: 0; z-index: 120;
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid rgba(236, 229, 216, 0.5);
+  background: rgba(236, 229, 216, 0.04);
+  pointer-events: none; opacity: 0;
+  transition: width var(--dur-base) var(--ease-unfold),
+    height var(--dur-base) var(--ease-unfold),
+    background var(--dur-base) var(--ease-unfold),
+    border-color var(--dur-base) var(--ease-unfold);
+  mix-blend-mode: screen;
+}
+.cursor-halo[data-hover="true"] {
+  width: 54px; height: 54px;
+  background: rgba(236, 229, 216, 0.10);
+  border-color: rgba(236, 229, 216, 0.75);
+}
+@media (hover: none) { .cursor-halo { display: none; } }
+
+/* Детали: выделение, скроллбар, фокус — тёплый свет, ничего дефолтного */
+::selection { background: rgba(236, 229, 216, 0.85); color: #0a0a0b; }
+* { scrollbar-width: thin; scrollbar-color: rgba(236,229,216,0.25) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(236,229,216,0.22); border-radius: 10px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(236,229,216,0.4); background-clip: content-box; }
+:focus-visible { outline: 2px solid rgba(236, 229, 216, 0.85); outline-offset: 3px; border-radius: 2px; }
