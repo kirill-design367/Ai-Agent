@@ -5287,3 +5287,32 @@ body, .site {
 .site-header-brand { margin-right: auto; }
 .site-header-cta { margin-left: auto; }
 .site-burger { order: 0; margin-left: 4px; }
+
+/* ── v5: ИНВЕРСНЫЙ РИТМ НА ВНУТРЕННИХ СТРАНИЦАХ — компоненты читаемы на бумаге ── */
+.sec--light { background: var(--paper);
+  --text-primary: #17130d; --text-secondary: #55503f; --text-tertiary: #8a8272;
+  --accent: #17130d; --accent-ink: #f3efe6; --gold: #17130d;
+  --border-soft: rgba(23,19,13,0.14); --border-strong: rgba(23,19,13,0.26);
+  color: #17130d; position: relative; z-index: 1;
+}
+.sec--light .pg-trust-card, .sec--light .pg-tst-card, .sec--light .pg-price-card,
+.sec--light .pg-step, .sec--light .pg-pain-sol, .sec--light .pg-founder-in { border-color: rgba(23,19,13,0.14); }
+.sec--light .pg-tst-card, .sec--light .pg-trust-card, .sec--light .pg-price-card { background: rgba(23,19,13,0.02); }
+.sec--light .pg-faq-list { border-top-color: rgba(23,19,13,0.22); }
+.sec--light .pg-faq-item { border-bottom-color: rgba(23,19,13,0.16); }
+.sec--light .pg-steps-list, .sec--light .pg-pains-list, .sec--light .pg-hub-grid,
+.sec--light .pg-related-grid { background: rgba(23,19,13,0.14); border-block-color: rgba(23,19,13,0.14); }
+.sec--light .pg-step, .sec--light .pg-pain-sol, .sec--light .pg-hub-card,
+.sec--light .pg-related-card { background: var(--paper); }
+.sec--light .pg-step:hover, .sec--light .pg-related-card:hover, .sec--light .pg-hub-card:hover { background: #ece7db; }
+.sec--light .pg-tst-card blockquote, .sec--light .pg-insight-q, .sec--light .pg-pain-quote { color: #17130d; }
+.sec--light .pg-prose a { text-decoration-color: rgba(23,19,13,0.4); }
+.sec--light .pill { border-color: rgba(23,19,13,0.28); color: #17130d; }
+.sec--light .pill--solid { background: #17130d; color: var(--paper); border-color: #17130d; }
+.sec--light .pill--solid::before { background: #ece7db; }
+.sec--light .pill--solid:hover { color: #17130d; }
+
+/* лёгкая асимметрия внутренних hero (краевой лейбл + выход заголовка за край) */
+.pg-hero-kicker { display: inline-flex; align-items: center; gap: 0.8em; }
+.pg-hero-kicker::after { content: ""; display: inline-block; width: clamp(40px, 12vw, 160px); height: 1px; background: currentColor; opacity: 0.4; }
+.pg-hero-h1 { margin-left: clamp(-0.4rem, -1.6vw, -2rem); }

@@ -41,11 +41,13 @@ export default function NicheHub() {
           "Ниже — направления, для которых уже собраны структуры решений. Не нашли своё? Расскажите про бизнес — разберёмся вместе.",
         ]}
       />
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <HubGrid cards={cards} />
-        </div>
-      </section>
+      <div className="sec--light">
+        <section className="pg-hub">
+          <div className="pg-wrap">
+            <HubGrid cards={cards} />
+          </div>
+        </section>
+      </div>
       <FounderBlock />
       <Cta />
     </>

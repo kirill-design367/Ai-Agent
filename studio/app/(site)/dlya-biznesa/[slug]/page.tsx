@@ -82,19 +82,21 @@ export default async function NichePage({
         <UpdatedAt iso={doc.dateModified} />
       </div>
 
-      <PainPoints items={doc.painPoints} />
-      <SolutionSteps items={doc.solutionSteps} />
-      <Insight text={doc.insight} />
+      <div className="sec--light">
+        <PainPoints items={doc.painPoints} />
+        <SolutionSteps items={doc.solutionSteps} />
+        <Insight text={doc.insight} />
 
-      <PriceBlock
-        priceFrom={priceFrom}
-        term={term}
-        note={doc.priceNote}
-        includes={includes}
-        factors={factors}
-      />
+        <PriceBlock
+          priceFrom={priceFrom}
+          term={term}
+          note={doc.priceNote}
+          includes={includes}
+          factors={factors}
+        />
 
-      <Prose body={doc.body} heading="Подробнее" />
+        <Prose body={doc.body} heading="Подробнее" />
+      </div>
 
       {relatedCase && (
         <RelatedLinks

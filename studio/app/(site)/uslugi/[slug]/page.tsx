@@ -65,20 +65,22 @@ export default async function ServicePage({
         term={doc.termFrom}
       />
 
-      {(doc.priceFrom != null || doc.includes.length > 0) && (
-        <PriceBlock
-          priceFrom={doc.priceFrom}
-          term={doc.termFrom}
-          heading={doc.priceFrom != null ? "Стоимость и что входит" : "Что входит"}
-          includes={doc.includes}
-          factors={doc.priceFactors}
-        />
-      )}
+      <div className="sec--light">
+        {(doc.priceFrom != null || doc.includes.length > 0) && (
+          <PriceBlock
+            priceFrom={doc.priceFrom}
+            term={doc.termFrom}
+            heading={doc.priceFrom != null ? "Стоимость и что входит" : "Что входит"}
+            includes={doc.includes}
+            factors={doc.priceFactors}
+          />
+        )}
 
-      {doc.insight && <Insight text={doc.insight} />}
-      <TrustBlock />
-      <Prose body={doc.body} heading="Подробнее" />
-      <Faq items={doc.faq} heading="Вопросы по услуге" />
+        {doc.insight && <Insight text={doc.insight} />}
+        <TrustBlock />
+        <Prose body={doc.body} heading="Подробнее" />
+        <Faq items={doc.faq} heading="Вопросы по услуге" />
+      </div>
       <FounderBlock />
       <RelatedLinks items={doc.related} />
       <Cta />
