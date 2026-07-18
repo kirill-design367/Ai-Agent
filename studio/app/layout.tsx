@@ -3,6 +3,8 @@ import CookieConsent from "@/components/kit/CookieConsent";
 import Atmosphere from "@/components/kit/Atmosphere";
 import SiteMotion from "@/components/kit/SiteMotion";
 import Interactions from "@/components/kit/Interactions";
+import Canvas from "@/components/kit/Canvas";
+import SmoothScroll from "@/components/kit/SmoothScroll";
 import PageTransition from "@/components/kit/PageTransition";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationLd } from "@/lib/seo/jsonld";
@@ -53,13 +55,17 @@ export default function RootLayout({
         />
         {/* Organization — глобально на всех страницах (§6.2) */}
         <JsonLd data={[organizationLd()]} />
-        <Atmosphere />
-        {children}
-        {/* Слой движения — надстройка поверх одной структуры (§арх) */}
-        <SiteMotion />
-        <Interactions />
-        <PageTransition />
-        <CookieConsent />
+        {/* Инерционный скролл-полотно (Lenis, синхрон с ScrollTrigger) — физика Locomotive */}
+        <SmoothScroll>
+          <Atmosphere />
+          {children}
+          {/* Слой движения — надстройка поверх одной структуры (§арх) */}
+          <SiteMotion />
+          <Interactions />
+          <Canvas />
+          <PageTransition />
+          <CookieConsent />
+        </SmoothScroll>
       </body>
     </html>
   );
