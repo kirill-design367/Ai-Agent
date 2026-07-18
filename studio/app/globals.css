@@ -23,19 +23,22 @@
    почти ту же высоту/ширину → своп не двигает лэйаут (CLS ≈ 0 даже на троттлинге). */
 @font-face { font-family: "Onest-fb"; src: local("Arial"), local("Helvetica Neue"), local("sans-serif");
   size-adjust: 104%; ascent-override: 93%; descent-override: 23%; line-gap-override: 0%; }
-/* PLAYFAIR DISPLAY — дисплейный контрастный сериф (variable 400–900), кириллица+латиница */
-@font-face { font-family: "Playfair"; font-style: normal; font-weight: 400 900; font-display: swap;
-  src: url("/fonts/playfair-cyrillic.woff2") format("woff2");
+/* UNBOUNDED — дисплейный мощный геометрический гротеск (variable 200–900),
+   полная кириллица (OFL, self-host). Скелет типографики по эталону OBYS:
+   «дорого» = масштаб + сетка, шрифт нейтрально-мощный. Кириллица проверена. */
+@font-face { font-family: "Unbounded"; font-style: normal; font-weight: 200 900; font-display: swap;
+  src: url("/fonts/unbounded-cyrillic.woff2") format("woff2");
   unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
-@font-face { font-family: "Playfair"; font-style: normal; font-weight: 400 900; font-display: swap;
-  src: url("/fonts/playfair-latin.woff2") format("woff2");
+@font-face { font-family: "Unbounded"; font-style: normal; font-weight: 200 900; font-display: swap;
+  src: url("/fonts/unbounded-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-@font-face { font-family: "Playfair-fb"; src: local("Georgia"), local("Times New Roman"), local("serif");
-  size-adjust: 108%; ascent-override: 96%; descent-override: 22%; line-gap-override: 0%; }
+/* Метрико-подогнанный фолбэк дисплея (пока грузится Unbounded — системный гротеск) */
+@font-face { font-family: "Unbounded-fb"; src: local("Arial Black"), local("Arial"), local("sans-serif");
+  size-adjust: 96%; ascent-override: 100%; descent-override: 24%; line-gap-override: 0%; }
 
 :root {
-  /* Роли (§5): характер добывается масштабом/трекингом, не сменой семейства. */
-  --font-display: "Playfair", "Playfair-fb", Georgia, "Times New Roman", serif;
+  /* Роли (§5): дисплей = Unbounded (OBYS-скелет), текст = Onest, лейблы = Martian. */
+  --font-display: "Unbounded", "Unbounded-fb", system-ui, -apple-system, sans-serif;
   --font-headline: var(--font-display);
   --font-body: "Onest", "Onest-fb", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -4857,3 +4860,221 @@ body, .site {
   .pl-word-in { animation: none; transform: none; }
   .preloader { transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   РЕДИЗАЙН v4 — ЭТАЛОННЫЙ СПЕК (OBYS × CUBERTO × LOCOMOTIVE). Идёт последним.
+   Монохром (янтарь-«самодеятельность» убран), Unbounded-дисплей, инверсный
+   ритм тёмное↔светлое, краевая микро-навигация, оверлей-меню, индекс-работ
+   с hover-превью, Cuberto-пилюли с радиальной заливкой от курсора.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 0. МОНОХРОМ: снять янтарь, вернуть Ч/Б + тёплую температуру ────────────── */
+:root { --ink: #0b0a09; --paper: #f3efe6; --header-h: 84px; }
+body, .site {
+  background: radial-gradient(130% 92% at 50% -12%, #141310 0%, #0b0a09 46%), #0b0a09;
+}
+.atmos-light {
+  background:
+    radial-gradient(40% 36% at 15% 16%, rgba(244,242,238,0.05), transparent 72%),
+    radial-gradient(46% 44% at 88% 86%, rgba(244,242,238,0.035), transparent 74%);
+}
+/* все прежние янтарные акценты → нейтральный контраст/приглушённый моно */
+.hero-m-idx, .pg-hero-kicker, .hero-m-feat-n, .pg-hub-card::before,
+.pg-hub-kicker { color: var(--text-tertiary); }
+.hm-em .hm-word-in { font-style: normal; color: inherit; font-weight: inherit; }
+.btn-unfold::before, .pg-btn--primary::before { background: var(--accent); }
+.btn-unfold:hover, .pg-btn--primary:hover { color: var(--accent-ink); border-color: var(--accent); }
+.site-nav a.is-active::after { background: var(--accent); box-shadow: none; }
+.site-logo-dot { background: var(--accent); box-shadow: none; }
+.pg-hub-card:hover .pg-hub-title { color: inherit; }
+.pg-monogram, .nf-dot { color: inherit; font-style: normal; }
+.nf-dot { background: var(--accent); box-shadow: none; }
+.hero-m-wm { -webkit-text-stroke: 1px rgba(244,242,238,0.05); }
+
+/* ── 1. UNBOUNDED-ДИСПЛЕЙ: масштаб + тугой трекинг (OBYS-скелет) ────────────── */
+.hero-m-h1 {
+  font-family: var(--font-display); font-weight: 800; text-transform: none;
+  font-size: clamp(2.5rem, 1rem + 9.4vw, 8.8rem); line-height: 0.93; letter-spacing: -0.025em;
+}
+.hero-m-h1 .hm-word { margin-right: 0.24em; padding-bottom: 0.1em; margin-bottom: -0.08em; }
+.pg-hero-h1 {
+  font-family: var(--font-display); font-weight: 700; text-transform: none;
+  font-size: clamp(2.1rem, 1rem + 6.4vw, 5.4rem); line-height: 0.98; letter-spacing: -0.025em; max-width: 17ch;
+}
+.pg-h2 {
+  font-family: var(--font-display); font-weight: 700; text-transform: none;
+  font-size: clamp(1.9rem, 1rem + 4.4vw, 4.1rem); line-height: 1.0; letter-spacing: -0.02em;
+}
+.pg-h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.015em; }
+.pg-cta-title {
+  font-family: var(--font-display); font-weight: 800; text-transform: none;
+  font-size: clamp(2.3rem, 1rem + 7vw, 6.2rem); line-height: 0.95; letter-spacing: -0.03em; max-width: 14ch;
+}
+.pg-hub-title { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+.pg-insight-q { font-family: var(--font-display); font-style: normal; font-weight: 500; letter-spacing: -0.015em; }
+.pg-monogram { font-family: var(--font-display); font-weight: 800; }
+.nf-h1 { font-family: var(--font-display); font-weight: 800; text-transform: none; letter-spacing: -0.02em; }
+.site-logo { font-family: var(--font-display); font-weight: 800; font-size: 1rem; letter-spacing: 0.02em; text-indent: 0; }
+.site-menu a { font-family: var(--font-display); }
+
+/* ── 2. ИНВЕРСНЫЙ РИТМ: секции на тёплом почти-белом (OBYS-инверсия) ────────── */
+.sec--light {
+  background: var(--paper);
+  --text-primary: #17130d; --text-secondary: #55503f; --text-tertiary: #8a8272;
+  --accent: #17130d; --accent-ink: #f3efe6;
+  --border-soft: rgba(23,19,13,0.14); --border-strong: rgba(23,19,13,0.26);
+  color: #17130d;
+  position: relative; z-index: 1;
+}
+.sec--light .pg-hub-card { background: var(--paper); }
+.sec--light .pg-hub-card:hover { background: #ece7db; }
+.sec--light .pg-hub-grid,
+.sec--light .pg-steps-list, .sec--light .pg-pains-list,
+.sec--light .pg-related-grid { background: rgba(23,19,13,0.14); border-block-color: rgba(23,19,13,0.14); }
+.sec--light .idx-row { border-block-color: rgba(23,19,13,0.16); }
+.sec--dark { background: var(--ink); position: relative; z-index: 1; }
+
+/* ── 3. КРАЕВАЯ МИКРО-НАВИГАЦИЯ (OBYS/Locomotive) ──────────────────────────── */
+.site-header { height: var(--header-h); }
+.site-header-in {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--sp-4);
+  max-width: none; width: 100%; padding-inline: clamp(20px, 4vw, 56px);
+}
+.site-header-brand { justify-self: start; }
+.site-nav { justify-self: center; margin: 0; gap: clamp(18px, 2.2vw, 36px); }
+.site-nav a { font-size: 0.92rem; font-weight: 500; }
+.site-header-cta {
+  justify-self: end; background: transparent; color: var(--text-primary);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 10px 22px;
+  transition: color .3s var(--ease-power), background .3s var(--ease-power), border-color .3s;
+}
+.site-header-cta:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); box-shadow: none; }
+@media (max-width: 860px) {
+  .site-header-in { grid-template-columns: 1fr auto; }
+  .site-header-brand { justify-self: start; }
+}
+
+/* ── 4. ОВЕРЛЕЙ-МЕНЮ (Cuberto): полноэкранное, крупные пункты, stagger ──────── */
+@media (max-width: 860px) {
+  .site-menu {
+    position: fixed; inset: 0; z-index: 250; display: flex; flex-direction: column;
+    justify-content: center; gap: 2px; padding: 0 clamp(20px, 6vw, 48px);
+    background: var(--ink); border: 0;
+  }
+  .site-menu[hidden] { display: none; }
+  .site-menu nav { display: flex; flex-direction: column; gap: 0; }
+  .site-menu a {
+    font-family: var(--font-display); font-weight: 700; text-transform: none;
+    font-size: clamp(2.2rem, 11vw, 3.6rem); line-height: 1.08; letter-spacing: -0.02em;
+    color: var(--text-primary); border: 0; padding: 6px 0;
+    opacity: 0; transform: translateY(40px);
+    transition: opacity .5s var(--ease-unfold), transform .5s var(--ease-unfold);
+  }
+  .site-header.is-open .site-menu a { opacity: 1; transform: none; }
+  .site-header.is-open .site-menu a:nth-child(1){ transition-delay:.06s } .site-header.is-open .site-menu a:nth-child(2){ transition-delay:.12s }
+  .site-header.is-open .site-menu a:nth-child(3){ transition-delay:.18s } .site-header.is-open .site-menu a:nth-child(4){ transition-delay:.24s }
+  .site-header.is-open .site-menu a:nth-child(5){ transition-delay:.30s } .site-header.is-open .site-menu a:nth-child(6){ transition-delay:.36s }
+  .site-menu-cta { color: var(--accent) !important; }
+  :root:has(.site-header.is-open) { overflow: hidden; }
+}
+
+/* ── 5. ИНДЕКС-РАБОТ (OBYS/Locomotive): строки + hover-превью ───────────────── */
+.idx { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border-strong); }
+.idx-row {
+  position: relative; display: grid; align-items: center; gap: var(--sp-3);
+  grid-template-columns: 3.5ch 1fr; padding: clamp(18px, 2.4vw, 34px) 0;
+  border-bottom: 1px solid var(--border-soft); text-decoration: none; color: var(--text-primary);
+  transition: color .4s var(--ease-move);
+}
+.idx-num { font-family: var(--font-mono); font-size: var(--fs-micro); color: var(--text-tertiary); align-self: start; padding-top: 0.5em; }
+.idx-main { display: grid; gap: 6px; }
+.idx-title {
+  font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em;
+  font-size: clamp(1.5rem, 1rem + 2.4vw, 2.8rem); line-height: 1.02; transition: transform .5s var(--ease-move);
+}
+.idx-meta { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); font-family: var(--font-mono);
+  font-size: var(--fs-micro); letter-spacing: 0.06em; color: var(--text-secondary); text-transform: uppercase; }
+.idx-desc { font-size: var(--fs-0); line-height: var(--lh-body); color: var(--text-secondary); max-width: 52ch; margin: 2px 0 0; }
+.idx-arrow { position: absolute; right: 0; top: 50%; transform: translateY(-50%) translateX(-8px); opacity: 0;
+  transition: opacity .4s var(--ease-move), transform .4s var(--ease-move); font-size: 1.4rem; }
+.idx-row:hover { color: var(--accent); }
+.idx-row:hover .idx-title { transform: translateX(clamp(8px, 1.2vw, 22px)); }
+.idx-row:hover .idx-arrow { opacity: 1; transform: translateY(-50%) translateX(0); }
+/* hover-превью — выезжает справа (только там, где есть медиа) */
+.idx-media {
+  position: absolute; right: clamp(40px, 8vw, 160px); top: 50%;
+  width: clamp(160px, 20vw, 300px); aspect-ratio: 4/3; overflow: hidden; border-radius: 4px;
+  pointer-events: none; z-index: 3; opacity: 0; transform: translateY(-50%) scale(0.92) rotate(-2deg);
+  transition: opacity .45s var(--ease-unfold), transform .45s var(--ease-unfold); will-change: transform, opacity;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+}
+.idx-media img { width: 100%; height: 100%; object-fit: cover; }
+.idx-row:hover .idx-media { opacity: 1; transform: translateY(-50%) scale(1) rotate(0deg); }
+@media (hover: none) {
+  .idx-media { display: none; }
+  .idx-arrow { opacity: 1; transform: translateY(-50%); }
+}
+@media (max-width: 640px) { .idx-title { font-size: clamp(1.4rem, 6vw, 2rem); } }
+
+/* ── 6. CUBERTO-ПИЛЮЛИ: радиальная заливка от курсора + магнит ──────────────── */
+.pill {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: inline-flex; align-items: center; gap: 0.6em;
+  font-family: var(--font-body); font-size: var(--fs-0); font-weight: 600; text-decoration: none;
+  color: var(--text-primary); background: transparent; border: 1px solid var(--border-strong);
+  border-radius: 999px; padding: 0.9em 1.7em; cursor: pointer;
+  transition: color .45s var(--ease-move), border-color .45s var(--ease-move);
+}
+.pill > * { position: relative; z-index: 1; }
+.pill::before {
+  content: ""; position: absolute; z-index: 0; left: var(--mx, 50%); top: var(--my, 50%);
+  width: 0; height: 0; border-radius: 50%; background: var(--accent);
+  transform: translate(-50%, -50%); transition: width .5s var(--ease-move), height .5s var(--ease-move);
+}
+.pill:hover { color: var(--accent-ink); border-color: var(--accent); }
+.pill:hover::before { width: 260%; height: 620%; }
+.pill--solid { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pill--solid::before { background: var(--ink); }
+.sec--light .pill--solid::before { background: #2a2419; }
+.pill--solid:hover { color: var(--paper); }
+
+/* ── 7. КРУПНЫЙ ТИПОГРАФИЧЕСКИЙ CTA (Cuberto «Have an idea?») ───────────────── */
+.pg-cta { text-align: left; }
+.pg-cta-in { gap: var(--sp-5); }
+.pg-cta-actions { margin-top: var(--sp-3); }
+
+/* ── 8. LOCOMOTIVE-REVEAL: единый язык появления (маска + сдвиг + stagger) ───── */
+.js .rv { opacity: 0; transform: translateY(28px); }
+.js .rv.is-in { opacity: 1; transform: none; }
+.js .rv { transition: opacity .8s var(--ease-unfold), transform .8s var(--ease-unfold); }
+.js [data-stagger] > * { opacity: 0; transform: translateY(24px);
+  transition: opacity .7s var(--ease-unfold), transform .7s var(--ease-unfold); }
+.js [data-stagger].is-in > * { opacity: 1; transform: none; }
+.js [data-stagger].is-in > *:nth-child(2){ transition-delay:.07s } .js [data-stagger].is-in > *:nth-child(3){ transition-delay:.14s }
+.js [data-stagger].is-in > *:nth-child(4){ transition-delay:.21s } .js [data-stagger].is-in > *:nth-child(5){ transition-delay:.28s }
+.js [data-stagger].is-in > *:nth-child(6){ transition-delay:.35s }
+@media (prefers-reduced-motion: reduce) {
+  .js .rv, .js [data-stagger] > * { opacity: 1; transform: none; transition: none; }
+  .site-menu a { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── 9. МИКРО-ЛЕЙБЛ-«БРОВЬ» с номером секции (OBYS-краевые маркеры) ─────────── */
+.pg-eyebrow {
+  display: flex; align-items: center; gap: 0.8em; margin: 0 0 var(--sp-4);
+  font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: var(--tr-label);
+  text-transform: uppercase; color: var(--text-secondary);
+}
+.pg-eyebrow-n { color: var(--text-tertiary); }
+.pg-eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
+
+/* индекс-работ в светлой зоне: линии темнее, медиа-тень мягче */
+.sec--light .idx { border-top-color: var(--border-strong); }
+.sec--light .idx-media { box-shadow: 0 24px 60px rgba(23,19,13,0.22); }
+/* заголовок секции в светлой зоне — не жмётся к брови */
+.sec--light .pg-h2 { margin-top: 0; }
+
+/* инсайт-цитата крупнее в редакционной зоне */
+.pg-insight-q { font-size: clamp(1.6rem, 1rem + 2.6vw, 3rem); line-height: 1.16; max-width: 26ch; }
+
+/* тёмный бренд-финал: мягкая верхняя кромка-переход из светлой зоны */
+.sec--dark { border-top: 1px solid rgba(244,242,238,0.08); }

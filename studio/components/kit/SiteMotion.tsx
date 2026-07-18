@@ -20,6 +20,7 @@ const REVEAL_SELECTOR = [
   ".pg-hero-lead > *",
   ".hub-card",
   ".pg-hub-card",
+  ".idx-row",
   ".pg-prose > *",
   "blockquote",
   ".faq-item, .pg-faq-item",

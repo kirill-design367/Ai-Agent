@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import CookieConsent from "@/components/kit/CookieConsent";
 import Atmosphere from "@/components/kit/Atmosphere";
 import SiteMotion from "@/components/kit/SiteMotion";
+import Interactions from "@/components/kit/Interactions";
 import PageTransition from "@/components/kit/PageTransition";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationLd } from "@/lib/seo/jsonld";
@@ -40,8 +41,8 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Preload LCP-дисплея (Playfair — заголовок героя) + Onest для тела */}
-        <link rel="preload" href="/fonts/playfair-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
+        {/* Preload LCP-дисплея (Unbounded — заголовок героя) + Onest для тела */}
+        <link rel="preload" href="/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
         <link rel="preload" href="/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
       </head>
       <body>
@@ -56,6 +57,7 @@ export default function RootLayout({
         {children}
         {/* Слой движения — надстройка поверх одной структуры (§арх) */}
         <SiteMotion />
+        <Interactions />
         <PageTransition />
         <CookieConsent />
       </body>

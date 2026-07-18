@@ -18,14 +18,14 @@ export default function Cta({
         <h2 className="pg-cta-title">{title}</h2>
         <p className="pg-cta-text">{text}</p>
         <div className="pg-cta-actions">
-          <Link href="/kontakty/" className="pg-btn pg-btn--primary" data-magnetic>
-            Оставить заявку
+          <Link href="/kontakty/" className="pill pill--solid" data-magnetic>
+            <span>Оставить заявку</span>
           </Link>
-          <a href={SITE.contacts.telegram} target="_blank" rel="noopener" className="pg-btn pg-btn--ghost" data-magnetic>
-            Написать в Telegram
+          <a href={SITE.contacts.telegram} target="_blank" rel="noopener" className="pill" data-magnetic>
+            <span>Написать в Telegram</span>
           </a>
-          <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener" className="pg-btn pg-btn--ghost" data-magnetic>
-            WhatsApp
+          <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener" className="pill" data-magnetic>
+            <span>WhatsApp</span>
           </a>
         </div>
       </div>

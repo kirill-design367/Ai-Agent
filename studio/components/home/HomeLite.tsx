@@ -80,11 +80,11 @@ export default function HomeLite() {
               ))}
             </ul>
             <div className="hero-m-actions">
-              <Link href="/uslugi/" className="btn-unfold" data-magnetic>
+              <Link href="/uslugi/" className="pill pill--solid" data-magnetic>
                 <span>Услуги и цены</span>
               </Link>
-              <Link href="/kontakty/" className="btn-line" data-magnetic>
-                Обсудить проект
+              <Link href="/kontakty/" className="pill" data-magnetic>
+                <span>Обсудить проект</span>
               </Link>
             </div>
           </div>
@@ -100,42 +100,52 @@ export default function HomeLite() {
         </div>
       </section>
 
-      {/* Модель работы §2 — тихая зона */}
-      <section className="pg-insight">
-        <div className="pg-wrap">
-          <blockquote className="pg-insight-q">
-            Вы работаете напрямую с&nbsp;основателем студии. Без менеджеров и&nbsp;потери
-            информации. За&nbsp;итоговый результат отвечаю лично я.
-          </blockquote>
-        </div>
-      </section>
+      {/* ── СВЕТЛАЯ РЕДАКЦИОННАЯ ЗОНА (инверсия OBYS): манифест + индексы работ ── */}
+      <div className="sec--light">
+        {/* Модель работы §2 — тихая зона */}
+        <section className="pg-insight">
+          <div className="pg-wrap">
+            <p className="pg-eyebrow"><span className="pg-eyebrow-n">01</span> Подход</p>
+            <blockquote className="pg-insight-q">
+              Вы работаете напрямую с&nbsp;основателем студии. Без менеджеров и&nbsp;потери
+              информации. За&nbsp;итоговый результат отвечаю лично я.
+            </blockquote>
+          </div>
+        </section>
 
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <h2 className="pg-h2">Услуги</h2>
-          <HubGrid cards={services} />
-        </div>
-      </section>
+        <section className="pg-hub">
+          <div className="pg-wrap">
+            <p className="pg-eyebrow"><span className="pg-eyebrow-n">02</span> Услуги</p>
+            <h2 className="pg-h2">Что я делаю</h2>
+            <HubGrid cards={services} />
+          </div>
+        </section>
 
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <h2 className="pg-h2">Сайты под нишу</h2>
-          <HubGrid cards={niches} />
-        </div>
-      </section>
+        <section className="pg-hub">
+          <div className="pg-wrap">
+            <p className="pg-eyebrow"><span className="pg-eyebrow-n">03</span> Ниши</p>
+            <h2 className="pg-h2">Сайты под задачу бизнеса</h2>
+            <HubGrid cards={niches} />
+          </div>
+        </section>
 
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <h2 className="pg-h2">Кейсы</h2>
-          <HubGrid cards={cases} />
-        </div>
-      </section>
+        <section className="pg-hub">
+          <div className="pg-wrap">
+            <p className="pg-eyebrow"><span className="pg-eyebrow-n">04</span> Работы</p>
+            <h2 className="pg-h2">Избранные кейсы</h2>
+            <HubGrid cards={cases} />
+          </div>
+        </section>
+      </div>
 
-      <TrustBlock />
-      <Testimonials />
-      <FounderBlock />
-      <Contact />
-      <Cta title="Готовы начать?" text={`Отвечу лично, обычно в течение пары часов. ${SITE.contacts.email}`} />
+      {/* ── ТЁМНЫЙ БРЕНД-ФИНАЛ: доверие, отзывы, основатель, контакт, CTA ── */}
+      <div className="sec--dark">
+        <TrustBlock />
+        <Testimonials />
+        <FounderBlock />
+        <Contact />
+        <Cta title="Обсудим ваш проект?" text={`Отвечу лично, обычно в течение пары часов. ${SITE.contacts.email}`} />
+      </div>
     </main>
   );
 }
