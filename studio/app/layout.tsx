@@ -3,7 +3,6 @@ import CookieConsent from "@/components/kit/CookieConsent";
 import Atmosphere from "@/components/kit/Atmosphere";
 import SiteMotion from "@/components/kit/SiteMotion";
 import PageTransition from "@/components/kit/PageTransition";
-import CustomCursor from "@/components/kit/CustomCursor";
 import JsonLd from "@/components/seo/JsonLd";
 import { organizationLd } from "@/lib/seo/jsonld";
 import { SITE } from "@/lib/seo/site";
@@ -41,9 +40,9 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Preload только LCP-начертаний Onest (кириллица — заголовок, латиница — AUREA/цифры) */}
+        {/* Preload LCP-дисплея (Playfair — заголовок героя) + Onest для тела */}
+        <link rel="preload" href="/fonts/playfair-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
         <link rel="preload" href="/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
-        <link rel="preload" href="/fonts/onest-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
       </head>
       <body>
         {/* Класс .js навешивается синхронно → CSS может прятать [data-reveal]
@@ -58,7 +57,6 @@ export default function RootLayout({
         {/* Слой движения — надстройка поверх одной структуры (§арх) */}
         <SiteMotion />
         <PageTransition />
-        <CustomCursor />
         <CookieConsent />
       </body>
     </html>

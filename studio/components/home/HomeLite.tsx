@@ -51,13 +51,18 @@ export default function HomeLite() {
           играют светопятно и композиция. Заголовок = LCP из первичного HTML. */}
       <section className="hero-m theme-dark">
         <div className="hero-m-glow" aria-hidden />
+        {/* Гигантский вордмарк-водяной знак — уходит за правый край (глубина, слои) */}
+        <span className="hero-m-wm" aria-hidden>AUREA</span>
         <div className="hero-m-inner">
-          <p className="hero-m-label">{HERO.kicker}</p>
+          <p className="hero-m-label">
+            <span className="hero-m-idx">01</span>{HERO.kicker}
+          </p>
           {/* Кинетический заголовок: каждое слово выезжает из маски снизу со
-              stagger (CSS-анимация на загрузке → LCP не страдает, текст в DOM). */}
+              stagger (CSS-анимация на загрузке → LCP не страдает, текст в DOM).
+              Одно слово — контрастный италик-акцент (Playfair). */}
           <h1 className="hero-m-h1" aria-label={HERO.headline.join(" ")}>
             {HERO.headline.map((w, i) => (
-              <span className="hm-word" key={i} aria-hidden>
+              <span className={`hm-word${i === 1 ? " hm-em" : ""}`} key={i} aria-hidden>
                 <span className="hm-word-in" style={{ ["--i" as string]: i }}>
                   {w}
                 </span>{" "}

@@ -23,10 +23,19 @@
    почти ту же высоту/ширину → своп не двигает лэйаут (CLS ≈ 0 даже на троттлинге). */
 @font-face { font-family: "Onest-fb"; src: local("Arial"), local("Helvetica Neue"), local("sans-serif");
   size-adjust: 104%; ascent-override: 93%; descent-override: 23%; line-gap-override: 0%; }
+/* PLAYFAIR DISPLAY — дисплейный контрастный сериф (variable 400–900), кириллица+латиница */
+@font-face { font-family: "Playfair"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/playfair-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: "Playfair"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/playfair-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Playfair-fb"; src: local("Georgia"), local("Times New Roman"), local("serif");
+  size-adjust: 108%; ascent-override: 96%; descent-override: 22%; line-gap-override: 0%; }
 
 :root {
   /* Роли (§5): характер добывается масштабом/трекингом, не сменой семейства. */
-  --font-display: "Onest", "Onest-fb", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Playfair", "Playfair-fb", Georgia, "Times New Roman", serif;
   --font-headline: var(--font-display);
   --font-body: "Onest", "Onest-fb", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -4683,3 +4692,168 @@ body, .site { background:
 @keyframes hmScroll { 0% { transform: translateY(-100%); } 60%,100% { transform: translateY(250%); } }
 @media (max-width: 899px) { .hero-m-scroll { display: none; } }
 @media (prefers-reduced-motion: reduce) { .hero-m-scroll { animation: none; } .hero-m-scroll-line i { animation: none; opacity: 0.4; } }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   РЕДИЗАЙН v3 (2026) — РЕДАКЦИОННАЯ ДОМИНАНТА. Идёт последним слоем, задаёт
+   новый облик поверх всей базы: гигантский Playfair mixed-case, италик-акцент,
+   тёплый ЯНТАРНЫЙ свет (aurea = aurum, свет а не плоская краска), ломаная
+   φ-композиция, реальная глубина (водяные знаки + свет + grain). Жест «разворот»
+   оставлен в ОДНОМ месте — бренд-занавес прелоадера; на экранах точки больше нет.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --header-h: 76px;
+  /* ЯНТАРЬ — единственный выразительный цвет: тёплый свет бренда. Не жёлтая
+     плашка (её убрали), а люминесцентный акцент + тонкие детали. */
+  --amber: #d8a24a;
+  --amber-bright: #e6b866;
+  --amber-soft: rgba(216, 162, 74, 0.16);
+  --amber-ink: #140d03;
+  --gold: #d8a24a; /* репойнт прежнего bone-акцента → янтарь (каскадом везде) */
+  /* Дисплейный масштаб крупнее — тип доминирует над экраном */
+  --fs-9: clamp(3rem, 1rem + 11vw, 8.4rem);
+  --fs-8: clamp(2.7rem, 0.6rem + 9vw, 7.2rem);
+  --fs-7: clamp(2.2rem, 0.5rem + 7vw, 5.8rem);
+  --fs-6: clamp(2.8rem, 1rem + 7.4vw, 5.6rem);
+}
+
+/* Тёплая, НЕ плоско-чёрная база + богатые световые поля (глубина сквозь секции) */
+body, .site {
+  background:
+    radial-gradient(135% 95% at 50% -14%, #17130d 0%, #0b0a09 46%),
+    #0b0a09;
+}
+.atmos-light {
+  background:
+    radial-gradient(40% 36% at 15% 18%, rgba(216, 162, 74, 0.08), transparent 70%),
+    radial-gradient(46% 44% at 88% 84%, rgba(216, 162, 74, 0.055), transparent 72%),
+    radial-gradient(72% 56% at 50% 130%, rgba(96, 88, 128, 0.05), transparent 72%);
+}
+.atmos-grain { opacity: 0.36; }
+
+/* ─── ШАПКА: воздух сверху + лёгкий скрим для читаемости над героем ─────────── */
+.site-header {
+  background: linear-gradient(to bottom, rgba(7, 7, 8, 0.66), rgba(7, 7, 8, 0));
+  /* .is-scrolled (2 класса) специфичнее — перекроет это стеклом при скролле */
+}
+.site-nav a { font-size: 0.98rem; }
+.site-nav a.is-active::after { height: 2px; background: var(--amber); box-shadow: 0 0 10px var(--amber-soft); }
+.site-logo-dot { background: var(--amber); box-shadow: 0 0 8px var(--amber-soft); }
+/* CTA-пилюля — тихая обводка, наполняется янтарём на ховере (премиально, не крикливо) */
+.site-header-cta {
+  background: transparent; color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  transition: color .28s var(--ease-power), background .28s var(--ease-power), border-color .28s var(--ease-power);
+}
+.site-header-cta:hover { background: var(--amber); color: var(--amber-ink); border-color: var(--amber); box-shadow: 0 10px 30px rgba(216,162,74,0.18); }
+
+/* ─── HERO-МАНИФЕСТ v3 ─────────────────────────────────────────────────────── */
+.hero-m {
+  padding: calc(var(--header-h) + clamp(3rem, 9vh, 7rem)) 0 clamp(3rem, 7vh, 6rem);
+  align-items: center;
+}
+.hero-m-glow {
+  left: -10%; top: 34%;
+  background: radial-gradient(circle at center,
+    rgba(216, 162, 74, 0.12), rgba(216, 162, 74, 0.035) 36%, transparent 66%);
+}
+/* Гигантский вордмарк-водяной знак — уходит за правый край (слои, глубина) */
+.hero-m-wm {
+  position: absolute; top: 50%; right: -7vw; transform: translateY(-50%);
+  z-index: 0; pointer-events: none; user-select: none; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 700; font-style: italic;
+  font-size: min(60vh, 46vw); line-height: 0.8; letter-spacing: -0.04em;
+  color: transparent; -webkit-text-stroke: 1px rgba(216, 162, 74, 0.07);
+}
+.hero-m-inner { row-gap: clamp(1.4rem, 3vh, 2.4rem); }
+.hero-m-label { display: flex; align-items: center; gap: 0.9em; }
+.hero-m-idx { color: var(--amber); font-weight: 600; letter-spacing: 0.14em; flex: none; white-space: nowrap; }
+.hero-m-h1 {
+  text-transform: none;           /* Playfair раскрывается в mixed-case */
+  font-weight: 600;
+  font-size: var(--fs-9);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+.hero-m-h1 .hm-word { margin-right: 0.3em; padding-bottom: 0.14em; margin-bottom: -0.12em; }
+.hm-em .hm-word-in { font-style: italic; font-weight: 500; color: var(--amber); padding-right: 0.05em; }
+.hero-m-lead { color: var(--text-secondary); font-size: var(--fs-1); }
+.hero-m-feat-n { color: var(--amber); }
+
+/* ─── ПЕРЕХОД МЕЖДУ СТРАНИЦАМИ — плотное тёплое полотно (не «точка») ────────── */
+.pt {
+  background: #0b0a09;
+  clip-path: none;
+  transform: translateY(101%);
+}
+.pt::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: auto; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  opacity: 0.6;
+}
+
+/* ─── ПРЕЛОАДЕР — бренд-занавес: вордмарк выезжает, полотно уходит вверх ─────── */
+.preloader {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.5em; background: #0b0a09; z-index: 300;
+  transition: transform 0.64s var(--ease-fold);
+}
+.preloader.is-lifting { transform: translateY(-101%); }
+.pl-word { overflow: hidden; display: block; padding-bottom: 0.14em; }
+.pl-word-in {
+  display: block; font-family: var(--font-display); font-style: italic; font-weight: 600;
+  font-size: clamp(3rem, 12vw, 7rem); line-height: 1; letter-spacing: 0.01em; color: var(--text-primary);
+  transform: translateY(118%); animation: plUp 0.82s var(--ease-unfold) forwards 0.1s;
+}
+.pl-word--sub .pl-word-in--sub {
+  font-family: var(--font-mono); font-style: normal; font-weight: 500;
+  font-size: var(--fs-micro); letter-spacing: var(--tr-label); text-transform: uppercase;
+  color: var(--amber); animation-delay: 0.34s;
+}
+@keyframes plUp { to { transform: translateY(0); } }
+
+/* ─── ВНУТРЕННИЕ СТРАНИЦЫ: крупный редакционный тип + янтарные акценты ──────── */
+.pg-hero-kicker { color: var(--amber); }
+.pg-hero-h1 {
+  text-transform: none; font-weight: 600;
+  font-size: var(--fs-6); line-height: 1.0; max-width: 15ch;
+}
+.pg-h2 { font-weight: 600; font-size: var(--fs-5); text-transform: none; max-width: 22ch; }
+.pg-cta-title { font-weight: 600; font-size: var(--fs-6); }
+
+/* Крупная цитата-инсайт — италик Playfair, редакционно */
+.pg-insight-q { font-style: italic; font-weight: 400; font-size: var(--fs-4); line-height: 1.24; max-width: 22ch; }
+
+/* Кнопки — единый бренд-жест: заливка тёплым ЯНТАРЁМ на ховере */
+.btn-unfold::before, .pg-btn--primary::before { background: var(--amber); }
+.btn-unfold:hover, .pg-btn--primary:hover { color: var(--amber-ink); border-color: var(--amber); }
+
+/* ХАБ/ИНДЕКС РАБОТ — редакционная нумерация (CSS-счётчик) + янтарь на ховере */
+.pg-hub-grid { counter-reset: hub; }
+.pg-hub-card { counter-increment: hub; }
+.pg-hub-card::before {
+  content: counter(hub, decimal-leading-zero);
+  position: absolute; top: var(--sp-4); right: var(--sp-4);
+  font-family: var(--font-mono); font-size: var(--fs-micro); letter-spacing: 0.1em;
+  color: var(--amber); opacity: 0.7;
+}
+.pg-hub-card:hover { background: #16110a; }
+.pg-hub-card:hover .pg-hub-title { color: var(--amber); }
+.pg-hub-card:hover::before { opacity: 1; }
+
+/* Основатель — монограмма как крупный янтарный италик-знак */
+.pg-monogram { color: var(--amber); font-style: italic; }
+
+/* 404 — точка статична (жест «разворота» живёт только в прелоадере) */
+.nf-dot { animation: none; background: var(--amber); box-shadow: 0 0 0.7em 0.06em rgba(216,162,74,0.55); }
+.nf-h1 { text-transform: none; font-weight: 600; }
+
+/* Мобайл: водяной знак прячем — держим чистую композицию */
+@media (max-width: 899px) {
+  .hero-m-wm { display: none; }
+  .hero-m-h1 .hm-word { margin-right: 0.26em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-word-in { animation: none; transform: none; }
+  .preloader { transition: none; }
+}
