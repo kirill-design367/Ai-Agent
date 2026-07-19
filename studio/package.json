@@ -16,7 +16,13 @@
   },
   "dependencies": {
     "@fontsource-variable/onest": "^5.2.11",
+    "@fontsource-variable/playfair-display": "^5.2.8",
+    "@fontsource-variable/unbounded": "^5.2.8",
+    "@fontsource/anton": "^5.2.7",
     "@fontsource/martian-mono": "^5.2.7",
+    "@fontsource/oswald": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "@fontsource/unbounded": "^5.2.8",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.0.0",
     "@react-three/fiber": "^9.0.0",

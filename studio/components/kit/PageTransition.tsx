@@ -4,78 +4,65 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 /*
-  ПЕРЕХОД МЕЖДУ СТРАНИЦАМИ (§3) — часть композиции, не перезагрузка. Концепция
-  «разворот из точки»: при уходе оверлей сворачивается ИЗ точки в полноэкранный
-  свет (fold), после навигации — обратно В точку (unfold), открывая новую страницу.
-  Клиентская навигация Next (router.push) — shell не перезагружается.
-  reduce-motion → не вмешиваемся, обычная мгновенная навигация.
+  ПЕРЕХОД МЕЖДУ СТРАНИЦАМИ (§3) — тёплый занавес, а не «точка» (§правки). Один жест
+  на весь сайт: при уходе панель накрывает снизу, после навигации уходит вверх,
+  открывая новую страницу. Клиентская навигация Next. reduce-motion → без вмешательства.
 */
-const EASE = "cubic-bezier(0.65, 0, 0.35, 1)"; // aurea-move
+const EASE = "cubic-bezier(0.76, 0, 0.24, 1)";
 const reduceMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export default function PageTransition() {
   const overlay = useRef<HTMLDivElement>(null);
+  const first = useRef(true);
   const pathname = usePathname();
   const router = useRouter();
 
-  // Вход: оверлей сворачивается в точку, открывая новую страницу
+  // Вход: панель (лежит внизу) уходит вверх, открывая новую страницу
   useEffect(() => {
     const el = overlay.current;
     if (!el) return;
-    if (reduceMotion()) {
-      el.style.clipPath = "circle(0% at 50% 50%)";
+    if (first.current) {
+      first.current = false; // на первой загрузке ничего не играем
       return;
     }
-    el.style.pointerEvents = "none";
+    if (reduceMotion()) return;
+    el.style.transform = "translateY(0)";
     el.animate(
-      [
-        { clipPath: "circle(150% at 50% 50%)" },
-        { clipPath: "circle(0% at 50% 50%)" },
-      ],
-      { duration: 660, easing: EASE, fill: "forwards" }
-    );
+      [{ transform: "translateY(0)" }, { transform: "translateY(-101%)" }],
+      { duration: 620, easing: EASE, fill: "forwards" }
+    ).finished.then(() => {
+      el.style.transform = "translateY(101%)"; // сброс вниз для следующего раза
+    });
   }, [pathname]);
 
-  // Уход: перехват внутренних ссылок → fold → навигация
+  // Уход: перехват внутренних ссылок → занавес снизу закрывает → навигация
   useEffect(() => {
     if (reduceMotion()) return;
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as HTMLElement | null)?.closest("a");
-      if (!a) return;
-      const href = a.getAttribute("href");
+      const href = a?.getAttribute("href");
       if (
-        !href ||
-        a.target === "_blank" ||
-        a.hasAttribute("download") ||
-        href.startsWith("http") ||
-        href.startsWith("#") ||
-        href.startsWith("mailto:") ||
-        href.startsWith("tel:")
+        !a || !href || a.target === "_blank" || a.hasAttribute("download") ||
+        href.startsWith("http") || href.startsWith("#") ||
+        href.startsWith("mailto:") || href.startsWith("tel:")
       )
         return;
       const url = new URL(href, window.location.href);
       if (url.origin !== window.location.origin) return;
-      if (url.pathname === window.location.pathname) return; // та же страница
+      if (url.pathname === window.location.pathname) return;
 
       e.preventDefault();
       const el = overlay.current;
-      if (!el) {
-        router.push(href);
-        return;
-      }
-      el.style.pointerEvents = "auto";
-      const anim = el.animate(
-        [
-          { clipPath: "circle(0% at 50% 50%)" },
-          { clipPath: "circle(150% at 50% 50%)" },
-        ],
+      if (!el) { router.push(href); return; }
+      el.style.transform = "translateY(101%)";
+      el.animate(
+        [{ transform: "translateY(101%)" }, { transform: "translateY(0)" }],
         { duration: 560, easing: EASE, fill: "forwards" }
-      );
-      anim.finished.then(() => router.push(href)).catch(() => router.push(href));
+      ).finished.then(() => router.push(href)).catch(() => router.push(href));
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);

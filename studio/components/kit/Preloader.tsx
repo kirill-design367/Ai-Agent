@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 
 /*
-  ПРЕЛОАДЕР — бренд-момент «разворот из точки» (§1.4). Точка тёплого света в центре
-  чёрного разворачивается и открывает страницу. ТОЛЬКО главная, ТОЛЬКО первый визит
-  за сессию (sessionStorage). Клиентский — в SSR-HTML его нет, поэтому боты и
-  Lighthouse-lab получают страницу без него, а LCP-текст под оверлеем уже отрисован
-  (цена для LCP ≈ 0). reduce-motion → не показываем вовсе.
+  ПРЕЛОАДЕР — бренд-занавес (§1.4). Тёмное полотно, из-под обреза выезжает вордмарк
+  AUREA, затем полотно уходит вверх, открывая страницу. Это ЕДИНСТВЕННОЕ место
+  фирменного жеста «разворот» — на самих экранах его больше нет. ТОЛЬКО главная,
+  ТОЛЬКО первый визит за сессию (sessionStorage). Клиентский — в SSR-HTML его нет,
+  поэтому боты и Lighthouse-lab получают страницу без него, а LCP-текст под
+  полотном уже отрисован (цена для LCP ≈ 0). reduce-motion → не показываем.
 */
 export default function Preloader() {
   const [show, setShow] = useState(false);
@@ -22,36 +23,28 @@ export default function Preloader() {
     document.documentElement.dataset.preloading = "1";
 
     const el = root.current;
-    let raf = 0;
-    const t0 = performance.now();
-    const DUR = 1200;
-    const tick = (t: number) => {
-      const p = Math.min(1, (t - t0) / DUR);
-      // ease-out «разворот»: точка → круг света → уходит
-      const e = 1 - Math.pow(1 - p, 3);
-      if (el) {
-        const dot = el.querySelector<HTMLElement>(".pl-dot");
-        if (dot) {
-          const scale = 0.06 + e * 26; // из точки в свет
-          dot.style.transform = `translate(-50%,-50%) scale(${scale})`;
-          dot.style.opacity = String(p < 0.7 ? 1 : 1 - (p - 0.7) / 0.3);
-        }
-        el.style.opacity = String(p < 0.82 ? 1 : 1 - (p - 0.82) / 0.18);
-      }
-      if (p < 1) raf = requestAnimationFrame(tick);
-      else {
-        delete document.documentElement.dataset.preloading;
-        setShow(false);
-      }
+    // тайминги совпадают с CSS-анимацией: вордмарк выезжает → полотно уходит вверх
+    const liftAt = window.setTimeout(() => el?.classList.add("is-lifting"), 920);
+    const doneAt = window.setTimeout(() => {
+      delete document.documentElement.dataset.preloading;
+      setShow(false);
+    }, 1560);
+
+    return () => {
+      window.clearTimeout(liftAt);
+      window.clearTimeout(doneAt);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
   }, []);
 
   if (!show) return null;
   return (
     <div ref={root} className="preloader" aria-hidden>
-      <span className="pl-dot" />
+      <span className="pl-word">
+        <span className="pl-word-in">AUREA</span>
+      </span>
+      <span className="pl-word pl-word--sub">
+        <span className="pl-word-in pl-word-in--sub">от точки до шедевра</span>
+      </span>
     </div>
   );
 }

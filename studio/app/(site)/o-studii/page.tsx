@@ -58,21 +58,23 @@ export default function OStudii() {
         ]}
       />
 
-      <section className="pg-steps" style={{ paddingTop: 0 }}>
-        <div className="pg-wrap">
-          <h2 className="pg-h2">Принципы</h2>
-          <div className="pg-trust-grid">
-            {PRINCIPLES.map((p, i) => (
-              <Reveal className="pg-trust-card" key={i} delay={i * 40}>
-                <h3 className="pg-h3">{p.t}</h3>
-                <p>{p.d}</p>
-              </Reveal>
-            ))}
+      <div className="sec--light">
+        <section className="pg-steps" style={{ paddingTop: 0 }}>
+          <div className="pg-wrap">
+            <h2 className="pg-h2">Принципы</h2>
+            <div className="pg-trust-grid">
+              {PRINCIPLES.map((p, i) => (
+                <Reveal className="pg-trust-card" key={i} delay={i * 40}>
+                  <h3 className="pg-h3">{p.t}</h3>
+                  <p>{p.d}</p>
+                </Reveal>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <TrustBlock heading="Что это даёт вам" />
+        <TrustBlock heading="Что это даёт вам" />
+      </div>
 
       <RelatedLinks
         heading="Дальше"

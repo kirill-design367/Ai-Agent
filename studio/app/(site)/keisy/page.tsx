@@ -50,11 +50,13 @@ export default function KeisyHub() {
           "Для концептов показываем технические показатели и дизайн-решения — то, что можно проверить.",
         ]}
       />
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <HubGrid cards={cards} />
-        </div>
-      </section>
+      <div className="sec--light">
+        <section className="pg-hub">
+          <div className="pg-wrap">
+            <HubGrid cards={cards} />
+          </div>
+        </section>
+      </div>
       <Cta />
     </>
   );

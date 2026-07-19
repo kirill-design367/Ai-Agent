@@ -46,11 +46,13 @@ export default function UslugiHub() {
           "Каждая цена «от» сопровождается составом и списком того, что влияет на итог. Никаких голых цифр.",
         ]}
       />
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <HubGrid cards={cards} />
-        </div>
-      </section>
+      <div className="sec--light">
+        <section className="pg-hub">
+          <div className="pg-wrap">
+            <HubGrid cards={cards} />
+          </div>
+        </section>
+      </div>
       <FounderBlock />
       <Cta />
     </>
