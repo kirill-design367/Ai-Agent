@@ -132,6 +132,9 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-header-brand { color: inherit; }
 .site-header-brand.is-hidden { opacity: 0; pointer-events: none; }
 .site-nav { display: none; }
+.site-nav-l { position: relative; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
+.site-nav-l::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
+.site-nav-l:hover::after { transform: scaleX(1); }
 .site-header-cta { margin-left: auto; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.01em; position: relative; padding: 6px 0; }
 .site-header-cta::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
 .site-header-cta:hover::after { transform: scaleX(1); }
@@ -141,6 +144,15 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-header.is-open .site-burger span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
 .site-header.is-open .site-burger span:nth-child(2) { opacity: 0; }
 .site-header.is-open .site-burger span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* Десктоп: текст-табы по центру, бургера нет (реф MONOLOG). */
+@media (min-width: 881px) {
+  .site-header-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+  .site-header-brand { justify-self: start; }
+  .site-nav { display: flex; justify-self: center; gap: clamp(1rem, 2vw, 2.4rem); }
+  .site-header-cta { justify-self: end; margin-left: 0; }
+  .site-burger { display: none; }
+}
 
 /* ── ПОЛНОЭКРАННОЕ ОВЕРЛЕЙ-МЕНЮ — только слова ── */
 .site-menu { position: fixed; inset: 0; z-index: 190; background: var(--ink); color: var(--paper);
@@ -504,11 +516,26 @@ textarea.field { resize: vertical; min-height: 4em; }
 /* V1 «Плакат» — капсом (по спеку) */
 .hx--poster .hx-title { text-transform: uppercase; }
 
-/* ── V4 «Частицы» — AUREA из макрочастиц (референс владельца) ── */
-.hx4 { display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 100svh;
-  padding-top: calc(var(--header-h) + 2vh); padding-bottom: 6vh; }
-.hx4-top { font-size: clamp(0.9rem, 1.4vw, 1.3rem); letter-spacing: 0.22em; text-transform: uppercase; color: var(--fg-2); font-weight: 500; }
-.ph-wrap { width: 100%; flex: 1; min-height: 340px; display: flex; align-items: center; }
-.ph-wrap canvas { width: 100%; height: 100%; display: block; }
-.hx4-bottom { font-size: 0.9rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg-2); font-weight: 500; }
+/* ── HERO ФИНАЛ — манифест по центру + AUREA из частиц край-в-край ──
+   Композиция: манифест центрируется в верхней зоне; частицы — абсолютной полосой
+   у нижней кромки (высота полосы задаёт кегль слова: слово упирается в низ и
+   срезается краем экрана). --ph-band — высота полосы (десктоп/мобайл). */
+.hxf { position: relative; justify-content: center; align-items: stretch;
+  padding: var(--header-h) 0 var(--ph-band); overflow: clip; --ph-band: 58vh; }
+.hxf-manifest { text-align: center; max-width: 46rem; margin: 0 auto; padding-inline: var(--gutter); }
+.hxf-lead { font-family: var(--font-body); font-weight: 500; text-transform: none;
+  font-size: clamp(1.25rem, 0.9rem + 1.9vw, 2.1rem); line-height: 1.18; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
+.hxf-sub { margin: clamp(0.9rem, 2.4vh, 1.5rem) auto 0; max-width: 34rem;
+  font-size: clamp(0.95rem, 0.86rem + 0.42vw, 1.12rem); line-height: 1.56; letter-spacing: 0.018em; color: var(--fg-2); text-wrap: balance; }
+
+/* частицы: полоса у нижней кромки, слово срезано низом экрана */
+.ph { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ph-band); }
+.ph canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ph-fallback { position: absolute; left: 50%; bottom: -0.07em; transform: translateX(-50%); margin: 0;
+  font-family: var(--font-display); font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em;
+  font-size: min(46vw, calc(var(--ph-band) * 1.24)); line-height: 0.72; color: var(--ink); white-space: nowrap; transition: opacity .5s var(--ease); }
+.ph.is-live .ph-fallback { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .ph-fallback { transition: none; } }
+@media (max-width: 880px) { .hxf { --ph-band: 23vh; } }
+
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

@@ -3,22 +3,54 @@
 import { useEffect, useRef } from "react";
 
 /*
-  «AUREA ИЗ МАКРОЧАСТИЦ» (по референсу): слово набрано серифом, левая часть —
-  литая с зерном, правая распадается в облако частиц-брызг, которое едва заметно
-  дрейфует (невесомость). Чистый canvas 2D, без библиотек:
-  1) слово → оффскрин → пикселы сэмплируются сеткой;
-  2) вероятность распада растёт слева направо (smoothstep + шум) —
-     «целые» пикселы запекаются в статичную подложку (зерно из джиттера),
-     «распавшиеся» становятся частицами со смещением вправо-вверх;
-  3) rAF-дрейф: sin/cos с индивидуальной фазой, амплитуда 1.5–3px, период 6–12с.
-  reduce-motion → статичный кадр. Мобайл — реже сетка (меньше частиц).
+  «AUREA ИЗ ЧАСТИЦ» — фирменный атом студии: «от точки до шедевра».
+  Слово набирается Druk-ом в оффскрин-канвас, пикселы читаются, и на каждый
+  «зажжённый» пиксель рождается частица-ТОЧКА (круг), которая помнит свой дом.
+
+  Физика в цикле (пул переиспользуется, частицы не создаются каждый кадр):
+  1) SPRING — точка тянется к дому (hx,hy) с инерцией (ease-out возврат);
+  2) BREATHING — постоянный броуновский микродрейф (гипнотично даже в покое);
+  3) CURSOR FORCE FIELD — курсор расталкивает точки в радиусе, они плавно
+     возвращаются домой (главный awwwards-момент);
+  4) ENTRY — на загрузке точки собираются из одной точки экрана в слово ~1.4s.
+
+  Размер шрифта берётся из РЕАЛЬНЫХ метрик глифов (не из догадок про cap-height):
+  fs = min(по ширине, по высоте) → слово край-в-край и упирается в низ канваса,
+  низ букв срезан нижней кромкой экрана. Пул прореживается равномерно до бюджета
+  (иначе бюджет тратится на верхние ряды и низ слова пустеет).
+
+  Градиент плотности: густо слева → редкая летящая пыль справа (без видимой
+  границы). Глубина: мелкие точки чуть медленнее крупных (параллакс). Ч/б: чёрные
+  точки на белом, серая вариация для мелкой пыли (воздушная перспектива). Мобайл —
+  меньше точек, без реакции на курсор. reduce-motion — точки застыли в собранном
+  слове. Только круглые точки.
 */
-type P = { x: number; y: number; s: number; ph: number; sp: number; ax: number; ay: number };
+type P = {
+  hx: number; hy: number;
+  x: number; y: number;
+  vx: number; vy: number;
+  si: number;
+  ph: number; sp: number;
+  ax: number; ay: number;
+};
 
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
 };
+
+// Пул готовых спрайтов-кружков [радиус, цвет]. Мелкая пыль — серая (перспектива),
+// крупные ядра — чистый чёрный. Рисуем один раз, в цикле только drawImage.
+const SPR: [number, string][] = [
+  [0.7, "#8f8f8f"],
+  [0.9, "#6f6f6f"],
+  [1.1, "#3d3d3d"],
+  [1.4, "#0b0b0b"],
+  [1.8, "#0b0b0b"],
+  [2.3, "#0b0b0b"],
+  [2.9, "#0b0b0b"],
+  [3.5, "#0b0b0b"],
+];
 
 export default function ParticleHero({ word = "AUREA" }: { word?: string }) {
   const wrap = useRef<HTMLDivElement>(null);
@@ -28,133 +60,213 @@ export default function ParticleHero({ word = "AUREA" }: { word?: string }) {
     const el = wrap.current, canvas = cnv.current;
     if (!el || !canvas) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarse = window.matchMedia("(hover: none)").matches;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let raf = 0;
+    let raf = 0, t0 = 0;
     let particles: P[] = [];
-    let soft: P[] = [];
-    let base: HTMLCanvasElement | null = null;
+    let sprites: { c: HTMLCanvasElement; r: number }[] = [];
     let W = 0, H = 0, dpr = 1;
+    let cx = 0, cy = 0;
+    let mx = -9999, my = -9999;
+    const R = 130, R2 = R * R, FORCE = 2.8;
+
+    const makeSprites = () => {
+      sprites = SPR.map(([r, color]) => {
+        const s = Math.ceil(r * 2 + 2);
+        const c = document.createElement("canvas");
+        c.width = s * dpr; c.height = s * dpr;
+        const g = c.getContext("2d")!;
+        g.scale(dpr, dpr);
+        g.fillStyle = color;
+        g.beginPath();
+        g.arc(s / 2, s / 2, r, 0, Math.PI * 2);
+        g.fill();
+        return { c, r };
+      });
+    };
 
     const build = () => {
-      const r = el.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
-      W = Math.max(320, Math.floor(r.width));
-      H = Math.max(300, Math.floor(r.height));
+      W = Math.max(320, Math.floor(rect.width));
+      H = Math.max(220, Math.floor(rect.height));
       canvas.width = W * dpr; canvas.height = H * dpr;
       canvas.style.width = W + "px"; canvas.style.height = H + "px";
+      makeSprites();
 
-      // ── 1. слово в оффскрин (сериф, как на референсе; латиница) ──
       const off = document.createElement("canvas");
       off.width = W; off.height = H;
       const o = off.getContext("2d")!;
-      let fs = Math.floor(W / (word.length * 0.62));
-      o.font = `700 ${fs}px Georgia, "Times New Roman", serif`;
-      const tw = o.measureText(word).width;
-      fs = Math.floor(fs * Math.min(1, (W * 0.78) / tw));
-      o.font = `700 ${fs}px Georgia, "Times New Roman", serif`;
-      o.textBaseline = "middle"; o.textAlign = "left";
-      const w2 = o.measureText(word).width;
-      const x0 = (W - w2 * 1.22) / 2;           // сдвиг влево: облаку нужен воздух справа
-      const y0 = H * 0.46;
+
+      // ── размер из реальных метрик глифов ──
+      const ref = 100;
+      o.font = `900 ${ref}px Druk, "Arial Black", sans-serif`;
+      o.textAlign = "center"; o.textBaseline = "alphabetic";
+      const m = o.measureText(word);
+      const wR = m.width / ref;                                   // ширина / fs
+      const aR = (m.actualBoundingBoxAscent || ref * 0.72) / ref; // cap-height / fs
+      const dR = (m.actualBoundingBoxDescent || 0) / ref;
+      const fsW = (W * 1.04) / wR;          // почти во всю ширину (край-в-край)
+      const fsH = (H * 0.99) / aR;          // почти во всю высоту канваса
+      const fs = Math.max(24, Math.min(fsW, fsH));
+      // базовая линия ниже низа канваса → низ букв уходит за край экрана
+      const baseline = H + fs * 0.055;
+      const ascent = aR * fs, descent = dR * fs;
+      const topY = baseline - ascent;       // верх инкованных глифов
+      const wpx = wR * fs;                   // ширина слова в px
+      const x0 = (W - wpx) / 2;              // левый край слова
+
+      o.font = `900 ${fs}px Druk, "Arial Black", sans-serif`;
+      o.textAlign = "center"; o.textBaseline = "alphabetic";
       o.fillStyle = "#000";
-      o.fillText(word, x0, y0);
+      o.fillText(word, W / 2, baseline);
       const img = o.getImageData(0, 0, W, H).data;
 
-      // ── 2. сэмплирование: подложка + частицы ──
-      const coarse = window.matchMedia("(hover: none)").matches;
-      const step = Math.max(2, Math.round(fs / (coarse ? 70 : 110)));
-      const maxScatter = w2 * 0.36;
-      base = document.createElement("canvas");
-      base.width = W * dpr; base.height = H * dpr;
-      const b = base.getContext("2d")!;
-      b.scale(dpr, dpr);
-      particles = []; soft = [];
-      const budget = coarse ? 3500 : 8000;
-
+      // ── 1. кандидаты: зажжённые пикселы, прорежены градиентом плотности ──
+      const step = coarse ? 3 : 2;
+      const budget = coarse ? 4200 : 13000;
+      cx = W / 2; cy = topY + ascent * 0.5;
+      const cand: number[] = []; // упаковано парами x,y
       for (let y = 0; y < H; y += step) {
         for (let x = 0; x < W; x += step) {
-          if (img[(y * W + x) * 4 + 3] < 140) continue;
-          const nx = (x - x0) / w2; // 0..1 по слову
-          const p = smooth(0.52, 1.02, nx + (Math.random() - 0.5) * 0.08);
-          if (Math.random() > p * 0.88) {  // даже в зоне распада часть пикселов остаётся — буква-«призрак» читается
-            // целый пиксел → подложка с зерном (джиттер + пропуски у кромки)
-            if (Math.random() < 0.05 + p * 0.42) continue;
-            b.globalAlpha = 0.72 + Math.random() * 0.28;
-            b.fillStyle = "#0b0b0b";
-            b.fillRect(x + (Math.random() - 0.5) * 1.2, y + (Math.random() - 0.5) * 1.2, step + 0.5, step + 0.5);
-          } else if (particles.length < budget) {
-            // распавшийся → частица, смещение вправо-вверх, дальше = сильнее
-            const d = p * p * (0.15 + Math.random() * 0.85) * maxScatter;
-            const dx = d * (0.55 + Math.random() * 0.6);
-            const dy = -d * (Math.random() - 0.32) * 0.95;
-            const s = Math.random() < 0.12 ? 2 + Math.random() * 3.2 : 1 + Math.random() * 1.6;
-            const pt: P = {
-              x: x + dx, y: y + dy, s,
-              ph: Math.random() * Math.PI * 2,
-              sp: 0.00035 + Math.random() * 0.00055,   // период ~6–12с
-              ax: 1.2 + Math.random() * 1.8,           // амплитуда 1.2–3px
-              ay: 1.0 + Math.random() * 1.6,
-            };
-            (Math.random() < 0.72 ? particles : soft).push(pt);
-          }
+          if (img[(y * W + x) * 4 + 3] < 128) continue;
+          const nx = wpx > 0 ? (x - x0) / wpx : x / W;           // 0..1 вдоль слова
+          const keep = 1 - 0.62 * smooth(0.28, 1.04, nx);        // слева густо, справа пыль
+          if (Math.random() > keep) continue;
+          cand.push(x, y);
         }
       }
-      // крупные кляксы в гуще облака (как на референсе)
-      const cx = x0 + w2 * 0.92, cy = y0 - fs * 0.1;
-      for (let i = 0; i < (coarse ? 40 : 90); i++) {
-        const a = Math.random() * Math.PI * 2;
-        const rr = Math.pow(Math.random(), 0.6) * maxScatter * 0.62;
-        soft.push({
-          x: cx + Math.cos(a) * rr * 1.15, y: cy + Math.sin(a) * rr * 0.8,
-          s: 2.5 + Math.random() * 4.5, ph: Math.random() * Math.PI * 2,
-          sp: 0.0003 + Math.random() * 0.0004, ax: 1.5 + Math.random() * 2, ay: 1.2 + Math.random() * 1.8,
+
+      // ── 2. равномерное прореживание до бюджета (сохраняет градиент) ──
+      const total = cand.length / 2;
+      const take = Math.min(budget, total);
+      const prob = total > 0 ? take / total : 0;
+      particles = [];
+      for (let i = 0; i < total; i++) {
+        if (Math.random() > prob) continue;
+        const x = cand[i * 2], y = cand[i * 2 + 1];
+        const big = Math.random();
+        let si: number;
+        if (big < 0.05) si = 5 + Math.floor(Math.random() * 3);
+        else if (big < 0.26) si = 3 + Math.floor(Math.random() * 2);
+        else si = Math.floor(Math.random() * 3);
+        particles.push({
+          hx: x, hy: y,
+          x: cx + (Math.random() - 0.5) * 46,
+          y: cy + (Math.random() - 0.5) * 46,
+          vx: 0, vy: 0, si,
+          ph: Math.random() * Math.PI * 2,
+          sp: 0.0006 + Math.random() * 0.0009,
+          ax: 0.8 + Math.random() * 1.6,
+          ay: 0.7 + Math.random() * 1.4,
         });
       }
+      // добить до бюджета, если prob округлил вниз
+      let i = 0;
+      while (particles.length < take && total > 0) {
+        const x = cand[(i % total) * 2], y = cand[(i % total) * 2 + 1];
+        particles.push({
+          hx: x, hy: y, x: cx, y: cy, vx: 0, vy: 0,
+          si: Math.floor(Math.random() * 3),
+          ph: Math.random() * Math.PI * 2,
+          sp: 0.0006 + Math.random() * 0.0009,
+          ax: 0.8 + Math.random() * 1.6, ay: 0.7 + Math.random() * 1.4,
+        });
+        i++;
+      }
+
+      if (reduce) drawStatic();
     };
 
-    const draw = (t: number) => {
+    const drawStatic = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      if (base) ctx.drawImage(base, 0, 0, W, H);
-      ctx.fillStyle = "#0b0b0b";
-      ctx.globalAlpha = 0.95;
       for (const p of particles) {
-        const dx = Math.sin(t * p.sp + p.ph) * p.ax;
-        const dy = Math.cos(t * p.sp * 0.83 + p.ph * 1.31) * p.ay;
-        ctx.fillRect(p.x + dx, p.y + dy, p.s, p.s);
+        const s = sprites[p.si];
+        ctx.drawImage(s.c, p.hx - s.r, p.hy - s.r, s.r * 2, s.r * 2);
       }
-      ctx.globalAlpha = 0.5;
-      for (const p of soft) {
-        const dx = Math.sin(t * p.sp + p.ph) * p.ax;
-        const dy = Math.cos(t * p.sp * 0.83 + p.ph * 1.31) * p.ay;
-        ctx.fillRect(p.x + dx, p.y + dy, p.s, p.s);
-      }
-      ctx.globalAlpha = 1;
     };
 
-    const loop = (t: number) => { draw(t); raf = requestAnimationFrame(loop); };
+    const frame = (t: number) => {
+      if (!t0) t0 = t;
+      const elapsed = (t - t0) / 1000;
+      const enter = smooth(0, 1.4, elapsed);
+      const k = 0.10 - 0.072 * enter;
+      const damp = 0.82 + 0.06 * enter;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
 
-    build();
-    if (reduce) draw(0);
-    else raf = requestAnimationFrame(loop);
+      for (const p of particles) {
+        const depth = 0.6 + p.si * 0.06;
+        const bx = Math.sin(t * p.sp + p.ph) * p.ax;
+        const by = Math.cos(t * p.sp * 0.83 + p.ph * 1.3) * p.ay;
+        const tx = p.hx + bx, ty = p.hy + by;
+        p.vx += (tx - p.x) * k * depth;
+        p.vy += (ty - p.y) * k * depth;
+        if (!coarse) {
+          const ddx = p.x - mx, ddy = p.y - my;
+          const d2 = ddx * ddx + ddy * ddy;
+          if (d2 < R2 && d2 > 0.01) {
+            const d = Math.sqrt(d2);
+            const f = (1 - d / R) * FORCE;
+            p.vx += (ddx / d) * f;
+            p.vy += (ddy / d) * f;
+          }
+        }
+        p.vx *= damp; p.vy *= damp;
+        p.x += p.vx; p.y += p.vy;
+        const s = sprites[p.si];
+        ctx.drawImage(s.c, p.x - s.r, p.y - s.r, s.r * 2, s.r * 2);
+      }
+      raf = requestAnimationFrame(frame);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      const r = canvas.getBoundingClientRect();
+      mx = e.clientX - r.left; my = e.clientY - r.top;
+    };
+    const onLeave = () => { mx = -9999; my = -9999; };
+
+    let cancelled = false;
+    const start = () => {
+      if (cancelled) return;
+      build();
+      el.classList.add("is-live");
+      if (reduce) { drawStatic(); return; }
+      if (!coarse) {
+        window.addEventListener("pointermove", onMove, { passive: true });
+        window.addEventListener("pointerdown", onMove, { passive: true });
+        canvas.addEventListener("pointerleave", onLeave);
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load("900 200px Druk").then(start).catch(start);
+    } else start();
 
     let rt = 0;
     const onResize = () => {
       window.clearTimeout(rt);
-      rt = window.setTimeout(() => { build(); if (reduce) draw(0); }, 200);
+      rt = window.setTimeout(() => { t0 = 0; build(); if (reduce) drawStatic(); }, 200);
     };
     window.addEventListener("resize", onResize);
+
     return () => {
+      cancelled = true;
       cancelAnimationFrame(raf);
       window.clearTimeout(rt);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onMove);
+      canvas.removeEventListener("pointerleave", onLeave);
     };
   }, [word]);
 
   return (
-    <div ref={wrap} className="ph-wrap" aria-hidden>
+    <div ref={wrap} className="ph" aria-hidden>
+      <span className="ph-fallback">{word}</span>
       <canvas ref={cnv} />
     </div>
   );

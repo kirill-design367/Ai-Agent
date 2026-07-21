@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { SITE } from "@/lib/seo/site";
 
 /*
-  ШАПКА — узкая верхняя панель (реф KOTA): лого слева, «Обсудить» + бургер справа.
-  mix-blend-difference делает панель авто-контрастной на любом ч/б фоне.
-  Меню — полноэкранный оверлей, только слова (реф 4.5): гигантские пункты со
-  stagger-появлением, живой hover (курсив/сдвиг), внизу мелко контакты.
-  Работает одинаково на десктопе и мобиле.
+  ШАПКА — узкая верхняя панель, максимум воздуха (реф MONOLOG):
+  • лого AUREA слева;
+  • ЦЕНТР — текст-табы без рамок/плашек (hover = вычерчиваемое подчёркивание);
+  • справа — «Обсудить проект», единственная плашка панели.
+  Десктоп: табы видимы, бургера НЕТ. Мобайл (≤880): табы прячутся в бургер +
+  полноэкранный оверлей (только слова). mix-blend-difference → авто-контраст ч/б.
 */
 const NAV = [
   { href: "/uslugi/", label: "Услуги" },
@@ -43,6 +44,14 @@ export default function SiteHeader() {
           <Link href="/" className="site-header-brand" aria-label="AUREA — на главную">
             <Logo />
           </Link>
+
+          <nav className="site-nav" aria-label="Основная навигация">
+            {NAV.map((n) => (
+              <Link key={n.href} href={n.href} className="site-nav-l">
+                {n.label}
+              </Link>
+            ))}
+          </nav>
 
           <Link href="/kontakty/" className="site-header-cta" data-magnetic>
             Обсудить проект
