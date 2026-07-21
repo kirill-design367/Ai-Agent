@@ -1,15 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 import { getAllServices, getAllNiches, getAllCases } from "@/lib/content/loader";
 import { formatPrice } from "@/lib/format";
 import HubGrid, { type HubCard } from "@/components/pg/HubGrid";
+import Hero, { HeroV1 } from "@/components/home/Hero";
 import FounderBlock from "@/components/pg/FounderBlock";
 import TrustBlock from "@/components/pg/TrustBlock";
 import Testimonials from "@/components/pg/Testimonials";
 import Cta from "@/components/pg/Cta";
 import Contact from "@/components/sections/Contact";
 import { SITE } from "@/lib/seo/site";
-import { HERO } from "@/lib/homeContent";
 
 /*
   ГЛАВНАЯ — «тихая роскошь», белый фон. Маршрут: hero-манифест (реф KOTA/Sidekick,
@@ -54,27 +55,10 @@ export default function HomeLite() {
 
   return (
     <main id="content" className="site home">
-      {/* ══ HERO-МАНИФЕСТ (реф KOTA/Sidekick) ══ */}
-      <section className="hx">
-        <div className="hx-art" aria-hidden><span className="hx-art-slot" /></div>
-        <h1 className="hx-title" aria-label={HERO.headline.join(" ")}>
-          <span className="hx-l hx-l1" aria-hidden>Первое</span>
-          <span className="hx-l hx-l2" aria-hidden>впечатление</span>
-          <span className="hx-l hx-l3" aria-hidden>невозможно</span>
-          <span className="hx-l hx-l1" aria-hidden>повторить</span>
-        </h1>
-        <div className="hx-foot">
-          <span className="hx-scroll"><i />листайте</span>
-          <p className="hx-lead">
-            Современные сайты для бизнеса на&nbsp;чистом коде. <b>Личная ответственность
-            за&nbsp;каждый проект</b> и&nbsp;внимание к&nbsp;деталям, которые продают.
-          </p>
-        </div>
-        <div className="hx-actions" style={{ position: "relative", zIndex: 1, marginTop: "var(--sp-4)" }}>
-          <Link href="/uslugi/" className="pill pill--solid" data-magnetic><span>Услуги и цены</span></Link>
-          <Link href="/kontakty/" className="pill" data-magnetic><span>Обсудить проект</span></Link>
-        </div>
-      </section>
+      {/* ══ HERO — 3 варианта по ?v= (v1 по умолчанию, SSR-fallback) ══ */}
+      <Suspense fallback={<HeroV1 />}>
+        <Hero />
+      </Suspense>
 
       {/* ══ УСЛУГИ ПОТОКОМ ══ */}
       <section className="pg-hub">

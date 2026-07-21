@@ -468,3 +468,38 @@ textarea.field { resize: vertical; min-height: 4em; }
 .bh-enter { animation: bhIn 0.5s var(--ease) both; }
 @keyframes bhIn { from { opacity: 0; transform: scale(1.015); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .bh-enter { animation: none; } }
+
+/* ═══════════════ HERO — 3 варианта (?v=) ═══════════════ */
+/* Общее: воздух сверху, actions под композицией */
+.hx { padding-top: calc(var(--header-h) + clamp(3rem, 9vh, 8rem)); }
+.hx .hx-actions { position: relative; z-index: 1; margin-top: var(--sp-4); display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+
+/* V1 «Плакат» — лесенка капсом, подпись справа внизу */
+.hx--poster .hx-foot { align-items: flex-end; }
+.hx--poster .hx-lead { margin-left: auto; text-align: left; }
+
+/* V2 «Редакция» — журнальный разворот, mixed-case, спокойствие */
+.hx2 { display: grid; align-items: end; gap: clamp(2rem,5vw,5rem);
+  grid-template-columns: 1fr; padding-bottom: clamp(3rem,8vh,7rem); }
+.hx2-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--fg-2); margin-bottom: var(--sp-4); }
+.hx2-title { font-family: var(--font-display); font-weight: 500; text-transform: none;
+  font-size: clamp(2.6rem, 1rem + 6vw, 6.4rem); line-height: 1.0; letter-spacing: -0.02em; max-width: 15ch; }
+.hx2-side { display: grid; gap: var(--sp-4); align-content: end; }
+.hx2-lead { font-size: var(--fs-1); line-height: 1.5; color: var(--fg-2); max-width: 40ch; }
+.hx2 .hx-scroll { color: var(--fg-2); }
+@media (min-width: 900px) {
+  .hx2 { grid-template-columns: 2fr 1fr; }
+  .hx2-side { padding-bottom: 0.4rem; }
+}
+
+/* V3 «Слово» — минимализм Sidekick: одно гигантское слово */
+.hx3 { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.hx3-word { font-family: var(--font-display); font-weight: 900; text-transform: uppercase;
+  font-size: clamp(4rem, 1rem + 20vw, 18rem); line-height: 0.9; letter-spacing: -0.03em; margin: 0 0 clamp(1.5rem,4vh,3rem); }
+.hx3-foot { display: grid; gap: var(--sp-4); justify-items: center; }
+.hx3-lead { font-size: var(--fs-1); color: var(--fg-2); max-width: 42ch; }
+.hx3 .hx-actions { justify-content: center; }
+@media (max-width: 720px) { .hx3-word { font-size: clamp(3.4rem, 22vw, 8rem); } }
+
+/* V1 «Плакат» — капсом (по спеку) */
+.hx--poster .hx-title { text-transform: uppercase; }

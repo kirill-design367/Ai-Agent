@@ -10,7 +10,8 @@
     "gen:og": "node --experimental-strip-types scripts/gen-og.mjs",
     "audit": "node --experimental-strip-types scripts/audit-phase1.mjs",
     "prebuild": "npm run check:parity && npm run check:content && npm run gen:og",
-    "build": "next build",
+    "check:h1": "node scripts/check-h1.mjs",
+    "build": "next build && npm run check:h1",
     "start": "next start",
     "lint": "next lint"
   },
