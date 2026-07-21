@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import ParticleHero from "@/components/home/ParticleHero";
 
 /*
   HERO — три радикально разных ПО ТОНУ варианта (ч/б, воздух). Временный механизм
@@ -95,9 +96,23 @@ function V3() {
   );
 }
 
+/* V4 «Частицы» (по референсу владельца): AUREA из макрочастиц — левая часть литая
+   с зерном, правая распадается в облако, невесомый дрейф. Canvas 2D. */
+function V4() {
+  return (
+    <section className="hx hx4">
+      <p className="hx4-top">AUREA WEB STUDIO</p>
+      <h1 className="sr-only">AUREA — авторская студия разработки сайтов</h1>
+      <ParticleHero word="AUREA" />
+      <Link href="/keisy/" className="hx4-bottom link-u" data-magnetic>Смотреть работы →</Link>
+    </section>
+  );
+}
+
 export default function Hero() {
   const v = useSearchParams().get("v");
   if (v === "2") return <V2 />;
   if (v === "3") return <V3 />;
+  if (v === "4") return <V4 />;
   return <HeroV1 />;
 }
