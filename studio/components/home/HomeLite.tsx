@@ -12,12 +12,21 @@ import { SITE } from "@/lib/seo/site";
 import { HERO } from "@/lib/homeContent";
 
 /*
-  ГЛАВНАЯ КАК ПОЛОТНО (эталон Locomotive/Obys). НЕ стек секций — единая
-  композиция-маршрут: завязка (hero-манифест) → разгон (услуги потоком строк) →
-  кульминация (кейсы: пин + горизонтальная прокрутка) → развязка (манифест-CTA).
-  Перекрытия вместо границ, разноскоростной параллакс, фон меняется под контентом
-  (см. Canvas.tsx). Контент — в SSR-HTML (SEO/LCP целы); движение — усиление.
+  ГЛАВНАЯ — «тихая роскошь», белый фон. Маршрут: hero-манифест (реф KOTA/Sidekick,
+  гигант лесенкой) → услуги потоком строк → кейсы парящими фигурами (реф Akoya) →
+  тёмная развязка (доверие/контакт/CTA). Контент — в SSR-HTML (SEO/LCP целы).
+  Заголовок героя — блоки-слова (не инлайн-маски): пробелы гарантированы.
 */
+
+// раскладка парящих кейсов (реф Akoya): позиция, ширина, клип-фигура, наклон, скорость дрейфа
+const SHAPES = [
+  { clip: "polygon(0 6%, 100% 0, 96% 92%, 4% 100%)", left: "1%", top: "0%", w: "30vw", rot: -5, drift: 0.10 },
+  { clip: "polygon(4% 0, 100% 8%, 100% 100%, 0 90%)", left: "39%", top: "26%", w: "34vw", rot: 4, drift: -0.06 },
+  { clip: "polygon(0 0, 100% 4%, 92% 100%, 6% 96%)", left: "70%", top: "2%", w: "26vw", rot: 7, drift: 0.14 },
+  { clip: "polygon(0 10%, 100% 0, 100% 90%, 0 100%)", left: "10%", top: "54%", w: "28vw", rot: -3, drift: -0.09 },
+  { clip: "polygon(6% 0, 100% 6%, 94% 100%, 0 94%)", left: "50%", top: "60%", w: "30vw", rot: 6, drift: 0.08 },
+] as const;
+
 export default function HomeLite() {
   const services: HubCard[] = getAllServices().map((s) => ({
     href: `/uslugi/${s.slug}/`,
@@ -35,104 +44,88 @@ export default function HomeLite() {
     title: n.title,
     desc: n.metaDescription,
   }));
-  const caseTrack = getAllCases()
-    .slice(0, 6)
-    .map((c) => ({
-      href: `/keisy/${c.slug}/`,
-      title: c.title,
-      cover: c.cover,
-      meta: [c.origin === "replica" ? "Воссоздано" : "Свой бренд", c.siteType, c.term].filter(Boolean) as string[],
-    }));
+  const cases = getAllCases().slice(0, SHAPES.length).map((c, i) => ({
+    href: `/keisy/${c.slug}/`,
+    title: c.title,
+    type: c.siteType,
+    cover: c.cover,
+    ...SHAPES[i],
+  }));
 
   return (
-    <main id="content" className="site theme-dark home-cv" data-canvas>
-      {/* Фон-полотно: цвет ведёт скролл (меняется ПОД контентом) */}
-      <div className="cv-bg" aria-hidden />
-
-      {/* ══ ЗАВЯЗКА — HERO-МАНИФЕСТ (тёмная зона) ══ */}
-      <section className="cv-hero" data-zone="dark">
-        <p className="cv-hero-tag"><span>01</span>&nbsp;&nbsp;AUREA — авторская студия разработки сайтов</p>
-        <h1 className="cv-hero-h1" aria-label={HERO.headline.join(" ")}>
-          <span className="cv-l cv-l1" aria-hidden>Первое</span>
-          <span className="cv-l cv-l2" aria-hidden>впечатление</span>
-          <span className="cv-l cv-l3" aria-hidden>невозможно</span>
-          <span className="cv-l cv-l4" aria-hidden>повторить</span>
+    <main id="content" className="site home">
+      {/* ══ HERO-МАНИФЕСТ (реф KOTA/Sidekick) ══ */}
+      <section className="hx">
+        <div className="hx-art" aria-hidden><span className="hx-art-slot" /></div>
+        <h1 className="hx-title" aria-label={HERO.headline.join(" ")}>
+          <span className="hx-l hx-l1" aria-hidden>Первое</span>
+          <span className="hx-l hx-l2" aria-hidden>впечатление</span>
+          <span className="hx-l hx-l3" aria-hidden>невозможно</span>
+          <span className="hx-l hx-l1" aria-hidden>повторить</span>
         </h1>
-        <div className="cv-hero-corner" data-speed="0.78">
-          <p className="cv-hero-lead">
-            Современные сайты для бизнеса на чистом коде. Личная ответственность
-            за каждый проект.
+        <div className="hx-foot">
+          <span className="hx-scroll"><i />листайте</span>
+          <p className="hx-lead">
+            Современные сайты для бизнеса на&nbsp;чистом коде. <b>Личная ответственность
+            за&nbsp;каждый проект</b> и&nbsp;внимание к&nbsp;деталям, которые продают.
           </p>
-          <div className="cv-hero-actions">
-            <Link href="/uslugi/" className="pill pill--solid" data-magnetic><span>Услуги и цены</span></Link>
-            <Link href="/kontakty/" className="pill" data-magnetic><span>Обсудить проект</span></Link>
-          </div>
         </div>
-        <span className="cv-scroll" aria-hidden><i />листайте</span>
+        <div className="hx-actions" style={{ position: "relative", zIndex: 1, marginTop: "var(--sp-4)" }}>
+          <Link href="/uslugi/" className="pill pill--solid" data-magnetic><span>Услуги и цены</span></Link>
+          <Link href="/kontakty/" className="pill" data-magnetic><span>Обсудить проект</span></Link>
+        </div>
       </section>
 
-      {/* ══ БЕГУЩАЯ ГРАФИКА — текст как объект между зонами ══ */}
-      <div className="cv-marquee" aria-hidden>
-        <div className="cv-marquee-row">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <span key={i} className={i % 2 ? "is-outline" : ""}>От&nbsp;точки до&nbsp;шедевра&nbsp;<em>✳</em>&nbsp;</span>
-          ))}
-        </div>
-      </div>
-
-      {/* ══ РАЗГОН — УСЛУГИ ПОТОКОМ (светлая зона, наезжает на hero) ══ */}
-      <section className="cv-flow" data-zone="light">
-        <div className="cv-flow-head">
-          <p className="cv-eyebrow" data-speed="0.7"><span>02</span> Услуги</p>
-          <h2 className="cv-h2 cv-bleed-l" data-speed="1.12">Что&nbsp;я делаю</h2>
-        </div>
-        <div className="cv-idx-wrap" data-speed="0.94">
+      {/* ══ УСЛУГИ ПОТОКОМ ══ */}
+      <section className="pg-hub">
+        <div className="pg-wrap">
+          <p className="pg-hero-kicker">01 — Услуги</p>
+          <h2 className="pg-h2">Что я делаю</h2>
           <HubGrid cards={services} />
         </div>
       </section>
 
-      {/* ниши — асимметрия: заголовок справа, индекс слева */}
-      <section className="cv-flow cv-flow--alt" data-zone="light">
-        <div className="cv-flow-head cv-flow-head--right">
-          <p className="cv-eyebrow" data-speed="0.7"><span>03</span> Ниши</p>
-          <h2 className="cv-h2 cv-bleed-r" data-speed="1.1">Сайты под задачу бизнеса</h2>
+      {/* ══ КЕЙСЫ — ПАРЯЩИЕ ФИГУРЫ (реф Akoya) ══ */}
+      <section className="wk">
+        <div className="pg-wrap">
+          <div className="wk-head">
+            <p className="pg-hero-kicker">02 — Работы</p>
+            <Link href="/keisy/" className="link-u" data-magnetic>Все кейсы →</Link>
+          </div>
         </div>
-        <div className="cv-idx-wrap" data-speed="0.96">
+        <div className="pg-wrap">
+          <div className="wk-stage">
+            {cases.map((c) => (
+              <Link
+                key={c.href}
+                href={c.href}
+                className="wk-item"
+                data-magnetic
+                data-drift={c.drift}
+                style={{ left: c.left, top: c.top, width: c.w }}
+              >
+                <span className="wk-name" style={{ left: 0, top: "-1.7em" }}>{c.title}</span>
+                <span className="wk-shape" style={{ clipPath: c.clip, transform: `rotate(${c.rot}deg)`, aspectRatio: "3 / 2" }}>
+                  {c.cover && <Image src={c.cover} alt="" width={560} height={373} />}
+                </span>
+                <span className="wk-type" style={{ right: 0, bottom: "-1.7em" }}>{c.type}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ НИШИ ══ */}
+      <section className="pg-hub">
+        <div className="pg-wrap">
+          <p className="pg-hero-kicker">03 — Ниши</p>
+          <h2 className="pg-h2">Сайты под задачу бизнеса</h2>
           <HubGrid cards={niches} />
         </div>
       </section>
 
-      {/* ══ КУЛЬМИНАЦИЯ — КЕЙСЫ: пин + горизонтальная прокрутка (тёмная зона) ══ */}
-      <section className="cv-cases" data-zone="dark" data-track-wrap>
-        <div className="cv-cases-head">
-          <p className="cv-eyebrow"><span>04</span> Работы</p>
-          <h2 className="cv-h2">Избранные кейсы</h2>
-          <span className="cv-cases-hint" aria-hidden>прокрутка&nbsp;→</span>
-        </div>
-        <div className="cv-track" data-track>
-          {caseTrack.map((c, i) => (
-            <Link key={c.href} href={c.href} className="cv-case" data-magnetic>
-              <span className="cv-case-n">{String(i + 1).padStart(2, "0")}</span>
-              {c.cover && (
-                <span className="cv-case-media">
-                  <Image src={c.cover} alt="" width={640} height={440} />
-                </span>
-              )}
-              <span className="cv-case-title">{c.title}</span>
-              <span className="cv-case-meta">
-                {c.meta.map((m, j) => (<span key={j}>{m}</span>))}
-              </span>
-            </Link>
-          ))}
-          <Link href="/keisy/" className="cv-case cv-case--all" data-magnetic>
-            <span className="cv-case-title">Все<br />кейсы</span>
-            <span className="cv-case-meta"><span>смотреть индекс&nbsp;↗</span></span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ══ РАЗВЯЗКА — доверие, отзывы, основатель, контакт, манифест-CTA ══ */}
-      <div className="cv-final" data-zone="dark">
+      {/* ══ ТЁМНАЯ РАЗВЯЗКА ══ */}
+      <div className="invert">
         <TrustBlock />
         <Testimonials />
         <FounderBlock />

@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getAllCases } from "@/lib/content/loader";
 import { buildMetadata } from "@/lib/seo/meta";
 import { breadcrumbLd } from "@/lib/seo/jsonld";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/pg/Breadcrumbs";
-import PageHero from "@/components/pg/PageHero";
-import HubGrid, { type HubCard } from "@/components/pg/HubGrid";
 import Cta from "@/components/pg/Cta";
 
 export const metadata: Metadata = buildMetadata({
@@ -16,47 +15,45 @@ export const metadata: Metadata = buildMetadata({
   path: "/keisy",
 });
 
-const BADGE: Record<string, string> = {
-  "own-product": "Свой бренд",
-  client: "Клиентский",
-  concept: "Концепт",
-};
-const kickerFor = (c: { origin: string; caseType: string }) =>
-  c.origin === "replica" ? "Воссоздано" : BADGE[c.caseType];
+// тип проекта → буква-пометка (реф Artworld: (Л)(М)(В))
+function tagFor(siteType: string): string {
+  const s = siteType.toLowerCase();
+  if (s.includes("магазин")) return "М";
+  if (s.includes("лендинг")) return "Л";
+  if (s.includes("витрин") || s.includes("визит")) return "В";
+  if (s.includes("портфол")) return "П";
+  if (s.includes("корпоратив") || s.includes("многостран")) return "К";
+  return siteType.charAt(0).toUpperCase();
+}
 
 export default function KeisyHub() {
   const crumbs = [
     { name: "Главная", path: "/" },
     { name: "Кейсы", path: "/keisy/" },
   ];
-  const cards: HubCard[] = getAllCases().map((c) => ({
-    href: `/keisy/${c.slug}/`,
-    kicker: kickerFor(c),
-    title: c.title,
-    desc: c.metaDescription,
-    meta: [c.siteType, c.term],
-    cover: c.cover,
-  }));
+  const cases = getAllCases();
 
   return (
     <>
       <JsonLd data={[breadcrumbLd(crumbs)]} />
       <Breadcrumbs items={crumbs} />
-      <PageHero
-        kicker="Работы"
-        h1="Кейсы"
-        lead={[
-          "Каждый проект помечен честным бейджем: собственный бренд студии, клиентская работа или концепт. Никаких выдуманных клиентов и неподтверждённых цифр.",
-          "Для концептов показываем технические показатели и дизайн-решения — то, что можно проверить.",
-        ]}
-      />
-      <div className="sec--light">
-        <section className="pg-hub">
-          <div className="pg-wrap">
-            <HubGrid cards={cards} />
-          </div>
-        </section>
-      </div>
+
+      {/* ХАБ КЕЙСОВ (реф Artworld): облако имён + гигант «РАБОТЫ» */}
+      <section className="ah">
+        <div className="pg-wrap">
+          <p className="ah-cloud">
+            {cases.map((c) => (
+              <Link key={c.slug} href={`/keisy/${c.slug}/`} className="ah-name">
+                {c.title}
+                <span className="ah-tag">({tagFor(c.siteType)})</span>
+              </Link>
+            ))}
+          </p>
+          <p className="ah-legend">(Л) Лендинг · (М) Магазин · (К) Корпоративный · (В) Витрина · (П) Портфолио</p>
+        </div>
+        <h1 className="ah-giant" aria-label="Работы">РАБОТЫ</h1>
+      </section>
+
       <Cta />
     </>
   );

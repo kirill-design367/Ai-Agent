@@ -3,7 +3,6 @@ import CookieConsent from "@/components/kit/CookieConsent";
 import Atmosphere from "@/components/kit/Atmosphere";
 import SiteMotion from "@/components/kit/SiteMotion";
 import Interactions from "@/components/kit/Interactions";
-import Canvas from "@/components/kit/Canvas";
 import SmoothScroll from "@/components/kit/SmoothScroll";
 import PageTransition from "@/components/kit/PageTransition";
 import JsonLd from "@/components/seo/JsonLd";
@@ -12,13 +11,9 @@ import { SITE } from "@/lib/seo/site";
 import "./globals.css";
 
 /*
-  Типосистема (§5): Onest (дисплей+текст) + Martian Mono (микро-лейблы).
-  Self-host: @font-face + unicode-range subset'ы в globals.css, файлы в
-  /public/fonts. Не next/font/google — тот тянет шрифт с gstatic на билде
-  (хрупко за прокси/в CI); next/font/local не умеет unicode-range для одного
-  переменного семейства из нескольких subset-файлов. Onest — переменный
-  (wght 100–900) одним файлом на subset. Preload — только кириллический subset
-  Onest (LCP-заголовок русский) + латиница (слово AUREA, цифры цен).
+  Типосистема: Druk Cyr (дисплей) + Dexa Round (текст/UI). Self-host @font-face
+  в globals.css, woff2 в /public/fonts. Два цвета — чёрный и белый.
+  Preload — дисплей Druk Super (LCP-заголовок героя) + Dexa Regular (тело).
 */
 
 export const metadata: Metadata = {
@@ -32,7 +27,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   // запрет горизонтального «уезжания» и единый тёмный chrome браузера на мобиле
   maximumScale: 5,
-  themeColor: "#0a0a0b",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -43,9 +38,9 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Preload LCP-дисплея (Unbounded — заголовок героя) + Onest для тела */}
-        <link rel="preload" href="/fonts/unbounded-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
-        <link rel="preload" href="/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
+        {/* Preload LCP-дисплея (Druk Super — заголовок героя) + Dexa для тела */}
+        <link rel="preload" href="/fonts/druk-super.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/dexa-regular.woff2" as="font" type="font/woff2" crossOrigin="" />
       </head>
       <body>
         {/* Класс .js навешивается синхронно → CSS может прятать [data-reveal]
@@ -59,10 +54,9 @@ export default function RootLayout({
         <SmoothScroll>
           <Atmosphere />
           {children}
-          {/* Слой движения — надстройка поверх одной структуры (§арх) */}
+          {/* Слой движения — тихая надстройка */}
           <SiteMotion />
           <Interactions />
-          <Canvas />
           <PageTransition />
           <CookieConsent />
         </SmoothScroll>

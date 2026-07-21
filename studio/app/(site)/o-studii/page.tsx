@@ -3,8 +3,6 @@ import { buildMetadata } from "@/lib/seo/meta";
 import { breadcrumbLd, founderPersonLd } from "@/lib/seo/jsonld";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/pg/Breadcrumbs";
-import PageHero from "@/components/pg/PageHero";
-import Reveal from "@/components/pg/Reveal";
 import TrustBlock from "@/components/pg/TrustBlock";
 import RelatedLinks from "@/components/pg/RelatedLinks";
 import Cta from "@/components/pg/Cta";
@@ -49,30 +47,30 @@ export default function OStudii() {
       <JsonLd data={[breadcrumbLd(crumbs), founderPersonLd()]} />
       <Breadcrumbs items={crumbs} />
 
-      <PageHero
-        kicker="О студии"
-        h1="Авторская студия AUREA"
-        lead={[
-          "Вы работаете напрямую с основателем студии. Без менеджеров, длинных цепочек согласований и потери информации. При необходимости к проекту подключаются профильные специалисты — дизайнеры, копирайтеры, фотографы. За итоговый результат отвечаю лично я.",
-          "Работаем с клиентами по всей России, удалённо. Студия не привязана к городу — важен результат, а не адрес офиса.",
-        ]}
-      />
-
-      <div className="sec--light">
-        <section className="pg-steps" style={{ paddingTop: 0 }}>
-          <div className="pg-wrap">
-            <h2 className="pg-h2">Принципы</h2>
-            <div className="pg-trust-grid">
-              {PRINCIPLES.map((p, i) => (
-                <Reveal className="pg-trust-card" key={i} delay={i * 40}>
-                  <h3 className="pg-h3">{p.t}</h3>
-                  <p>{p.d}</p>
-                </Reveal>
-              ))}
+      {/* МАНИФЕСТ (реф Lees): гигант-буквы + текст-манифест композицией вокруг */}
+      <section className="mf">
+        <span className="mf-giant" aria-hidden>AUREA</span>
+        <div className="pg-wrap">
+          <div className="mf-grid">
+            <div className="mf-point mf-p-a">
+              <h1 className="mf-h1">Авторская студия AUREA</h1>
+              <p>Вы работаете напрямую с&nbsp;основателем студии. Без менеджеров, длинных цепочек согласований и&nbsp;потери информации. При необходимости к&nbsp;проекту подключаются профильные специалисты — дизайнеры, копирайтеры, фотографы. За&nbsp;итоговый результат отвечаю лично я.</p>
             </div>
+            <div className="mf-point mf-p-b">
+              <p>Я&nbsp;— основатель и&nbsp;главный разработчик. Работаем с&nbsp;клиентами по&nbsp;всей России, удалённо. Студия не&nbsp;привязана к&nbsp;городу — важен результат, а&nbsp;не&nbsp;адрес офиса.</p>
+            </div>
+            {PRINCIPLES.map((p, i) => (
+              <div className={`mf-point mf-p-${["c","d","e","d"][i]}`} key={i}>
+                <span className="mf-point-n">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{p.t}</h3>
+                <p>{p.d}</p>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
+      <div className="invert">
         <TrustBlock heading="Что это даёт вам" />
       </div>
 

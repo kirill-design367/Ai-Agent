@@ -24,15 +24,9 @@ export default function Home() {
   return (
     <>
       <Preloader />
-      <div className="theme-dark">
-        <SiteHeader />
-      </div>
-
+      <SiteHeader />
       <HomeLite />
-
-      <div className="theme-dark">
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </>
   );
 }

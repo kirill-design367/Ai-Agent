@@ -10,7 +10,7 @@ import MagneticTargets from "@/components/kit/MagneticTargets";
 */
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="site theme-dark">
+    <div className="site">
       <SiteHeader />
       <MagneticTargets />
       <main id="content" className="site-main">
