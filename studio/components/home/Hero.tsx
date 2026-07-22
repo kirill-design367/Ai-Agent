@@ -1,6 +1,6 @@
 "use client";
 
-import ParticleHero from "@/components/home/ParticleHero";
+import HeroImage from "@/components/home/HeroImage";
 
 /*
   HERO — финальная спецификация (реф Active Theory / Lusion; вертикаль MONOLOG).
@@ -27,7 +27,7 @@ function HeroInner() {
           на&nbsp;доверие с&nbsp;первого взгляда.
         </p>
       </div>
-      <ParticleHero word="AUREA" />
+      <HeroImage />
     </section>
   );
 }
