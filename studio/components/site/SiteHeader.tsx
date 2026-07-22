@@ -22,12 +22,20 @@ const NAV = [
   { href: "/kontakty/", label: "Контакты" },
 ];
 
+// Логотип-вордмарк: то же начертание, что particle-надпись — «A» Λ-образная
+// (без перекладины) с точкой в контрформе, тонкий геометрический гротеск.
 function Logo() {
   return (
-    <span className="site-logo" aria-label="AUREA">
-      AURE<span className="site-logo-seed">A</span>
-      <span className="site-logo-dot" aria-hidden />
-    </span>
+    <svg className="site-logo" viewBox="0 0 86 24" role="img" aria-label="AUREA"
+      fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
+      <path d="M0 21 L8.3 3 L16.6 21" />
+      <path d="M19.4 3 L19.4 13.8 A7.2 7.2 0 0 1 33.8 13.8 L33.8 3" />
+      <path d="M36.7 21 L36.7 3 L43.6 3 C50.9 3 50.9 12.4 43.6 12.4 L36.7 12.4 M42.5 12.4 L50.4 21" />
+      <path d="M65.2 3 L53.3 3 L53.3 21 L65.2 21 M53.3 12 L63 12" />
+      <path d="M68 21 L76.3 3 L84.6 21" />
+      <circle cx="8.3" cy="14.9" r="2.8" fill="currentColor" stroke="none" />
+      <circle cx="76.3" cy="14.9" r="2.8" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
 

@@ -126,7 +126,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-header { position: fixed; inset: 0 0 auto 0; z-index: 200; height: var(--header-h); display: flex; align-items: center; mix-blend-mode: difference; color: #fff; }
 /* mix-blend-difference: панель авто-контрастна на любом фоне (ч/б) */
 .site-header-in { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); display: flex; align-items: center; gap: var(--sp-4); }
-.site-logo { font-family: var(--font-display); font-weight: 900; font-size: 1.15rem; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; display: inline-flex; align-items: center; }
+.site-logo { display: block; height: 19px; width: auto; }
 .site-logo-seed { position: relative; }
 .site-logo-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-left: 4px; align-self: flex-end; margin-bottom: 0.18em; }
 .site-header-brand { color: inherit; }
@@ -135,9 +135,11 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-nav-l { position: relative; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
 .site-nav-l::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
 .site-nav-l:hover::after { transform: scaleX(1); }
-.site-header-cta { margin-left: auto; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.01em; position: relative; padding: 6px 0; }
-.site-header-cta::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
-.site-header-cta:hover::after { transform: scaleX(1); }
+/* CTA — тонкая рамка-плашка (реф макет) */
+.site-header-cta { margin-left: auto; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em;
+  border: 1px solid currentColor; border-radius: 9px; padding: 9px 18px; line-height: 1;
+  transition: opacity var(--dur-2) var(--ease); }
+.site-header-cta:hover { opacity: 0.62; }
 .site-burger { margin-left: var(--sp-4); width: 34px; height: 18px; position: relative; display: inline-flex; }
 .site-burger span { position: absolute; left: 0; width: 100%; height: 2px; background: currentColor; transition: transform var(--dur-2) var(--ease), opacity var(--dur-1); }
 .site-burger span:nth-child(1) { top: 0; } .site-burger span:nth-child(2) { top: 8px; } .site-burger span:nth-child(3) { top: 16px; }
@@ -521,17 +523,20 @@ textarea.field { resize: vertical; min-height: 4em; }
    у нижней кромки (высота полосы задаёт кегль слова: слово упирается в низ и
    срезается краем экрана). --ph-band — высота полосы (десктоп/мобайл). */
 .hxf { position: relative; justify-content: center; align-items: stretch;
-  padding: var(--header-h) 0 var(--ph-band); overflow: clip; --ph-band: 35vh; }
+  padding: var(--header-h) 0 var(--ph-band); overflow: clip; --ph-band: 46vh;
+  background: #f5f2ec; } /* чуть тёплый белый (реф макет) */
 .hxf-manifest { text-align: center; max-width: 46rem; margin: 0 auto; padding-inline: var(--gutter); }
 .hxf-lead { font-family: var(--font-body); font-weight: 500; text-transform: none;
   font-size: clamp(1.25rem, 0.9rem + 1.9vw, 2.1rem); line-height: 1.18; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
 .hxf-sub { margin: clamp(0.9rem, 2.4vh, 1.5rem) auto 0; max-width: 34rem;
   font-size: clamp(0.95rem, 0.86rem + 0.42vw, 1.12rem); line-height: 1.56; letter-spacing: 0.018em; color: var(--fg-2); text-wrap: balance; }
 
-/* частицы: полоса у нижней кромки, слово срезано низом экрана.
+/* частицы: широкая лента снизу, слово ЦЕЛИКОМ в кадре (по центру полосы).
    Канвас декоративный; заголовок-бренд озвучен логотипом в шапке, H1 — манифест. */
 .ph { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ph-band); }
 .ph canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-@media (max-width: 880px) { .hxf { --ph-band: 22vh; } }
+/* сплошные точки в контрформах «A» (позиция/размер из JS) */
+.ph-dot { position: absolute; border-radius: 50%; background: var(--ink); transform: translate(-50%, -50%); pointer-events: none; }
+@media (max-width: 880px) { .hxf { --ph-band: 32vh; } .site-header-cta { display: none; } }
 
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
