@@ -91,13 +91,15 @@ export default function ParticleHero({ word = "AUREA" }: { word?: string }) {
     let raf = 0, running = false, onScreen = false, docVisible = true;
     let played = false, started = false, t0 = 0;
     let measured = false, activeMs = 0, mFrames = 0, mLast = 0;
+    let dprCap = 3, qualityRatio = 1;                 // потолок dpr (динамический) и доля точек
+    let scheduleRebuild: () => void = () => {};
     let cx = -1e5, cy = -1e5, lastMove = -1e9, rectL = 0, rectT = 0;
     const CR = 84, CR2 = CR * CR, CFORCE = 0.42, CK = 0.11, CDAMP = 0.82;
 
     // ── сэмплирование слова: контур + заливка + пыль ──
     const sample = () => {
       const rect = el.getBoundingClientRect();
-      dpr = Math.min(2, window.devicePixelRatio || 1);
+      dpr = Math.min(dprCap, window.devicePixelRatio || 1);
       W = Math.max(320, Math.floor(rect.width));
       H = Math.max(120, Math.floor(rect.height));
       rectL = rect.left; rectT = rect.top;
@@ -194,7 +196,10 @@ export default function ParticleHero({ word = "AUREA" }: { word?: string }) {
         start[i * 2 + 1] = hy + Math.sin(ang) * dist * 0.8;
       }
       void NRM;
-      drawCount = N;
+      // сохраняем адаптивную долю точек при пересборке (зум/ресайз)
+      drawCount = qualityRatio < 1
+        ? Math.max(edgeCount + Math.floor((N - edgeCount) * 0.2), Math.floor(N * qualityRatio))
+        : N;
     };
 
     // ══════════════ WebGL ══════════════
@@ -295,8 +300,9 @@ export default function ParticleHero({ word = "AUREA" }: { word?: string }) {
           const fps = mFrames / (activeMs / 1000);
           const targetFps = coarse ? 46 : 55;
           if (fps < targetFps) {
-            const ratio = Math.max(0.35, fps / targetFps);
-            drawCount = Math.max(edgeCount + Math.floor((N - edgeCount) * 0.2), Math.floor(N * ratio));
+            qualityRatio = Math.max(0.35, fps / targetFps);
+            drawCount = Math.max(edgeCount + Math.floor((N - edgeCount) * 0.2), Math.floor(N * qualityRatio));
+            if (fps < targetFps * 0.65 && dprCap > 2) { dprCap = 2; scheduleRebuild(); } // откат dpr при сильной просадке
           }
         }
         if (reduce || !running) return;
@@ -374,24 +380,43 @@ export default function ParticleHero({ word = "AUREA" }: { word?: string }) {
     if (document.fonts && document.fonts.load) document.fonts.load("900 200px Druk").then(boot).catch(boot);
     else boot();
 
+    // ── зум/ресайз/смена dpr → пересборка backing store и позиций частиц ──
     let rt = 0;
-    const onResize = () => {
-      window.clearTimeout(rt);
-      rt = window.setTimeout(() => {
-        sample();
-        played = true; measured = true; // вход не переигрываем
-        if (glOk) glResize?.(); else setup2D();
-        if (reduce || !running) drawOnce(performance.now());
-      }, 240);
+    const rebuild = () => {
+      if (cancelled) return;
+      sample();                                // новые глифы под актуальный размер и dpr
+      played = true;                           // вход не переигрываем
+      if (glOk) glResize?.(); else setup2D();  // width/height = cssSize × dpr, viewport, uniform-масштабы
+      if (reduce || !running) drawOnce(performance.now());
     };
-    window.addEventListener("resize", onResize);
+    scheduleRebuild = () => { window.clearTimeout(rt); rt = window.setTimeout(rebuild, 180); };
+
+    // подписка на КОНКРЕТНОЕ разрешение; при срабатывании пере-подписываемся на новое
+    let dprMq: MediaQueryList | null = null;
+    const onDpr = () => {
+      if (dprMq) { dprMq.removeEventListener ? dprMq.removeEventListener("change", onDpr) : dprMq.removeListener(onDpr); }
+      scheduleRebuild();
+      watchDpr();
+    };
+    function watchDpr() {
+      const d = window.devicePixelRatio || 1;
+      try { dprMq = window.matchMedia(`(resolution: ${d}dppx)`); } catch { dprMq = null; }
+      if (dprMq) { dprMq.addEventListener ? dprMq.addEventListener("change", onDpr) : dprMq.addListener(onDpr); }
+    }
+    watchDpr();
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") { ro = new ResizeObserver(() => scheduleRebuild()); ro.observe(el); }
+    window.addEventListener("resize", scheduleRebuild);
 
     return () => {
       cancelled = true; running = false;
       cancelAnimationFrame(raf);
       window.clearTimeout(rt);
       io?.disconnect();
-      window.removeEventListener("resize", onResize);
+      ro?.disconnect();
+      if (dprMq) { dprMq.removeEventListener ? dprMq.removeEventListener("change", onDpr) : dprMq.removeListener(onDpr); }
+      window.removeEventListener("resize", scheduleRebuild);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onMove);
       window.removeEventListener("scroll", onScroll);
