@@ -66,9 +66,10 @@ const DOTS = [[-1.72, 0.27], [1.78, 0.27]] as const;
 const CX = 0.03, CY = 0.5; // центр слова → к началу координат
 
 // ── 8-ступенчатая калибровка размера ВНУТРИ букв (микс, не зонами) ──
-const MAXR = 0.042;
+// макс. размер уменьшен на ~30%; крупных ступеней (1–2) меньше, зерно средне-мелкое.
+const MAXR = 0.0294;
 const TIER_M = [1.0, 0.72, 0.52, 0.37, 0.26, 0.18, 0.12, 0.07];
-const TIER_PCT = [3, 5, 8, 11, 14, 17, 20, 22];
+const TIER_PCT = [1, 3, 8, 12, 15, 18, 21, 22];
 const TIER_CUM: number[] = [];
 { let a = 0; for (const p of TIER_PCT) { a += p; TIER_CUM.push(a); } } // →100
 function tierSize(): number {
@@ -144,28 +145,35 @@ export default function Hero3D() {
     const uni = {
       uTime: { value: 0 }, uEnter: { value: reduce ? 1 : 0 }, uBreath: { value: reduce ? 0 : 1 },
       uScroll: { value: 0 }, uMouse: { value: new THREE.Vector2(9e3, 9e3) },
-      uParallax: { value: new THREE.Vector2(0, 0) }, uRepel: { value: 0.015 }, uRepelR: { value: 0.45 },
-      uLightR: { value: 0.7 }, uLightStr: { value: 0.55 },
-      uFadeY0: { value: -3 }, uFadeY1: { value: -5 },
+      uRepel: { value: 0.06 }, uRepelR: { value: 0.5 },
+      uFadeY0: { value: -3 }, uFadeY1: { value: -5 },   // нижнее затухание (низ канваса)
+      uFadeTop0: { value: 0.7 }, uFadeTop1: { value: 1.9 }, // верхнее затухание (над облаком)
     };
     material.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, uni);
       sh.vertexShader = `
-        attribute vec3 aHome; attribute vec3 aDrift; attribute vec3 aEject; attribute float aPhase; attribute float aFlow; attribute float aSpeed;
-        uniform float uTime, uEnter, uBreath, uScroll, uRepel, uRepelR, uFadeY0, uFadeY1; uniform vec2 uMouse, uParallax;
-        varying float vFade; varying vec2 vWorld;
+        attribute vec3 aHome; attribute vec3 aDrift; attribute vec3 aEject; attribute float aPhase; attribute float aFlow; attribute float aSpeed; attribute float aReact; attribute float aAng;
+        uniform float uTime, uEnter, uBreath, uScroll, uRepel, uRepelR, uFadeY0, uFadeY1, uFadeTop0, uFadeTop1; uniform vec2 uMouse;
+        varying float vFade;
       ` + sh.vertexShader;
       sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
         vec3 _drift = aDrift * sin(uTime * aSpeed + aPhase) * (aFlow * uBreath);
         vec3 _far = aHome + aEject * 3.2;
         float _sc = smoothstep(0.08, 0.72, uScroll);
         vec3 _base = mix(_far, aHome, uEnter) + _drift + aEject * (_sc * 2.4);
-        // параллакс по глубине: ближние (больше Z) смещаются сильнее
-        _base.xy += uParallax * (0.35 + _base.z * 0.9);
-        // очень слабое отталкивание от курсора (форма не гуляет)
+        // ── ХАОТИЧНОЕ отталкивание от курсора (живая масса, не круглый штамп) ──
         vec2 _md = _base.xy - uMouse; float _d = length(_md);
-        _base.xy += normalize(_md + vec2(1e-4)) * (smoothstep(uRepelR, 0.0, _d) * uRepel);
-        vWorld = _base.xy;
+        float _pa = atan(_md.y, _md.x);
+        // неровный (органический) радиус влияния — модуляция шумом по углу
+        float _r = uRepelR * (1.0 + 0.35 * sin(_pa * 3.0 + aReact * 6.2831));
+        float _fall = smoothstep(_r, 0.0, _d);
+        // направление: от курсора + индивидуальное угловое отклонение (±50°)
+        vec2 _dir = normalize(_md + vec2(1e-4));
+        float _c = cos(aAng), _s = sin(aAng);
+        _dir = vec2(_dir.x * _c - _dir.y * _s, _dir.x * _s + _dir.y * _c);
+        // индивидуальная скорость/дрожь → возвращаются вразнобой
+        float _wob = 0.8 + 0.2 * sin(uTime * (aSpeed * 1.6 + 0.6) + aPhase);
+        _base.xy += _dir * (_fall * uRepel * aReact * _wob);
       `);
       sh.vertexShader = sh.vertexShader.replace("#include <project_vertex>", `
         vec4 mvPosition = vec4(transformed, 1.0);
@@ -176,20 +184,16 @@ export default function Hero3D() {
         mvPosition = modelViewMatrix * mvPosition;
         gl_Position = projectionMatrix * mvPosition;
         vec2 _ndc = gl_Position.xy / gl_Position.w;
-        float _fx = smoothstep(1.04, 0.72, abs(_ndc.x));         // мягкие боковые края
-        float _fyb = smoothstep(uFadeY1, uFadeY0, _base.y);      // низ канваса → в ноль (мировая Y)
-        float _leave = 1.0 - smoothstep(0.16, 0.9, uScroll);     // растворение при уходе героя
-        vFade = _fx * _fyb * _leave;
+        float _fx = smoothstep(1.04, 0.72, abs(_ndc.x));            // мягкие боковые края
+        float _fyb = smoothstep(uFadeY1, uFadeY0, _base.y);         // низ канваса → в ноль
+        float _fyt = 1.0 - smoothstep(uFadeTop0, uFadeTop1, _base.y); // верх облака → в ноль
+        float _leave = 1.0 - smoothstep(0.16, 0.9, uScroll);        // растворение при уходе героя
+        vFade = _fx * _fyb * _fyt * _leave;
       `);
-      sh.fragmentShader = `
-        varying float vFade; varying vec2 vWorld; uniform vec2 uMouse; uniform float uLightR, uLightStr;
-      ` + sh.fragmentShader;
+      sh.fragmentShader = "varying float vFade;\n" + sh.fragmentShader;
       sh.fragmentShader = sh.fragmentShader.replace(
         "#include <dithering_fragment>",
         `#include <dithering_fragment>
-        float _ld = distance(vWorld, uMouse);
-        float _lift = smoothstep(uLightR, 0.0, _ld) * uLightStr;  // курсор «протирает лак»
-        gl_FragColor.rgb += (vec3(1.0) - gl_FragColor.rgb) * _lift;
         gl_FragColor.a *= vFade;`
       );
     };
@@ -209,12 +213,16 @@ export default function Hero3D() {
       keepMin = nMain + nDot * 2; // минимум, ниже которого буквы теряются
       const home = new Float32Array(N * 3), drift = new Float32Array(N * 3), eject = new Float32Array(N * 3);
       const phase = new Float32Array(N), flow = new Float32Array(N), scl = new Float32Array(N), spd = new Float32Array(N);
+      const react = new Float32Array(N), ang = new Float32Array(N);
       let i = 0;
       const put = (x: number, y: number, z: number, size: number, ejx: number, ejy: number, ejz: number, fl: number, sp: number) => {
         home[i * 3] = x - CX; home[i * 3 + 1] = y - CY; home[i * 3 + 2] = z;
         drift[i * 3] = Math.sin(y * 3.1 + x * 1.7); drift[i * 3 + 1] = Math.cos(x * 2.9 - y * 1.3); drift[i * 3 + 2] = Math.sin(x * 2.0 + y * 2.3);
         eject[i * 3] = ejx; eject[i * 3 + 1] = ejy; eject[i * 3 + 2] = ejz;
-        phase[i] = Math.random() * 6.283; flow[i] = fl; scl[i] = size; spd[i] = sp; i++;
+        phase[i] = Math.random() * 6.283; flow[i] = fl; scl[i] = size; spd[i] = sp;
+        react[i] = 0.3 + Math.random() * 1.4;          // индивидуальный коэффициент реакции 0.3–1.7
+        ang[i] = (Math.random() * 2 - 1) * 0.8727;      // угловое отклонение ±50°
+        i++;
       };
       const sampleSeg = () => {
         let r = Math.random() * totalLen; let s = WORD[0];
@@ -306,6 +314,8 @@ export default function Hero3D() {
       gm.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phase, 1));
       gm.setAttribute("aFlow", new THREE.InstancedBufferAttribute(flow, 1));
       gm.setAttribute("aSpeed", new THREE.InstancedBufferAttribute(spd, 1));
+      gm.setAttribute("aReact", new THREE.InstancedBufferAttribute(react, 1));
+      gm.setAttribute("aAng", new THREE.InstancedBufferAttribute(ang, 1));
       mesh.frustumCulled = false;
       group.add(mesh);
     };
@@ -323,7 +333,7 @@ export default function Hero3D() {
       wpp = 5.2 / vw;                       // world-единиц на пиксель вьюпорта
       const halfW = wpp * W / 2, halfH = wpp * H / 2;
       const bandPx = Math.min(0.425 * vw, 0.66 * vh);     // видимая полоса слова
-      const yTarget = hero.bottom - bandPx * 0.5;         // центр слова (пиксель вьюпорта)
+      const yTarget = hero.bottom - bandPx * 0.5 + 0.06 * vh; // центр слова ниже на ~6vh (больше паузы под манифестом)
       camCY = wpp * ((yTarget - rect.top) - H / 2);        // world-Y центра слова = 0
       cam.left = -halfW; cam.right = halfW; cam.top = camCY + halfH; cam.bottom = camCY - halfH;
       cam.updateProjectionMatrix();
@@ -333,26 +343,22 @@ export default function Hero3D() {
     };
 
     // ── интерактив + цикл ──
-    let mnx = 0, mny = 0, parX = 0, parY = 0, mvx = 9e3, mvy = 9e3, tmvx = 9e3, tmvy = 9e3;
+    let mvx = 9e3, mvy = 9e3, tmvx = 9e3, tmvy = 9e3;
     let scrollTarget = 0, scrollCur = 0, running = false, onScreen = false, docVis = true;
     let measured = false, frames = 0, tStart = 0;
 
     const onMove = (e: PointerEvent) => {
       const rect = el.getBoundingClientRect();
-      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1, ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-      mnx = Math.max(-1, Math.min(1, nx)); mny = Math.max(-1, Math.min(1, ny));
       tmvx = (e.clientX - rect.left - W / 2) * wpp;
       tmvy = camCY + (H / 2 - (e.clientY - rect.top)) * wpp;
     };
-    const onLeave = () => { mnx = 0; mny = 0; tmvx = 9e3; tmvy = 9e3; };
+    const onLeave = () => { tmvx = 9e3; tmvy = 9e3; };
     const onScroll = () => { const r = el.getBoundingClientRect(); const h = (el.parentElement || el).clientHeight || 1; scrollTarget = Math.min(1, Math.max(0, (-(r.top) + 0) / h)); };
 
     const tick = () => {
       uni.uTime.value = performance.now() * 0.001;
       if (!coarse) {
-        // параллакс: инерционное смещение слоёв (без вращения группы)
-        parX += ((mnx * 0.09) - parX) * 0.06; parY += ((-mny * 0.09) - parY) * 0.06;
-        uni.uParallax.value.set(parX, parY);
+        // инерционное следование курсора → хаотичное отталкивание в шейдере
         mvx += (tmvx - mvx) * 0.12; mvy += (tmvy - mvy) * 0.12;
         uni.uMouse.value.set(mvx, mvy);
       }
