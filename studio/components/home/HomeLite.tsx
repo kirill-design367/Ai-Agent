@@ -55,16 +55,7 @@ export default function HomeLite() {
 
   return (
     <main id="content" className="site home">
-      {/* LCP: preload hero-надписи (WebP srcset), приоритет высокий */}
-      <link
-        rel="preload"
-        as="image"
-        href="/hero/aurea-1920.webp"
-        imageSrcSet="/hero/aurea-960.webp 960w, /hero/aurea-1920.webp 1920w, /hero/aurea-3200.webp 3200w"
-        imageSizes="100vw"
-        fetchPriority="high"
-      />
-      {/* ══ HERO ══ */}
+      {/* ══ HERO — 3D-облако (после гидратации); LCP = манифест/h1 (в SSR) ══ */}
       <Suspense fallback={<HeroV1 />}>
         <Hero />
       </Suspense>

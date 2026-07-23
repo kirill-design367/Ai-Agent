@@ -7,24 +7,16 @@
    как ритм. Единственный источник дизайна: промпт + 6 референсов (DESIGN-DNA.md).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── ШРИФТЫ (self-host, кириллица проверена) ─────────────────────────────── */
-@font-face { font-family:"Druk"; font-weight:500; font-style:normal; font-display:swap; src:url("/fonts/druk-medium.woff2") format("woff2"); }
-@font-face { font-family:"Druk"; font-weight:500; font-style:italic; font-display:swap; src:url("/fonts/druk-medium-italic.woff2") format("woff2"); }
-@font-face { font-family:"Druk"; font-weight:800; font-style:normal; font-display:swap; src:url("/fonts/druk-heavy.woff2") format("woff2"); }
-@font-face { font-family:"Druk"; font-weight:900; font-style:normal; font-display:swap; src:url("/fonts/druk-super.woff2") format("woff2"); }
-@font-face { font-family:"Druk"; font-weight:900; font-style:italic; font-display:swap; src:url("/fonts/druk-super-italic.woff2") format("woff2"); }
-@font-face { font-family:"Druk-fb"; src:local("Arial Black"),local("Arial"); size-adjust:88%; ascent-override:98%; descent-override:20%; line-gap-override:0%; }
-
-@font-face { font-family:"Dexa"; font-weight:400; font-style:normal; font-display:swap; src:url("/fonts/dexa-regular.woff2") format("woff2"); }
-@font-face { font-family:"Dexa"; font-weight:400; font-style:italic; font-display:swap; src:url("/fonts/dexa-italic.woff2") format("woff2"); }
-@font-face { font-family:"Dexa"; font-weight:500; font-style:normal; font-display:swap; src:url("/fonts/dexa-medium.woff2") format("woff2"); }
-@font-face { font-family:"Dexa"; font-weight:600; font-style:normal; font-display:swap; src:url("/fonts/dexa-semibold.woff2") format("woff2"); }
-@font-face { font-family:"Dexa"; font-weight:900; font-style:normal; font-display:swap; src:url("/fonts/dexa-black.woff2") format("woff2"); }
-@font-face { font-family:"Dexa-fb"; src:local("Arial"),local("Helvetica Neue"); size-adjust:100%; ascent-override:95%; descent-override:24%; line-gap-override:0%; }
+/* ── ШРИФТЫ (self-host woff2, кириллица проверена) ───────────────────────────
+   Дисплей/заголовки = Antiqva (антиква/сериф). Текст/UI = Rooftop.
+   Оба — одно начертание; диапазон font-weight 400–900 → без синтетического
+   болда (иерархия — кеглем). */
+@font-face { font-family:"Antiqva"; font-weight:400 900; font-style:normal; font-display:swap; src:url("/fonts/antiqva-regular.woff2") format("woff2"); }
+@font-face { font-family:"Rooftop"; font-weight:400 900; font-style:normal; font-display:swap; src:url("/fonts/rooftop-regular.woff2") format("woff2"); }
 
 :root {
-  --font-display: "Druk","Druk-fb",Arial,sans-serif;
-  --font-body: "Dexa","Dexa-fb",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-display: "Antiqva", Georgia, "Times New Roman", serif;
+  --font-body: "Rooftop", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* ── ЦВЕТОВОЙ ЗАКОН: чёрный + белый, серые — смеси ── */
   --ink: #0b0b0b;
@@ -524,26 +516,24 @@ textarea.field { resize: vertical; min-height: 4em; }
    срезается краем экрана). --ph-band — высота полосы (десктоп/мобайл). */
 .hxf { position: relative; justify-content: center; align-items: stretch;
   padding: var(--header-h) 0 var(--ph-band); overflow: clip; --ph-band: min(42.5vw, 66vh);
-  background: #f5f2ec; } /* чуть тёплый белый (реф макет) */
+  background: #ffffff; } /* абсолютно белый */
 .hxf-manifest { text-align: center; max-width: 46rem; margin: 0 auto; padding-inline: var(--gutter); }
 .hxf-lead { font-family: var(--font-body); font-weight: 500; text-transform: none;
   font-size: clamp(1.25rem, 0.9rem + 1.9vw, 2.1rem); line-height: 1.18; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
 .hxf-sub { margin: clamp(0.9rem, 2.4vh, 1.5rem) auto 0; max-width: 34rem;
   font-size: clamp(0.95rem, 0.86rem + 0.42vw, 1.12rem); line-height: 1.56; letter-spacing: 0.018em; color: var(--fg-2); text-wrap: balance; }
 
-/* HERO-надпись — фоторендер AUREA (PNG/WebP), край-в-край, слово целиком в кадре.
-   Слои: .ph-enter (появление, CSS-автоплей) → .ph-stage (JS: дыхание/параллакс)
-   → picture; .ph-dust — canvas живой пыли поверх. Всё на transform/opacity.
-   Высота полосы фиксирована (min(42.5vw,66vh)) → CLS = 0. */
-.ph { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ph-band); perspective: 1100px; pointer-events: none; }
-.ph-enter, .ph-stage { position: absolute; inset: 0; transform-origin: 50% 100%; }
-.ph-stage { will-change: transform, opacity; }
-.ph picture, .ph img { display: block; width: 100%; height: 100%; }
-.ph img { object-fit: contain; object-position: center bottom; }
-.ph-dust { position: absolute; inset: 0; width: 100%; height: 100%; }
-.ph-enter { animation: phIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
-@keyframes phIn { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .ph-enter { animation: none; } }
+/* HERO-надпись — 3D-облако сфер (Three.js) в полосе снизу, край-в-край.
+   Высота полосы фиксирована (CLS = 0); канвас декоративный, aria-hidden. */
+.ph { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ph-band); }
+.ph-gl { display: block; width: 100%; height: 100%; }
+
+/* Кинематографичный вход сцены (вместо прелоадера): манифест построчно снизу,
+   частицы собираются своим входом. */
+.hxf-lead { animation: hxUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.hxf-sub { animation: hxUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.30s both; }
+@keyframes hxUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hxf-lead, .hxf-sub { animation: none; } }
 @media (max-width: 880px) { .site-header-cta { display: none; } }
 
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

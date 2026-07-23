@@ -38,9 +38,9 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Preload LCP-дисплея (Druk Super — заголовок героя) + Dexa для тела */}
-        <link rel="preload" href="/fonts/druk-super.woff2" as="font" type="font/woff2" crossOrigin="" />
-        <link rel="preload" href="/fonts/dexa-regular.woff2" as="font" type="font/woff2" crossOrigin="" />
+        {/* Preload шрифтов: Antiqva (заголовки/LCP-манифест) + Rooftop (тело) */}
+        <link rel="preload" href="/fonts/antiqva-regular.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/rooftop-regular.woff2" as="font" type="font/woff2" crossOrigin="" />
       </head>
       <body>
         {/* Класс .js навешивается синхронно → CSS может прятать [data-reveal]

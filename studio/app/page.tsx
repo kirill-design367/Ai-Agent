@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import HomeLite from "@/components/home/HomeLite";
-import Preloader from "@/components/kit/Preloader";
 import { buildMetadata } from "@/lib/seo/meta";
 
 export const metadata: Metadata = buildMetadata({
@@ -23,7 +22,6 @@ export const metadata: Metadata = buildMetadata({
 export default function Home() {
   return (
     <>
-      <Preloader />
       <SiteHeader />
       <HomeLite />
       <SiteFooter />

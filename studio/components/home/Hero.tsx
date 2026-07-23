@@ -1,6 +1,6 @@
 "use client";
 
-import HeroImage from "@/components/home/HeroImage";
+import Hero3D from "@/components/home/Hero3D";
 
 /*
   HERO — финальная спецификация (реф Active Theory / Lusion; вертикаль MONOLOG).
@@ -27,7 +27,7 @@ function HeroInner() {
           на&nbsp;доверие с&nbsp;первого взгляда.
         </p>
       </div>
-      <HeroImage />
+      <Hero3D />
     </section>
   );
 }
