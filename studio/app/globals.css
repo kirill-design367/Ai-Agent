@@ -134,59 +134,45 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-header-brand.is-min .logo-clip { width: 56px; }
 .site-header-brand.is-min .site-logo { height: 68px; }
 .site-header-brand.is-min .lg-rest { opacity: 0; }
-/* правая группа: CTA «Обсудить проект» + «меню» (тем же весом). hover CTA —
-   мягкое раскрытие трекинга; «меню» — вычерчиваемое подчёркивание. */
+/* правая группа: CTA «Обсудить проект» + «меню» (тем же весом). hover обоих —
+   мягкое раскрытие трекинга (буквы «дышат»); амплитуда сдержанная. */
 .site-header-right { margin-left: auto; display: inline-flex; align-items: baseline; gap: clamp(0.9rem, 2vw, 2rem); }
 .site-header-cta { border: 0; background: none; box-shadow: none; font-weight: 600; font-size: 0.85rem; outline: none; }
 .site-menu-btn { border: 0; padding: 0; background: none; color: inherit; cursor: pointer; outline: none;
   font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
 .site-header-cta:focus, .site-menu-btn:focus { outline: none; }
+.cta-txt { display: inline-block; letter-spacing: 0.02em;
+  transition: letter-spacing 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+.site-header-cta:hover .cta-txt, .site-header-cta:focus-visible .cta-txt,
+.site-menu-btn:hover .cta-txt, .site-menu-btn:focus-visible .cta-txt,
+.site-menu-wrap:hover .cta-txt { letter-spacing: 0.1em; }
+@media (prefers-reduced-motion: reduce) { .cta-txt { transition: none; } }
 
-/* ── ЕДИНЫЙ masked-flip для интерактивного текста (CTA, «меню», пункты меню):
-   на hover/фокус текст сдвигается по вертикали под маской, его дублёр приходит
-   снизу. Одна механика на весь сайт. Амплитуда сдержанная (маска = кегль, а не
-   вся строка), кривая мягкая, длительность спокойная, без scale/сдвига по X. */
-.flip { display: inline-block; overflow: hidden; position: relative; vertical-align: bottom; }
-.flip-i { display: block; line-height: 1.05; transition: transform 0.52s cubic-bezier(0.25, 1, 0.5, 1); }
-.flip-i--copy { position: absolute; inset: 0; transform: translateY(100%); }
-.site-header-cta:hover .flip-i, .site-header-cta:focus-visible .flip-i,
-.site-menu-btn:hover .flip-i, .site-menu-btn:focus-visible .flip-i,
-.nav-panel-l:hover .flip-i, .nav-panel-l:focus-visible .flip-i { transform: translateY(-100%); }
-.site-header-cta:hover .flip-i--copy, .site-header-cta:focus-visible .flip-i--copy,
-.site-menu-btn:hover .flip-i--copy, .site-menu-btn:focus-visible .flip-i--copy,
-.nav-panel-l:hover .flip-i--copy, .nav-panel-l:focus-visible .flip-i--copy { transform: translateY(0); }
-@media (prefers-reduced-motion: reduce) { .flip-i { transition: none; } }
-
-/* ── КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ (реф noth.in): небольшая карточка у слова «меню».
-   БЕЗ рамки и тени вообще. Отделяется только ЛИНИЯМИ-РАЗДЕЛИТЕЛЯМИ под каждым
-   пунктом (1px, почти чёрные #1a1a1a), которые ВЫЧЕРЧИВАЮТСЯ слева направо при
-   раскрытии со стаггером — вместе с появлением пунктов. hover пункта — тот же
-   masked-flip, что у CTA. Страница под панелью живая, не затемнена. */
-.nav-panel { position: fixed; z-index: 250; top: calc(var(--header-h) - 16px); right: var(--gutter);
-  width: min(272px, 82vw); background: transparent; color: #0a0a0a;
-  border: 0; box-shadow: none; padding: 12px 2px 2px 2px; transform-origin: top right;
-  opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0s linear 0.4s; }
-.nav-panel.is-open { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition-delay: 0s, 0s, 0s; }
-.nav-panel-list { display: flex; flex-direction: column; }
-.nav-panel-l { position: relative; display: block; padding: 11px 6px; color: #0a0a0a;
-  font-family: var(--font-body); font-weight: 600; font-size: 1.06rem; letter-spacing: 0.005em; outline: none; }
-/* линия-разделитель под пунктом — вычерчивается слева направо при раскрытии */
-.nav-panel-l::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
-  background: #1a1a1a; transform: scaleX(0); transform-origin: left;
-  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1); }
-.nav-panel.is-open .nav-panel-l::after { transform: scaleX(1); transition-delay: calc(0.05s + var(--i) * 0.05s); }
-/* появление пункта (flip-контейнер) — вместе с линией, со стаггером */
-.nav-panel-l .flip { opacity: 0; transform: translateY(45%);
-  transition: opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
-.nav-panel.is-open .nav-panel-l .flip { opacity: 1; transform: none; transition-delay: calc(0.05s + var(--i) * 0.05s); }
-@media (max-width: 760px) { .nav-panel { width: min(78vw, 300px); } .nav-panel-l { font-size: 1.12rem; padding: 13px 6px; } }
+/* ── МЕНЮ БЕЗ ПАНЕЛИ: пункты выезжают снизу из-под маски прямо под словом «меню»,
+   выровнены по правому краю. Нет фона/карточки/рамки — только текст и линии.
+   hover-зона = вся группа (.site-menu-wrap), чтобы меню не схлопывалось при
+   движении курсора к пунктам. Появление — stagger 50мс cubic-bezier(0.16,1,0.3,1),
+   уход — в обратном порядке. Тач — по классу .is-open (тап). ── */
+.site-menu-wrap { position: relative; }
+.site-menu-drop { position: absolute; top: 100%; right: 0; padding-top: 14px;
+  display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+.site-menu-wrap:hover .site-menu-drop, .site-menu-wrap:focus-within .site-menu-drop,
+.site-menu-wrap.is-open .site-menu-drop { pointer-events: auto; }
+.site-menu-item { position: relative; display: block; overflow: hidden; padding: 7px 0; text-align: right; color: inherit; }
+.site-menu-item-in { display: block; font-family: var(--font-body); font-weight: 600; font-size: 0.95rem;
+  letter-spacing: 0.01em; white-space: nowrap; transform: translateY(150%);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--ri) * 0.05s); }
+.site-menu-wrap:hover .site-menu-item-in, .site-menu-wrap:focus-within .site-menu-item-in,
+.site-menu-wrap.is-open .site-menu-item-in { transform: translateY(0); transition-delay: calc(var(--i) * 0.05s); }
+/* линия-разделитель под пунктом — проявляется вместе с пунктом (тем же стаггером) */
+.site-menu-item::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: right;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--ri) * 0.05s); }
+.site-menu-wrap:hover .site-menu-item::after, .site-menu-wrap:focus-within .site-menu-item::after,
+.site-menu-wrap.is-open .site-menu-item::after { transform: scaleX(1); transition-delay: calc(var(--i) * 0.05s); }
+@media (max-width: 760px) { .site-menu-item-in { font-size: 1rem; } }
 @media (prefers-reduced-motion: reduce) {
-  .nav-panel { transition: opacity 0.2s linear, visibility 0s linear 0.2s; transform: none; }
-  .nav-panel.is-open { transition-delay: 0s; }
-  .nav-panel-l::after { transition: none; }
-  .nav-panel-l .flip { transition: opacity 0.2s linear; transform: none; }
+  .site-menu-item-in, .site-menu-item::after { transition: none; }
 }
 
 /* ── ПЛАВАЮЩАЯ CTA (только мобайл ≤768) — доступ к контакту при скролле ── */
@@ -202,7 +188,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .mfab.is-in:active { transform: scale(0.97); }
 @media (min-width: 769px) { .mfab { display: none; } }
 /* при открытом оверлей-меню — прячем, чтобы не перекрывать пункты */
-:root:has(.nav-panel.is-open) .mfab { opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none; }
+:root:has(.site-menu-wrap.is-open) .mfab { opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .mfab { transition: none; transform: none; } .mfab.is-in { transform: none; } }
 
 /* ═══════════════ КНОПКИ — тихая роскошь, живой отклик ═══════════════ */

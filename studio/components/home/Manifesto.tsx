@@ -32,46 +32,59 @@ export default function Manifesto() {
       items.forEach((i) => i.classList.add("is-in"));
       return;
     }
-    // Появление групп при входе в вьюпорт — работает и на мобиле, и на десктопе
-    // (лёгкие CSS-переходы, на скролл не влияют): AUREA побуквенно из-под маски,
-    // строка-статья сдвигом, манифест построчно из-под маски со stagger.
-    const io = new IntersectionObserver((es) => {
-      for (const e of es) if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
-    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.2 });
-    const vh = window.innerHeight;
-    items.forEach((i) => io.observe(i));
+    const dbg = !!(window as unknown as { __mfDbg?: boolean }).__mfDbg;
 
-    // ── ПАРАЛЛАКС по скроллу (только transform) — ТОЛЬКО десктоп: острова расходятся
-    //    по вертикали. На мобиле (одна колонка) параллакс выключен — сдвиг transform
-    //    выталкивал текст за высоту секции и резал его + давал рывки. Анимации
-    //    появления (выше) при этом остаются.
-    if (!window.matchMedia("(min-width: 761px)").matches) return () => io.disconnect();
+    // ── ПОЯВЛЕНИЕ — ДЕТЕРМИНИРОВАННО по РЕАЛЬНОЙ позиции (не IntersectionObserver).
+    //    На каждом скролле через rAF проверяем getBoundingClientRect().top: как только
+    //    элемент выше 85% высоты вьюпорта — ставим is-in (CSS-переход отыгрывает
+    //    появление). Не зависит от таймингов IO/iOS и НЕ может «отыграть заранее»:
+    //    класс ставится строго когда элемент реально виден. Взводится после того, как
+    //    стартовый форс-скролл к hero улёгся (иначе блок мог пометиться при загрузке).
+    const isDesktop = window.matchMedia("(min-width: 761px)").matches;
     const head = el.querySelector<HTMLElement>(".mf2-head");
     const man = el.querySelector<HTMLElement>(".mf2-manifesto");
-    let blockTop = 0, praf = 0, prunning = false;
+    let pending = items.slice();
+    let armed = false, rafReveal = 0, rafPar = 0, queued = false, blockTop = 0;
     const measure = () => { blockTop = el.getBoundingClientRect().top + (window.scrollY || 0); };
     measure();
-    // сильный пин (почти стоит), но с ПОТОЛКОМ: после ~полэкрана скролла элемент
-    // «отпускается» и уезжает вместе со страницей → не наплывает на след. блок.
-    const clampY = (prog: number, k: number, cap: number) =>
-      Math.max(-0.25 * vh, Math.min(cap * vh, prog * k));
-    const ploop = () => {
-      prunning = false;
+    const clampY = (prog: number, k: number, cap: number) => {
+      const vh = window.innerHeight;
+      return Math.max(-0.25 * vh, Math.min(cap * vh, prog * k));
+    };
+
+    // ПОЯВЛЕНИЕ: НЕПРЕРЫВНЫЙ rAF-цикл (не зависит от scroll-событий — на iOS во время
+    // инерции они приходят редко/рывками). Крутится только пока есть непоявившиеся
+    // группы, затем сам останавливается. Класс ставится строго по реальной позиции.
+    const revealLoop = () => {
+      rafReveal = requestAnimationFrame(revealLoop);
+      if (!armed) return;
+      const vh = window.innerHeight;
+      pending = pending.filter((i) => {
+        if (i.getBoundingClientRect().top < vh * 0.85) { i.classList.add("is-in"); if (dbg) console.log("[mf2] reveal", i.className, "@scrollY", Math.round(window.scrollY)); return false; }
+        return true;
+      });
+      if (!pending.length) { cancelAnimationFrame(rafReveal); rafReveal = 0; }
+    };
+    rafReveal = requestAnimationFrame(revealLoop);
+    // взводим появление после стартового форс-скролла (SmoothScroll держит верх ~1.5с)
+    const armT = window.setTimeout(() => { armed = true; if (dbg) console.log("[mf2] armed; pending", pending.length); }, 1600);
+
+    // ПАРАЛЛАКС островов — только десктоп (на мобиле одна колонка, transform ломал бы
+    // вёрстку). Скролл-триггер + rAF (не на каждом кадре впустую).
+    const par = () => {
+      queued = false;
+      if (!isDesktop) return;
       const prog = (window.scrollY || 0) - blockTop;
-      // мягкий параллакс: левый остров почти стоит (apparent ~0.15× = k 0.85),
-      // манифест чуть быстрее (apparent ~0.28× = k 0.72). Небольшие потолки, чтобы
-      // острова расходились деликатно и оставались в ОДНОМ визуальном поле.
       if (head) head.style.transform = `translate3d(0, ${clampY(prog, 0.85, 0.34).toFixed(1)}px, 0)`;
       if (man) man.style.transform = `translate3d(0, ${clampY(prog, 0.72, 0.26).toFixed(1)}px, 0)`;
     };
-    const onParallax = () => { if (!prunning) { prunning = true; praf = requestAnimationFrame(ploop); } };
-    ploop();
-    window.addEventListener("scroll", onParallax, { passive: true });
+    const onScroll = () => { if (!queued) { queued = true; rafPar = requestAnimationFrame(par); } };
+    if (isDesktop) { window.addEventListener("scroll", onScroll, { passive: true }); par(); }
     window.addEventListener("resize", measure);
 
     return () => {
-      io.disconnect(); cancelAnimationFrame(praf);
-      window.removeEventListener("scroll", onParallax); window.removeEventListener("resize", measure);
+      cancelAnimationFrame(rafReveal); cancelAnimationFrame(rafPar); window.clearTimeout(armT);
+      window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure);
     };
   }, []);
 

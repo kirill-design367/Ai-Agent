@@ -2,18 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /*
   ШАПКА — узкая верхняя панель (реф noth.in / MONOLOG):
-  • лого AUREA слева — ВЕКТОРНЫЙ вордмарк; при прокрутке сворачивается до Λ
-    (крупный акцент, вровень по весу с правой группой);
-  • справа — два элемента в ряд: «Обсудить проект» (CTA) и «меню» (строчными,
-    тем же весом) — открывает ПОЛНОЭКРАННЫЙ оверлей;
-  • оверлей: пункты крупным кеглем (Druk) слева друг под другом со стаггером,
-    внизу — контакты. Закрытие: «закрыть», Esc, клик по фону. Бургера нет —
-    одна механика на десктопе и мобиле.
-  mix-blend-difference → авто-контраст ч/б. Панель sticky, CLS=0.
+  • лого AUREA слева — ВЕКТОРНЫЙ вордмарк; при прокрутке сворачивается до Λ;
+  • справа — «Обсудить проект» (CTA) и «меню». hover обоих — мягкое раскрытие
+    трекинга (буквы «дышат»);
+  • «меню»: при наведении пункты ВЫЕЗЖАЮТ снизу из-под маски прямо под словом,
+    выровнены по правому краю, без панели/фона/рамки (только текст + линии).
+    На тач — раскрытие по тапу, закрытие повторным тапом/тапом вне.
+  mix-blend-difference → авто-контраст ч/б. Панель fixed, CLS=0.
 */
 const NAV = [
   { href: "/uslugi/", label: "Услуги" },
@@ -23,17 +22,6 @@ const NAV = [
   { href: "/o-studii/", label: "О студии" },
   { href: "/kontakty/", label: "Контакты" },
 ];
-
-// Единый masked-flip для интерактивного текста (CTA «Обсудить проект», «меню»,
-// пункты меню): один компонент → одна механика на весь сайт.
-function Flip({ children }: { children: ReactNode }) {
-  return (
-    <span className="flip">
-      <span className="flip-i">{children}</span>
-      <span className="flip-i flip-i--copy" aria-hidden>{children}</span>
-    </span>
-  );
-}
 
 // Векторный вордмарк — полилинии по тем же координатам, что particle-надпись.
 function Logo() {
@@ -61,8 +49,7 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isContactPage = !!pathname && pathname.startsWith("/kontakty");
-  const panelRef = useRef<HTMLDivElement>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   // при прокрутке логотип сворачивается в Λ
   const [scrolled, setScrolled] = useState(false);
@@ -73,15 +60,13 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // закрытие панели при смене маршрута
+  // закрытие меню при смене маршрута
   useEffect(() => setOpen(false), [pathname]);
-  // компактная панель: закрытие по Esc и клику ВНЕ панели/кнопки. Страница НЕ
-  // блокируется и не затемняется — остаётся живой (скролл под панелью работает).
+  // тач: закрытие по тапу ВНЕ группы и по Esc. Страница не блокируется.
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (panelRef.current?.contains(t) || btnRef.current?.contains(t)) return;
+      if (wrapRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
@@ -118,36 +103,39 @@ export default function SiteHeader() {
 
           <div className="site-header-right">
             <Link href="/kontakty/" className="site-header-cta">
-              <Flip>Обсудить проект</Flip>
+              <span className="cta-txt">Обсудить проект</span>
             </Link>
-            <button
-              ref={btnRef}
-              type="button"
-              className="site-menu-btn"
-              aria-label={open ? "Закрыть меню" : "Открыть меню"}
-              aria-expanded={open}
-              aria-haspopup="menu"
-              onClick={() => setOpen((v) => !v)}
-            >
-              <Flip>меню</Flip>
-            </button>
+
+            {/* «меню» + выезжающие пункты (без панели). hover-зона = вся группа,
+                чтобы меню не схлопывалось при движении курсора к пунктам. */}
+            <div className={`site-menu-wrap${open ? " is-open" : ""}`} ref={wrapRef}>
+              <button
+                type="button"
+                className="site-menu-btn"
+                aria-label={open ? "Закрыть меню" : "Открыть меню"}
+                aria-expanded={open}
+                aria-haspopup="menu"
+                onClick={() => setOpen((v) => !v)}
+              >
+                <span className="cta-txt">меню</span>
+              </button>
+              <div className="site-menu-drop" role="menu">
+                {NAV.map((n, i) => (
+                  <Link
+                    key={n.href}
+                    href={n.href}
+                    className="site-menu-item"
+                    style={{ ["--i" as string]: i, ["--ri" as string]: NAV.length - 1 - i }}
+                    role="menuitem"
+                  >
+                    <span className="site-menu-item-in">{n.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </header>
-
-      {/* КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ — привязана к слову «меню», правый верхний угол.
-          Только разделы. Без рамки/тени — под каждым пунктом линия-разделитель,
-          вычерчивается при раскрытии со стаггером. hover — тот же masked-flip, что
-          у CTA. Страница под панелью не затемняется и остаётся живой. */}
-      <div ref={panelRef} className={`nav-panel${open ? " is-open" : ""}`} role="menu" aria-hidden={!open}>
-        <nav className="nav-panel-list" aria-label="Разделы">
-          {NAV.map((n, i) => (
-            <Link key={n.href} href={n.href} className="nav-panel-l" style={{ ["--i" as string]: i }} role="menuitem" tabIndex={open ? undefined : -1}>
-              <Flip>{n.label}</Flip>
-            </Link>
-          ))}
-        </nav>
-      </div>
 
       {/* Плавающая CTA — только мобайл */}
       <Link

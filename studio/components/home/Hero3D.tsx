@@ -408,10 +408,15 @@ export default function Hero3D() {
     const sync = () => { if (docVis && (window.scrollY || 0) < DISSOLVE * H) start(); else stop(); };
 
     // старт
+    const _t0 = performance.now();
     build(); captureSize(); resize();
-    // курсор активен СРАЗУ по завершении сборки (без лишних таймаутов); адаптив выключен.
-    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.4, ease: "power2.out", onComplete: () => { ready = true; } }); uni.uBreath.value = 1; }
+    // КУРСОР АКТИВЕН СРАЗУ (без ожидания конца сборки/таймаутов/замера FPS): ready
+    // выставляется в этом же кадре, реакция доступна с первого движения мыши.
+    // Входная анимация (uEnter 0→1) идёт параллельно и на готовность не влияет.
+    if (!reduce) { ready = true; uni.uBreath.value = 1; gsap.to(uni.uEnter, { value: 1, duration: 1.4, ease: "power2.out" }); }
     else { ready = true; renderer.render(scene, cam); }
+    if (typeof window !== "undefined" && (window as unknown as { __heroDbg?: boolean }).__heroDbg)
+      console.log("[hero] effect start→ready:", Math.round(performance.now() - _t0), "ms; ready=", ready);
     sync();
 
     const onVis = () => { docVis = document.visibilityState !== "hidden"; sync(); };
