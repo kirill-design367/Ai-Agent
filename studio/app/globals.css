@@ -121,7 +121,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-header { position: fixed; inset: 0 0 auto 0; z-index: 200; height: var(--header-h); display: flex; align-items: center; mix-blend-mode: difference; color: #fff; }
 /* mix-blend-difference: панель авто-контрастна на любом фоне (ч/б) */
 .site-header-in { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); display: flex; align-items: center; gap: var(--sp-4); }
-.site-logo { display: block; height: 20px; width: auto; }
+.site-logo { display: block; height: 20px; width: auto; transition: height 0.5s var(--ease); }
 .site-logo-seed { position: relative; }
 .site-logo-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-left: 4px; align-self: flex-end; margin-bottom: 0.18em; }
 .site-header-brand { color: inherit; }
@@ -130,14 +130,16 @@ input, textarea, select { font: inherit; color: inherit; }
 .logo-clip { display: inline-block; overflow: hidden; width: 76px; line-height: 0;
   transition: width 0.5s var(--ease); }
 .lg-rest { transition: opacity 0.45s var(--ease); }
-.site-header-brand.is-min .logo-clip { width: 16px; }
+/* при прокрутке остаётся только Λ, но КРУПНЕЕ (~2.3×) — полноценный знак бренда */
+.site-header-brand.is-min .logo-clip { width: 38px; }
+.site-header-brand.is-min .site-logo { height: 46px; }
 .site-header-brand.is-min .lg-rest { opacity: 0; }
 .site-nav { display: none; }
 .site-nav-l { position: relative; display: inline-flex; align-items: center; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
 .nav-dot { flex: none; width: 0; height: 5px; border-radius: 50%; background: currentColor; opacity: 0;
-  transition: width 0.4s var(--ease), opacity 0.4s var(--ease); }
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .nav-txt { position: relative; display: inline-block; max-width: 9rem; overflow: hidden; white-space: nowrap;
-  transition: max-width 0.45s var(--ease), opacity 0.35s var(--ease); }
+  transition: max-width 0.62s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .nav-txt::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
 .site-nav-l:hover .nav-txt::after { transform: scaleX(1); }
 /* CTA — только текст: ни рамки, ни фона, ни тени, ни обрезки. hover = мягкое
@@ -177,15 +179,43 @@ input, textarea, select { font: inherit; color: inherit; }
   .site-nav.is-shown .site-nav-l:nth-child(4) { transition-delay: 0.17s; }
   .site-nav.is-shown .site-nav-l:nth-child(5) { transition-delay: 0.22s; }
   .site-nav.is-shown .site-nav-l:nth-child(6) { transition-delay: 0.27s; }
-  /* при прокрутке табы схлопываются в точки (одна на пункт); hover группы —
-     плавно разворачивает обратно в полноценное меню; уход — снова точки. */
-  .site-nav.is-dots { gap: 0.8rem; transition: gap 0.4s var(--ease); }
-  .site-nav.is-dots .site-nav-l { transition-delay: 0s; }
+  /* При прокрутке табы схлопываются в компактную группу точек (одна на пункт),
+     hover группы — плавно разворачивает обратно (реф noth.in «works»): пункты
+     стягиваются к центру НЕРАВНОМЕРНО — у каждого своя задержка (от краёв к
+     центру при сжатии, вразнобой при раскрытии), кривая одна, без резких
+     переключений. gap сжимается → слова наезжают друг на друга и гаснут в точки. */
+  .site-nav.is-dots { gap: 0.7rem; transition: gap 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
   .site-nav.is-dots .nav-txt { max-width: 0; opacity: 0; }
   .site-nav.is-dots .nav-dot { width: 5px; opacity: 1; }
   .site-nav.is-dots:hover { gap: clamp(1rem, 2vw, 2.4rem); }
   .site-nav.is-dots:hover .nav-txt { max-width: 9rem; opacity: 1; }
   .site-nav.is-dots:hover .nav-dot { width: 0; opacity: 0; }
+  /* стаггер сжатия: крайние пункты стартуют первыми, центральные — последними */
+  .site-nav.is-dots .site-nav-l:nth-child(1) .nav-txt,
+  .site-nav.is-dots .site-nav-l:nth-child(1) .nav-dot { transition-delay: 0s; }
+  .site-nav.is-dots .site-nav-l:nth-child(6) .nav-txt,
+  .site-nav.is-dots .site-nav-l:nth-child(6) .nav-dot { transition-delay: 0.02s; }
+  .site-nav.is-dots .site-nav-l:nth-child(2) .nav-txt,
+  .site-nav.is-dots .site-nav-l:nth-child(2) .nav-dot { transition-delay: 0.06s; }
+  .site-nav.is-dots .site-nav-l:nth-child(5) .nav-txt,
+  .site-nav.is-dots .site-nav-l:nth-child(5) .nav-dot { transition-delay: 0.09s; }
+  .site-nav.is-dots .site-nav-l:nth-child(3) .nav-txt,
+  .site-nav.is-dots .site-nav-l:nth-child(3) .nav-dot { transition-delay: 0.13s; }
+  .site-nav.is-dots .site-nav-l:nth-child(4) .nav-txt,
+  .site-nav.is-dots .site-nav-l:nth-child(4) .nav-dot { transition-delay: 0.16s; }
+  /* стаггер раскрытия (hover): вразнобой — иной порядок задержек */
+  .site-nav.is-dots:hover .site-nav-l:nth-child(4) .nav-txt,
+  .site-nav.is-dots:hover .site-nav-l:nth-child(4) .nav-dot { transition-delay: 0s; }
+  .site-nav.is-dots:hover .site-nav-l:nth-child(2) .nav-txt,
+  .site-nav.is-dots:hover .site-nav-l:nth-child(2) .nav-dot { transition-delay: 0.05s; }
+  .site-nav.is-dots:hover .site-nav-l:nth-child(6) .nav-txt,
+  .site-nav.is-dots:hover .site-nav-l:nth-child(6) .nav-dot { transition-delay: 0.08s; }
+  .site-nav.is-dots:hover .site-nav-l:nth-child(1) .nav-txt,
+  .site-nav.is-dots:hover .site-nav-l:nth-child(1) .nav-dot { transition-delay: 0.12s; }
+  .site-nav.is-dots:hover .site-nav-l:nth-child(5) .nav-txt,
+  .site-nav.is-dots:hover .site-nav-l:nth-child(5) .nav-dot { transition-delay: 0.15s; }
+  .site-nav.is-dots:hover .site-nav-l:nth-child(3) .nav-txt,
+  .site-nav.is-dots:hover .site-nav-l:nth-child(3) .nav-dot { transition-delay: 0.18s; }
 }
 @media (min-width: 881px) and (prefers-reduced-motion: reduce) {
   .site-nav .site-nav-l { transition: opacity 0.2s linear; transform: none; }
@@ -606,34 +636,34 @@ textarea.field { resize: vertical; min-height: 4em; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ═══════════════ БЛОК 02 — MANIFESTO (словарная статья) ═══════════════
-   Композиция по φ: верхние ~38% пусты (догорают частицы hero), «Aurea» слева
-   (база ~38% высоты), манифест в правой нижней зоне (левый край 61.8%, верх
-   61.8%), между ними — диагональная пустота, в конце — пуант. Глубина 180vh:
-   группы проявляются в свои моменты прокрутки (каждая своим IO).
-   --mf-serif: mixed-case антиква для словоформы и пуанта (Antiqva — капитель без
-   строчных, поэтому здесь Georgia-стек; заменить при наличии брендовой антиквы). */
-:root { --aurea-fs: clamp(4.5rem, 13vw, 16rem); }
+   Разворот дорогого журнала: два смысловых острова, между ними тишина.
+   «Aurea» — заголовок словарной статьи слева сверху (кегль ~6vw, база ~38.2%
+   высоты блока), под ней ОДНА мелкая строка (транскрипция·часть речи·этимология).
+   Манифест — правая нижняя зона (левый край 61.8%, верх ~56%), правый край НЕ
+   доходит до края экрана (колонка «висит»). Между островами — большая
+   диагональная пустота. Глубина ~265vh: над «Aurea» ~120vh воздуха (догорают
+   частицы hero), затем события разнесены по прокрутке (каждое — свой IO). */
+:root { --aurea-fs: clamp(2.6rem, 6vw, 7rem); }
 .mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
 .mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
-  padding-inline: var(--gutter); min-height: 180vh; }
+  padding-inline: var(--gutter); min-height: 265vh; }
 
-/* Единый левый блок: AUREA + транскрипция + этимология, левый край на 4.5%,
-   отступы по φ; воздух над AUREA ~65vh (частицы hero догорают). */
-.mf2-head { position: absolute; left: 4.5%; top: 36%; will-change: transform; }
+/* Левый остров: AUREA + одна строка-статья, левый край на 4.5%, база ~38.2%. */
+.mf2-head { position: absolute; left: 4.5%; top: 34%; will-change: transform; }
 .mf2-word { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
   line-height: 0.9; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
 .mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom; }
 .mf2-l-in { display: inline-block; }
-.mf2-ipa { margin: calc(var(--aurea-fs) * 0.14) 0 0; font-family: var(--font-body);
-  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.15rem); letter-spacing: 0.02em; color: #4d4d4d; }
-.mf2-ipa-tr { color: #4d4d4d; margin-right: 0.7em; letter-spacing: 0.06em; }
-.mf2-etym { margin: calc(var(--aurea-fs) * 0.227) 0 0; max-width: 40ch; font-family: var(--font-body);
-  font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1rem); line-height: 1.55; color: #4d4d4d; }
-.mf2-etym i { font-style: italic; }
+/* транскрипция · часть речи · этимология — единой мелкой строкой под словом */
+.mf2-meta { margin: 1.15em 0 0; max-width: 64ch; font-family: var(--font-body);
+  font-size: 0.8rem; line-height: 1.55; letter-spacing: 0.01em; color: #4d4d4d; }
+.mf2-ipa-tr { letter-spacing: 0.06em; }
+.mf2-sep { margin: 0 0.55em; color: #a2a2a2; }
+.mf2-meta i { font-style: italic; }
 
-.mf2-manifesto { position: absolute; left: 61.8%; top: 50%; width: 38%; min-width: 22rem;
+.mf2-manifesto { position: absolute; left: 61.8%; top: 56%; width: 30%; min-width: 19rem;
   display: flex; flex-direction: column; gap: 0.9em; font-family: var(--font-body);
-  font-weight: 500; font-size: clamp(1.25rem, 1.1rem + 0.55vw, 1.55rem); line-height: 1.5; color: #1a1a1a;
+  font-weight: 500; font-size: clamp(1rem, 0.95rem + 0.3vw, 1.2rem); line-height: 1.55; color: #1a1a1a;
   will-change: transform; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
@@ -647,26 +677,24 @@ textarea.field { resize: vertical; min-height: 4em; }
 .mf2-word.is-in .mf2-l:nth-child(3) .mf2-l-in { transition-delay: 0.14s; }
 .mf2-word.is-in .mf2-l:nth-child(4) .mf2-l-in { transition-delay: 0.21s; }
 .mf2-word.is-in .mf2-l:nth-child(5) .mf2-l-in { transition-delay: 0.28s; }
-/* транскрипция/этимология — сдвиг слева-направо, после заголовка */
-.js .mf2-ipa, .js .mf2-etym {
+/* строка-статья — сдвиг слева-направо, с паузой после заголовка */
+.js .mf2-meta {
   opacity: 0; transform: translateX(-24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
-.mf2-ipa.is-in, .mf2-etym.is-in { opacity: 1; transform: none; }
-.mf2-ipa.is-in { transition-delay: 0.55s; }
-.mf2-etym.is-in { transition-delay: 0.72s; }
+.mf2-meta.is-in { opacity: 1; transform: none; transition-delay: 0.55s; }
 /* манифест — построчно из-под маски снизу, stagger */
 .js .mf2-ln { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 .mf2-manifesto.is-in p:nth-child(1) .mf2-ln { transform: translateY(0); transition-delay: 0.05s; }
 .mf2-manifesto.is-in p:nth-child(2) .mf2-ln { transform: translateY(0); transition-delay: 0.17s; }
 @media (prefers-reduced-motion: reduce) {
-  .js .mf2-l-in, .js .mf2-ipa, .js .mf2-etym, .js .mf2-ln {
+  .js .mf2-l-in, .js .mf2-meta, .js .mf2-ln {
     transition: none; opacity: 1; transform: none; }
 }
 
 /* ── Мобильная (одна колонка, φ-пропорции, левая ось, драматургия сохранена) ── */
 @media (max-width: 760px) {
-  :root { --aurea-fs: clamp(3.8rem, 25vw, 7rem); }
-  .mf2-inner { min-height: 0; padding-top: 40vh; padding-bottom: clamp(5rem, 16vh, 10rem);
+  :root { --aurea-fs: clamp(2.8rem, 17vw, 5rem); }
+  .mf2-inner { min-height: 0; padding-top: 62vh; padding-bottom: clamp(6rem, 18vh, 12rem);
     display: flex; flex-direction: column; }
   .mf2-head, .mf2-manifesto { position: static; left: auto; top: auto; right: auto; width: auto; }
-  .mf2-manifesto { min-width: 0; width: 100%; max-width: 42ch; margin-top: clamp(6rem, 24vh, 13rem); }
+  .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(8rem, 32vh, 16rem); }
 }
