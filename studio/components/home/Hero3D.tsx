@@ -200,8 +200,10 @@ export default function Hero3D() {
         gl_Position = projectionMatrix * mvPosition;
         vec2 _ndc = gl_Position.xy / gl_Position.w;
         float _fx = smoothstep(1.04, 0.72, abs(_ndc.x));            // мягкие боковые края
-        float _fyb = smoothstep(uFadeY1, uFadeY0, _base.y);         // низ канваса → в ноль
-        float _fyt = 1.0 - smoothstep(uFadeTop0, uFadeTop1, _base.y); // верх облака → в ноль
+        // индивидуальный порог затухания ±~0.2 world → край физически не ровный
+        float _fjit = (aReact - 1.0) * 0.28;
+        float _fyb = smoothstep(uFadeY1 + _fjit, uFadeY0 + _fjit, _base.y);         // низ → в ноль (нелинейно, вразнобой)
+        float _fyt = 1.0 - smoothstep(uFadeTop0 + _fjit, uFadeTop1 + _fjit, _base.y); // верх → в ноль (нелинейно, вразнобой)
         float _leave = 1.0 - smoothstep(0.16, 0.9, uScroll);        // растворение при уходе героя
         vFade = _fx * _fyb * _fyt * _leave;
       `);
@@ -342,14 +344,15 @@ export default function Hero3D() {
     // размеры/камера: слово сохраняет кегль (5.2 world на ширину вьюпорта) и
     // позицию (центр нижней полосы). Раскладка КЭШИРУЕТСЯ здесь (обновляется на
     // resize) → в кадре ни scroll-колбэк, ни курсор не читают layout.
-    let W = 0, H = 0, wpp = 1, camCY = 0;
+    let W = 0, H = 0, wpp = 1, camCY = 0, dispersing = false;
     let heroTopDoc = 0, heroH = 1, canvasTopDoc = 0, canvasLeft = 0;
+    const baseDpr = () => Math.min(2, window.devicePixelRatio || 1);
+    const applyRes = () => { renderer.setPixelRatio(baseDpr() * (dispersing ? 0.72 : 1)); renderer.setSize(W, H, false); };
     const resize = () => {
       const rect = el.getBoundingClientRect();
       const hero = (el.parentElement || el).getBoundingClientRect();
       W = Math.max(1, rect.width); H = Math.max(1, rect.height);
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-      renderer.setSize(W, H, false);
+      applyRes();
       const vw = window.innerWidth, vh = window.innerHeight;
       wpp = 5.2 / vw;                       // world-единиц на пиксель вьюпорта
       const halfW = wpp * W / 2, halfH = wpp * H / 2;
@@ -400,6 +403,9 @@ export default function Hero3D() {
       // прогресс разлёта — из кэша (без layout), мягкая интерполяция (частицы догоняют)
       const scrollTarget = Math.min(1, Math.max(0, (sy - heroTopDoc) / heroH));
       scrollCur += (scrollTarget - scrollCur) * 0.09; uni.uScroll.value = scrollCur;
+      // на время разлёта — рендер в 0.72× (в движении незаметно, кадры дешевле); гистерезис
+      if (!dispersing && scrollCur > 0.06) { dispersing = true; applyRes(); }
+      else if (dispersing && scrollCur < 0.02) { dispersing = false; applyRes(); }
       renderer.render(scene, cam);
       // разнос событий конца входа во времени (см. коммент выше)
       if (phase === 0) {

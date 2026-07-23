@@ -588,57 +588,61 @@ textarea.field { resize: vertical; min-height: 4em; }
    группы проявляются в свои моменты прокрутки (каждая своим IO).
    --mf-serif: mixed-case антиква для словоформы и пуанта (Antiqva — капитель без
    строчных, поэтому здесь Georgia-стек; заменить при наличии брендовой антиквы). */
-:root { --mf-serif: Georgia, "Times New Roman", "Playfair Display", serif; }
+/* --mf-serif: mixed-case антиква словоформы (Antiqva — капитель без строчных). */
+:root { --mf-serif: Georgia, "Times New Roman", serif; --aurea-fs: clamp(4.5rem, 13vw, 16rem); }
 .mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
 .mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
   padding-inline: var(--gutter); min-height: 180vh; }
 
-.mf2-head { position: absolute; left: 9%; top: 28%; }
-.mf2-word { margin: 0; overflow: hidden; font-family: var(--mf-serif); font-weight: 500;
-  text-transform: none; line-height: 0.92; font-size: clamp(4rem, 12vw, 15rem); letter-spacing: -0.01em; color: #000; }
-.mf2-word-in { display: inline-block; will-change: clip-path; }
-.mf2-ipa { margin: clamp(1.2rem, 3vh, 2.2rem) 0 0; font-family: var(--font-body);
+/* Единый левый блок: Aurea + транскрипция + этимология, левый край на 8%,
+   отступы по φ; база «Aurea» ~38.2% высоты блока (top подобран под кегль). */
+.mf2-head { position: absolute; left: 8%; top: 29%; }
+.mf2-word { margin: 0; font-family: var(--mf-serif); font-weight: 500; text-transform: none;
+  line-height: 0.9; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
+.mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.mf2-l-in { display: inline-block; }
+.mf2-ipa { margin: calc(var(--aurea-fs) * 0.14) 0 0; font-family: var(--font-body);
   font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.15rem); letter-spacing: 0.02em; color: #4d4d4d; }
 .mf2-ipa-tr { color: #4d4d4d; margin-right: 0.7em; letter-spacing: 0.06em; }
-
-.mf2-etym { position: absolute; left: 9%; top: 49%; margin: 0; max-width: 36ch;
-  font-family: var(--font-body); font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1rem); line-height: 1.55; color: #4d4d4d; }
+.mf2-etym { margin: calc(var(--aurea-fs) * 0.227) 0 0; max-width: 40ch; font-family: var(--font-body);
+  font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1rem); line-height: 1.55; color: #4d4d4d; }
 .mf2-etym i { font-style: italic; }
 
-.mf2-manifesto { position: absolute; left: 61.8%; top: 61.8%; width: 30%; min-width: 22rem;
-  display: flex; flex-direction: column; gap: 1.1em; font-family: var(--font-body);
-  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.22rem); line-height: 1.62; color: #1a1a1a; }
-.mf2-manifesto p { margin: 0; }
+.mf2-manifesto { position: absolute; left: 61.8%; top: 61.8%; width: 30%; min-width: 21rem;
+  display: flex; flex-direction: column; gap: 0.9em; font-family: var(--font-body);
+  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.22rem); line-height: 1.6; color: #1a1a1a; }
+.mf2-manifesto p { margin: 0; overflow: hidden; }
+.mf2-ln { display: block; }
 
-.mf2-final { position: absolute; left: 0; right: 0; top: 87%; margin: 0; text-align: center;
-  font-family: var(--mf-serif); font-weight: 500; color: #000; letter-spacing: -0.005em;
-  font-size: clamp(1.7rem, 1rem + 2.6vw, 3.4rem); line-height: 1.2; }
-.mf2-final-l { display: block; }
-.mf2-final-l + .mf2-final-l { font-style: italic; }
-
-/* ── Motion: reveal по группам (скрытое состояние только при JS) ── */
-.js .mf2-word-in { clip-path: inset(110% 0 0 0); transition: clip-path 1s cubic-bezier(0.16, 1, 0.3, 1); }
-.mf2-head.is-in .mf2-word-in { clip-path: inset(0 0 0 0); }
-.js .mf2-ipa, .js .mf2-etym, .js .mf2-manifesto p, .js .mf2-final-l {
-  opacity: 0; transform: translateY(18px); transition: opacity 0.75s var(--ease), transform 0.75s var(--ease); }
-.mf2-head.is-in .mf2-ipa { opacity: 1; transform: none; transition-delay: 0.55s; }
-.mf2-etym.is-in { opacity: 1; transform: none; }
-.mf2-manifesto.is-in p:nth-child(1) { opacity: 1; transform: none; }
-.mf2-manifesto.is-in p:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.18s; }
-.mf2-final.is-in .mf2-final-l:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.1s; }
-.mf2-final.is-in .mf2-final-l:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.34s; }
+/* ── Motion: reveal по группам (скрытое состояние только при JS) ──
+   «Aurea» — побуквенно из-под маски (stagger), oversloot-кривая. */
+.js .mf2-l-in { transform: translateY(115%); transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
+.mf2-word.is-in .mf2-l-in { transform: translateY(0); }
+.mf2-word.is-in .mf2-l:nth-child(1) .mf2-l-in { transition-delay: 0s; }
+.mf2-word.is-in .mf2-l:nth-child(2) .mf2-l-in { transition-delay: 0.07s; }
+.mf2-word.is-in .mf2-l:nth-child(3) .mf2-l-in { transition-delay: 0.14s; }
+.mf2-word.is-in .mf2-l:nth-child(4) .mf2-l-in { transition-delay: 0.21s; }
+.mf2-word.is-in .mf2-l:nth-child(5) .mf2-l-in { transition-delay: 0.28s; }
+/* транскрипция/этимология — сдвиг слева-направо, после заголовка */
+.js .mf2-ipa, .js .mf2-etym {
+  opacity: 0; transform: translateX(-24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.mf2-ipa.is-in, .mf2-etym.is-in { opacity: 1; transform: none; }
+.mf2-ipa.is-in { transition-delay: 0.55s; }
+.mf2-etym.is-in { transition-delay: 0.72s; }
+/* манифест — построчно из-под маски снизу, stagger */
+.js .mf2-ln { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.mf2-manifesto.is-in p:nth-child(1) .mf2-ln { transform: translateY(0); transition-delay: 0.05s; }
+.mf2-manifesto.is-in p:nth-child(2) .mf2-ln { transform: translateY(0); transition-delay: 0.17s; }
 @media (prefers-reduced-motion: reduce) {
-  .js .mf2-word-in, .js .mf2-ipa, .js .mf2-etym, .js .mf2-manifesto p, .js .mf2-final-l {
-    transition: none; opacity: 1; transform: none; clip-path: none; }
+  .js .mf2-l-in, .js .mf2-ipa, .js .mf2-etym, .js .mf2-ln {
+    transition: none; opacity: 1; transform: none; }
 }
 
-/* ── Мобильная (одна колонка, воздух между группами, глубина сохранена) ── */
+/* ── Мобильная (одна колонка, φ-пропорции, левая ось, драматургия сохранена) ── */
 @media (max-width: 760px) {
-  .mf2-inner { min-height: 0; padding-top: 42vh; padding-bottom: clamp(4rem, 12vh, 8rem);
+  :root { --aurea-fs: clamp(3.8rem, 25vw, 7rem); }
+  .mf2-inner { min-height: 0; padding-top: 40vh; padding-bottom: clamp(5rem, 16vh, 10rem);
     display: flex; flex-direction: column; }
-  .mf2-head, .mf2-etym, .mf2-manifesto, .mf2-final { position: static; left: auto; top: auto; right: auto; width: auto; }
-  .mf2-word { font-size: clamp(3.6rem, 24vw, 7rem); }
-  .mf2-etym { max-width: none; margin-top: clamp(3rem, 12vh, 7rem); }
-  .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(4rem, 16vh, 9rem); }
-  .mf2-final { text-align: left; margin-top: clamp(5rem, 20vh, 11rem); }
+  .mf2-head, .mf2-manifesto { position: static; left: auto; top: auto; right: auto; width: auto; }
+  .mf2-manifesto { min-width: 0; width: 100%; max-width: 42ch; margin-top: clamp(6rem, 24vh, 13rem); }
 }

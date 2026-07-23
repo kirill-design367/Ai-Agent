@@ -3,22 +3,24 @@
 import { useEffect, useRef } from "react";
 
 /*
-  БЛОК 02 — MANIFESTO. Словарная статья: «Aurea» как термин (mixed-case,
-  строчными — как в словаре). Композиция по золотому сечению: верхние ~38%
-  пустые (догорают частицы из hero), «Aurea» слева с базой ~38% высоты, манифест
-  в правой нижней зоне (левый край 61.8%, верх 61.8%), между ними — огромная
-  диагональная пустота. В конце — акцентный пуант. Глубина блока 180vh: группы
-  проявляются в свои моменты прокрутки (каждая своим IntersectionObserver), между
-  ними — паузы-воздух. Никакого скролл-скраба/WebGL. Частицы hero долетают сверху.
+  БЛОК 02 — MANIFESTO. Словарная статья. Композиция по φ: единый левый блок
+  (Aurea + транскрипция + этимология, левый край на 8%), манифест в правой нижней
+  зоне (левый край 61.8%, верх 61.8%), диагональная пустота между ними. Глубина
+  180vh: группы проявляются по мере прокрутки (каждая своим IO). Появление —
+  «Aurea» побуквенно из-под маски (stagger), транскрипция/этимология сдвигом
+  слева-направо, манифест построчно из-под маски. reduce-motion — всё сразу.
 
-  ШРИФТ «Aurea»/финала: заявлена Antiqva, но это капительная (unicase) гарнитура
-  без строчных — mixed-case в ней невозможен, а mixed-case здесь критичен. Поэтому
-  словоформа и пуант набраны элегантной mixed-case антиквой (Georgia-стек). При
-  наличии брендовой антиквы со строчными — заменить одной переменной --mf-serif.
+  Шрифт «Aurea»: заявлена Antiqva, но загруженный файл Antiqva — КАПИТЕЛЬ (unicase,
+  строчные нарисованы в высоту прописных, проверено по метрикам глифов), поэтому
+  mixed-case («не капс», критично по ТЗ) в ней невозможен. Словоформа набрана
+  mixed-case антиквой (переменная --mf-serif). При наличии брендовой антиквы со
+  строчными — заменить одной переменной.
 
-  Сохранено для другой секции (убрано отсюда по ТЗ):
-    «То, что делает первое впечатление ценнее, чем слова.»
+  Сохранено для отдельной секции (убрано отсюда по ТЗ):
+    «Хорошие бренды общаются. Великие бренды удивляют.»
 */
+const WORD = ["A", "u", "r", "e", "a"];
+
 export default function Manifesto() {
   const root = useRef<HTMLElement>(null);
 
@@ -32,10 +34,10 @@ export default function Manifesto() {
     }
     const io = new IntersectionObserver((es) => {
       for (const e of es) if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
-    }, { rootMargin: "0px 0px -16% 0px", threshold: 0.2 });
+    }, { rootMargin: "0px 0px -14% 0px", threshold: 0.25 });
     const vh = window.innerHeight;
     items.forEach((i) => {
-      if (i.getBoundingClientRect().top < vh * 0.85) i.classList.add("is-in"); // над сгибом — сразу
+      if (i.getBoundingClientRect().top < vh * 0.82) i.classList.add("is-in");
       else io.observe(i);
     });
     return () => io.disconnect();
@@ -44,31 +46,31 @@ export default function Manifesto() {
   return (
     <section ref={root} className="mf2" aria-labelledby="mf2-title" data-no-reveal>
       <div className="mf2-inner">
-        <div className="mf2-head mf2-rv">
-          <h2 className="mf2-word" id="mf2-title"><span className="mf2-word-in">Aurea</span></h2>
-          <p className="mf2-ipa"><span className="mf2-ipa-tr">[au·re·a]</span> существительное</p>
+        <div className="mf2-head">
+          <h2 className="mf2-word mf2-rv" id="mf2-title" aria-label="Aurea">
+            {WORD.map((ch, i) => (
+              <span className="mf2-l" key={i} aria-hidden><span className="mf2-l-in">{ch}</span></span>
+            ))}
+          </h2>
+          <p className="mf2-ipa mf2-rv"><span className="mf2-ipa-tr">[au·re·a]</span> существительное</p>
+          <p className="mf2-etym mf2-rv">
+            от&nbsp;лат. <i>aureus</i> — «золотой», «ценный», «совершенный»
+          </p>
         </div>
-
-        <p className="mf2-etym mf2-rv">
-          от&nbsp;лат. <i>aureus</i> — «золотой», «ценный», «совершенный»
-        </p>
 
         <div className="mf2-manifesto mf2-rv">
-          <p>
-            Вы&nbsp;уже делаете свою работу хорошо. Но&nbsp;сайт часто выглядит
-            так, будто стоит дешевле, чем то, что вы&nbsp;на&nbsp;самом деле создаёте.
-          </p>
-          <p>
-            Мы&nbsp;делаем цифровое присутствие, которое соответствует уровню
-            вашего дела. Когда первое впечатление совпадает с&nbsp;реальной
-            ценностью, доверие возникает ещё до&nbsp;первого разговора.
-          </p>
+          <p><span className="mf2-ln">
+            Сайт&nbsp;— это не&nbsp;про красиво. Это про то, выберут вас или
+            следующего в&nbsp;поиске.
+          </span></p>
+          <p><span className="mf2-ln">
+            Мы&nbsp;делаем сайты, которые продают: от&nbsp;лендинга частного
+            эксперта до&nbsp;полноценного сайта компании. Дизайн здесь&nbsp;—
+            инструмент, а&nbsp;не&nbsp;украшение. Каждый экран, каждая строка
+            и&nbsp;каждая пауза работают на&nbsp;одно&nbsp;— чтобы клиент дошёл
+            до&nbsp;заявки и&nbsp;не&nbsp;ушёл сравнивать.
+          </span></p>
         </div>
-
-        <p className="mf2-final mf2-rv">
-          <span className="mf2-final-l">Хорошие бренды общаются.</span>
-          <span className="mf2-final-l">Великие бренды удивляют.</span>
-        </p>
       </div>
     </section>
   );
