@@ -346,10 +346,32 @@ export default function Hero3D() {
       group.add(mesh);
     };
 
+    // ── 3D-ЯКОРЬ БЛОКА 02: кластер лаковых сфер (тот же matcap-материал), медленно
+    //    вращается и всплывает в диагональной пустоте по мере прокрутки — второй
+    //    центр тяжести. Отдельный меш/материал (hero-шейдер не трогает), один draw
+    //    call. Проявляется/уходит по скроллу; на грубых экранах меньше сфер. ──
+    const orbSphere = new THREE.SphereGeometry(1, coarse ? 14 : 24, coarse ? 10 : 18);
+    const orbMat = new THREE.MeshMatcapMaterial({ matcap, color: 0x0b0b0b, transparent: true, opacity: 0 });
+    const orb = new THREE.Group(); orb.position.x = -0.9; scene.add(orb);
+    let orbMesh: THREE.InstancedMesh | null = null;
+    const buildOrb = () => {
+      const n = coarse ? 22 : 44;
+      orbMesh = new THREE.InstancedMesh(orbSphere, orbMat, n);
+      const d = new THREE.Object3D();
+      for (let k = 0; k < n; k++) {
+        const gx = gauss(), gy = gauss(), gz = gauss(), rad = 0.56;
+        d.position.set(gx * rad, gy * rad * 0.9, gz * rad);
+        d.scale.setScalar(0.06 + Math.pow(Math.random(), 2.2) * 0.26); // крупные редки
+        d.updateMatrix(); orbMesh.setMatrixAt(k, d.matrix);
+      }
+      orbMesh.instanceMatrix.needsUpdate = true; orbMesh.frustumCulled = false;
+      orb.add(orbMesh);
+    };
+
     // ГЛОБАЛЬНЫЙ FIXED-КАНВАС во весь вьюпорт: слово 5.2 world на ширину экрана,
     // world 0 (центр слова) на ~76% высоты при scroll=0. Канвас не принадлежит
     // секциям → у частиц нет края на стыке hero↔manifesto.
-    let W = 0, H = 0, wpp = 1, camCY = 0, dispersing = false;
+    let W = 0, H = 0, wpp = 1, camCY = 0, halfH = 1, dispersing = false;
     const baseDpr = () => Math.min(2, window.devicePixelRatio || 1);
     const applyRes = () => { renderer.setPixelRatio(baseDpr() * (dispersing ? 0.7 : 1)); renderer.setSize(W, H, false); };
     const resize = () => {
@@ -357,7 +379,7 @@ export default function Hero3D() {
       W = Math.max(1, vw); H = Math.max(1, vh);
       applyRes();
       wpp = 5.2 / vw;
-      const halfW = wpp * W / 2, halfH = wpp * H / 2;
+      const halfW = wpp * W / 2; halfH = wpp * H / 2;
       camCY = 0.26 * wpp * H;               // world 0 → ~76% высоты экрана
       cam.left = -halfW; cam.right = halfW; cam.top = camCY + halfH; cam.bottom = camCY - halfH;
       cam.updateProjectionMatrix();
@@ -367,7 +389,7 @@ export default function Hero3D() {
     let mvx = 9e3, mvy = 9e3, tmvx = 9e3, tmvy = 9e3;
     let scrollCur = 0, running = false, docVis = true;
     let ready = reduce, pointerX = 0, pointerY = 0, hasPointer = false;
-    const DISSOLVE = 1.25;                  // за столько высот экрана облако растворилось → рендер стоп
+    const RENDER_END = 3.3;                 // hero растворился (~1.25H) + 3D-якорь блока 02 ушёл → рендер стоп
 
     const onMove = (e: PointerEvent) => { if (!ready) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
     const onLeave = () => { hasPointer = false; };
@@ -385,18 +407,32 @@ export default function Hero3D() {
       const st = Math.min(1, scrollPx / (0.85 * H));
       scrollCur += (st - scrollCur) * 0.12; uni.uScroll.value = scrollCur;
       uni.uScrollWorld.value = scrollPx * wpp;
+      // hero-облако полностью растворилось (>~1.45H) → скрываем его draw в блоке 02
+      // (виден только 3D-якорь): экономия на большом InstancedMesh.
+      if (mesh) mesh.visible = scrollPx < 1.45 * H;
+      // 3D-ЯКОРЬ блока 02: всплытие снизу вверх + медленное вращение + плавное
+      // появление/уход (не виден в hero и после блока). Дрейф по X — лёгкий.
+      const pOrb = Math.min(1, Math.max(0, (scrollPx - H) / (1.4 * H)));
+      const fOrb = 0.92 - pOrb * 0.55;                       // экранная доля: низ→середина-верх
+      orb.position.y = camCY + halfH * (1 - 2 * fOrb);
+      orb.position.x = -0.9 + Math.sin(uni.uTime.value * 0.12) * 0.12;
+      orb.rotation.y += 0.0030; orb.rotation.x = Math.sin(uni.uTime.value * 0.16) * 0.22;
+      const appear = Math.min(1, Math.max(0, (scrollPx - 0.8 * H) / (0.45 * H)));
+      const leave = 1 - Math.min(1, Math.max(0, (scrollPx - 2.55 * H) / (0.6 * H)));
+      orbMat.opacity = appear * leave;
+      orb.visible = orbMat.opacity > 0.002;
       // 0.7× во время активного скролла (в движении незаметно)
       const moving = scrollCur > 0.01 && scrollCur < 0.99;
       if (moving !== dispersing) { dispersing = moving; applyRes(); }
       renderer.render(scene, cam);
-      if (scrollPx > DISSOLVE * H) stop();      // облако растворилось → останавливаем rAF
+      if (scrollPx > RENDER_END * H) stop();     // hero + 3D-якорь ушли → останавливаем rAF
     };
     const start = () => { if (running) return; running = true; gsap.ticker.add(tick); };
     const stop = () => { if (!running) return; running = false; gsap.ticker.remove(tick); };
-    const sync = () => { if (docVis && (window.scrollY || 0) < DISSOLVE * H) start(); else stop(); };
+    const sync = () => { if (docVis && (window.scrollY || 0) < RENDER_END * H) start(); else stop(); };
 
     // старт
-    build(); resize();
+    build(); buildOrb(); resize();
     // курсор активен СРАЗУ по завершении сборки (без лишних таймаутов); адаптив выключен.
     if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.4, ease: "power2.out", onComplete: () => { ready = true; } }); uni.uBreath.value = 1; }
     else { ready = true; renderer.render(scene, cam); }
@@ -416,7 +452,8 @@ export default function Hero3D() {
       window.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll", onScrollWake); document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("resize", onRe);
-      mesh?.dispose(); sphere.dispose(); material.dispose(); matcap.dispose(); renderer.dispose();
+      mesh?.dispose(); orbMesh?.dispose(); orbSphere.dispose(); orbMat.dispose();
+      sphere.dispose(); material.dispose(); matcap.dispose(); renderer.dispose();
     };
   }, []);
 

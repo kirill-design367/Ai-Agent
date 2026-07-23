@@ -134,113 +134,53 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-header-brand.is-min .logo-clip { width: 56px; }
 .site-header-brand.is-min .site-logo { height: 68px; }
 .site-header-brand.is-min .lg-rest { opacity: 0; }
-.site-nav { display: none; }
-.site-nav-l { position: relative; display: inline-flex; align-items: center; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
-.nav-dot { flex: none; width: 0; height: 3px; border-radius: 50%; background: currentColor; opacity: 0;
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-.nav-txt { position: relative; display: inline-block; max-width: 9rem; overflow: hidden; white-space: nowrap;
-  transition: max-width 0.62s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-.nav-txt::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
-.site-nav-l:hover .nav-txt::after { transform: scaleX(1); }
-/* CTA — только текст: ни рамки, ни фона, ни тени, ни обрезки. hover = мягкое
-   раскрытие трекинга (буквы «дышат») — сдержанный премиальный микро-жест без
-   лишних элементов; высота стабильна, симметрично при уходе, авторская кривая,
-   работает во всех браузерах (letter-spacing анимируем везде, вкл. Safari). */
-.site-header-cta { margin-left: auto; border: 0; background: none; box-shadow: none;
-  font-weight: 600; font-size: 0.85rem; }
+/* правая группа: CTA «Обсудить проект» + «меню» (тем же весом). hover CTA —
+   мягкое раскрытие трекинга; «меню» — вычерчиваемое подчёркивание. */
+.site-header-right { margin-left: auto; display: inline-flex; align-items: baseline; gap: clamp(0.9rem, 2vw, 2rem); }
+.site-header-cta { border: 0; background: none; box-shadow: none; font-weight: 600; font-size: 0.85rem; }
 .cta-txt { display: inline-block; letter-spacing: 0.02em;
   transition: letter-spacing 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
 .site-header-cta:hover .cta-txt, .site-header-cta:active .cta-txt { letter-spacing: 0.2em; }
+.site-menu-btn { position: relative; border: 0; padding: 0; background: none; color: inherit; cursor: pointer;
+  font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
+.site-menu-btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform var(--dur-2) var(--ease); }
+.site-menu-btn:hover::after { transform: scaleX(1); transform-origin: left; }
 @media (prefers-reduced-motion: reduce) { .cta-txt { transition: none; } }
-/* margin-left:auto → на мобиле бургер уходит к ПРАВОМУ краю (лого слева, между
-   ними пусто); правый отступ = --gutter (симметрично отступу лого слева). */
-.site-burger { margin-left: auto; width: 34px; height: 18px; position: relative; display: inline-flex; }
-.site-burger span { position: absolute; left: 0; width: 100%; height: 2px; background: currentColor; transition: transform var(--dur-2) var(--ease), opacity var(--dur-1); }
-.site-burger span:nth-child(1) { top: 0; } .site-burger span:nth-child(2) { top: 8px; } .site-burger span:nth-child(3) { top: 16px; }
-.site-header.is-open .site-burger span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.site-header.is-open .site-burger span:nth-child(2) { opacity: 0; }
-.site-header.is-open .site-burger span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-/* Десктоп: текст-табы по центру, бургера нет (реф MONOLOG). */
-@media (min-width: 881px) {
-  .site-header-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
-  .site-header-brand { justify-self: start; }
-  .site-nav { display: flex; justify-self: center; gap: clamp(1rem, 2vw, 2.4rem); }
-  .site-header-cta { justify-self: end; margin-left: 0; }
-  .site-burger { display: none; }
-  /* Табы проявляются при прокрутке ко 2-му блоку (место зарезервировано → CLS=0):
-     на главной .site-nav без .is-shown — прозрачны; со стаггером выезжают вниз. */
-  .site-nav .site-nav-l { opacity: 0; transform: translateY(-7px);
-    transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
-  .site-nav.is-shown .site-nav-l { opacity: 1; transform: none; }
-  .site-nav.is-shown .site-nav-l:nth-child(1) { transition-delay: 0.02s; }
-  .site-nav.is-shown .site-nav-l:nth-child(2) { transition-delay: 0.07s; }
-  .site-nav.is-shown .site-nav-l:nth-child(3) { transition-delay: 0.12s; }
-  .site-nav.is-shown .site-nav-l:nth-child(4) { transition-delay: 0.17s; }
-  .site-nav.is-shown .site-nav-l:nth-child(5) { transition-delay: 0.22s; }
-  .site-nav.is-shown .site-nav-l:nth-child(6) { transition-delay: 0.27s; }
-  /* При прокрутке табы схлопываются в КОМПАКТНЫЙ, деликатный типографический знак
-     (ряд точек 3px, светлее — 0.5 currentColor, плотная группа), почти незаметный.
-     hover группы — плавно разворачивает: каждая точка ПРЕВРАЩАЕТСЯ в свой пункт
-     меню с неравномерной задержкой (реф noth.in «works»), без резких переключений. */
-  .site-nav.is-dots { gap: 0.34rem; transition: gap 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-  .site-nav.is-dots .nav-txt { max-width: 0; opacity: 0; }
-  .site-nav.is-dots .nav-dot { width: 3px; opacity: 0.5; }
-  .site-nav.is-dots:hover { gap: clamp(1rem, 2vw, 2.4rem); }
-  .site-nav.is-dots:hover .nav-txt { max-width: 9rem; opacity: 1; }
-  .site-nav.is-dots:hover .nav-dot { width: 0; opacity: 0; }
-  /* стаггер сжатия: крайние пункты стартуют первыми, центральные — последними */
-  .site-nav.is-dots .site-nav-l:nth-child(1) .nav-txt,
-  .site-nav.is-dots .site-nav-l:nth-child(1) .nav-dot { transition-delay: 0s; }
-  .site-nav.is-dots .site-nav-l:nth-child(6) .nav-txt,
-  .site-nav.is-dots .site-nav-l:nth-child(6) .nav-dot { transition-delay: 0.02s; }
-  .site-nav.is-dots .site-nav-l:nth-child(2) .nav-txt,
-  .site-nav.is-dots .site-nav-l:nth-child(2) .nav-dot { transition-delay: 0.06s; }
-  .site-nav.is-dots .site-nav-l:nth-child(5) .nav-txt,
-  .site-nav.is-dots .site-nav-l:nth-child(5) .nav-dot { transition-delay: 0.09s; }
-  .site-nav.is-dots .site-nav-l:nth-child(3) .nav-txt,
-  .site-nav.is-dots .site-nav-l:nth-child(3) .nav-dot { transition-delay: 0.13s; }
-  .site-nav.is-dots .site-nav-l:nth-child(4) .nav-txt,
-  .site-nav.is-dots .site-nav-l:nth-child(4) .nav-dot { transition-delay: 0.16s; }
-  /* стаггер раскрытия (hover): вразнобой — иной порядок задержек */
-  .site-nav.is-dots:hover .site-nav-l:nth-child(4) .nav-txt,
-  .site-nav.is-dots:hover .site-nav-l:nth-child(4) .nav-dot { transition-delay: 0s; }
-  .site-nav.is-dots:hover .site-nav-l:nth-child(2) .nav-txt,
-  .site-nav.is-dots:hover .site-nav-l:nth-child(2) .nav-dot { transition-delay: 0.05s; }
-  .site-nav.is-dots:hover .site-nav-l:nth-child(6) .nav-txt,
-  .site-nav.is-dots:hover .site-nav-l:nth-child(6) .nav-dot { transition-delay: 0.08s; }
-  .site-nav.is-dots:hover .site-nav-l:nth-child(1) .nav-txt,
-  .site-nav.is-dots:hover .site-nav-l:nth-child(1) .nav-dot { transition-delay: 0.12s; }
-  .site-nav.is-dots:hover .site-nav-l:nth-child(5) .nav-txt,
-  .site-nav.is-dots:hover .site-nav-l:nth-child(5) .nav-dot { transition-delay: 0.15s; }
-  .site-nav.is-dots:hover .site-nav-l:nth-child(3) .nav-txt,
-  .site-nav.is-dots:hover .site-nav-l:nth-child(3) .nav-dot { transition-delay: 0.18s; }
+/* ── ПОЛНОЭКРАННЫЙ ОВЕРЛЕЙ-МЕНЮ (реф noth.in): пункты Druk слева со стаггером,
+   контакты снизу. Закрытие — «закрыть», Esc, клик по фону. ── */
+.nav-overlay { position: fixed; inset: 0; z-index: 300; visibility: hidden; pointer-events: none; }
+.nav-overlay.is-open { visibility: visible; pointer-events: auto; }
+.nav-overlay-bg { position: absolute; inset: 0; border: 0; padding: 0; cursor: pointer; background: #090909;
+  opacity: 0; transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+.nav-overlay.is-open .nav-overlay-bg { opacity: 1; }
+.nav-overlay-in { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  width: 100%; max-width: var(--maxw); margin-inline: auto;
+  display: flex; flex-direction: column; justify-content: center; padding: var(--header-h) var(--gutter) 6vh; }
+.nav-overlay-in > * { pointer-events: auto; }
+.nav-overlay-close { position: absolute; top: calc((var(--header-h) - 1em) / 2); right: var(--gutter);
+  border: 0; padding: 0; background: none; color: #8a8a8a; cursor: pointer;
+  font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; transition: color var(--dur-1); }
+.nav-overlay-close:hover { color: #fff; }
+.nav-overlay-list { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(0.05rem, 0.5vh, 0.45rem); }
+.nav-overlay-l { display: block; overflow: hidden; color: #fff; transition: color var(--dur-1) var(--ease); }
+.nav-overlay-l:hover { color: #9a9a9a; }
+.nav-overlay-l-in { display: block; font-family: var(--font-druk); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(2.6rem, 8.5vw, 7rem); line-height: 1.04; letter-spacing: 0.004em;
+  transform: translateY(112%); transition: transform 0.82s cubic-bezier(0.16, 1, 0.3, 1); }
+.nav-overlay.is-open .nav-overlay-l-in { transform: translateY(0); transition-delay: calc(0.1s + var(--i) * 0.06s); }
+.nav-overlay-foot { position: absolute; left: var(--gutter); bottom: 6vh; display: flex; flex-wrap: wrap; gap: 0.4rem 2rem;
+  font-family: var(--font-body); font-size: 0.85rem; color: #7a7a7a;
+  opacity: 0; transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.42s; }
+.nav-overlay.is-open .nav-overlay-foot { opacity: 1; }
+.nav-overlay-foot a { color: #d0d0d0; transition: color var(--dur-1); }
+.nav-overlay-foot a:hover { color: #fff; }
+:root:has(.nav-overlay.is-open) { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .nav-overlay-bg, .nav-overlay-l-in, .nav-overlay-foot { transition: none; }
+  .nav-overlay.is-open .nav-overlay-l-in { transform: none; }
 }
-@media (min-width: 881px) and (prefers-reduced-motion: reduce) {
-  .site-nav .site-nav-l { transition: opacity 0.2s linear; transform: none; }
-}
-
-/* ── ПОЛНОЭКРАННОЕ ОВЕРЛЕЙ-МЕНЮ — только слова ── */
-.site-menu { position: fixed; inset: 0; z-index: 190; background: var(--ink); color: var(--paper);
-  display: flex; flex-direction: column; justify-content: center; padding: var(--header-h) var(--gutter) 6vh;
-  clip-path: inset(0 0 100% 0); pointer-events: none; transition: clip-path var(--dur-3) var(--ease); }
-.site-header.is-open ~ .site-menu, .site-menu.is-open { clip-path: inset(0 0 0% 0); pointer-events: auto; }
-.site-menu nav { display: flex; flex-direction: column; }
-.site-menu a { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; letter-spacing: -0.01em;
-  font-size: clamp(2.4rem, 8vw, 6rem); line-height: 1.04; color: var(--paper); width: max-content; max-width: 100%;
-  opacity: 0; transform: translateY(40px); transition: opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease), color var(--dur-1); }
-.site-menu a:hover { font-style: italic; color: var(--fg-2); }
-.site-header.is-open ~ .site-menu a, .site-menu.is-open a { opacity: 1; transform: none; }
-.site-menu.is-open a:nth-child(1){transition-delay:.08s}.site-menu.is-open a:nth-child(2){transition-delay:.14s}
-.site-menu.is-open a:nth-child(3){transition-delay:.2s}.site-menu.is-open a:nth-child(4){transition-delay:.26s}
-.site-menu.is-open a:nth-child(5){transition-delay:.32s}.site-menu.is-open a:nth-child(6){transition-delay:.38s}
-.site-menu-foot { margin-top: auto; padding-top: 4vh; display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-6);
-  font-size: 0.9rem; color: var(--fg-2); opacity: 0; transition: opacity var(--dur-2) var(--ease) .44s; }
-.site-menu.is-open .site-menu-foot { opacity: 1; }
-.site-menu-foot a { font: inherit; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-weight: 500; color: var(--paper); opacity: 1; transform: none; width: auto; }
-.site-menu-cta { color: var(--paper) !important; }
-:root:has(.site-menu.is-open) { overflow: hidden; }
-@media (prefers-reduced-motion: reduce) { .site-menu { transition: none; } .site-menu a { opacity: 1; transform: none; transition: none; } }
 
 /* ── ПЛАВАЮЩАЯ CTA (только мобайл ≤768) — доступ к контакту при скролле ── */
 .mfab { position: fixed; z-index: 150;
@@ -254,8 +194,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .mfab.is-in { opacity: 1; transform: none; pointer-events: auto; }
 .mfab.is-in:active { transform: scale(0.97); }
 @media (min-width: 769px) { .mfab { display: none; } }
-/* при открытом бургер-меню — прячем, чтобы не перекрывать пункты */
-:root:has(.site-menu.is-open) .mfab { opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none; }
+/* при открытом оверлей-меню — прячем, чтобы не перекрывать пункты */
+:root:has(.nav-overlay.is-open) .mfab { opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .mfab { transition: none; transform: none; } .mfab.is-in { transform: none; } }
 
 /* ═══════════════ КНОПКИ — тихая роскошь, живой отклик ═══════════════ */
@@ -634,70 +574,56 @@ textarea.field { resize: vertical; min-height: 4em; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* ═══════════════ БЛОК 02 — MANIFESTO (словарная статья) ═══════════════
-   Разворот дорогого журнала: два смысловых острова в одном визуальном поле.
-   «Aurea» — заголовок словарной статьи слева сверху (кегль ~6vw, база ~30%
-   высоты блока), под ней ОДНА мелкая строка (транскрипция·часть речи·этимология).
-   Манифест — правее и выше (левый край 58%, верх ~46%), правый край НЕ доходит до
-   края экрана (колонка «висит»). Между островами — диагональная пустота. Глубина
-   ~200vh: над «Aurea» ~55-65vh воздуха (догорают частицы hero), события разнесены
-   по прокрутке (каждое — свой IO). Маска побуквенной анимации — с верт. запасом
-   (padding+neg.margin), чтобы верхушки глифов Antiqva не срезались. */
-:root { --aurea-fs: clamp(2.6rem, 6vw, 7rem); }
-.mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
-.mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
-  padding-inline: var(--gutter); min-height: 200vh; }
+/* ═══════════════ БЛОК 02 — MANIFESTO (scroll-театр) ═══════════════
+   «AUREA» — не заголовок, а МОНУМЕНТ: гигантская антиква край-в-край, обрезанная
+   вьюпортом (целиком не видна). Сцена пинится (sticky) на ~140vh прокрутки: слово
+   дрейфует по X и растёт, буквы расходятся (per-letter), в пустоте всплывает
+   3D-объект (глобальный канвас). Манифест врезается в верхний-правый контур слова,
+   транскрипция — тонкой строкой сверху. Управление — JS (rAF, прогресс пиннинга). */
+:root { --aurea-fs: clamp(9rem, 33vw, 40rem); }
+.mf2 { position: relative; height: 240vh; background: #ffffff; color: #000; }
+.mf2-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; z-index: 1; }
 
-/* Левый остров: AUREA + одна строка-статья, левый край на 4.5%, база ~30%. */
-.mf2-head { position: absolute; left: 4.5%; top: 26%; will-change: transform; }
-.mf2-word { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
-  line-height: 1; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
-/* маска с верт. запасом: padding даёт место восходящим/нисходящим элементам
-   глифов, отрицательный margin компенсирует, чтобы визуальное положение не сдвигалось */
-.mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom;
-  padding-top: 0.28em; padding-bottom: 0.12em; margin-top: -0.28em; margin-bottom: -0.12em; }
-.mf2-l-in { display: inline-block; }
-/* транскрипция · часть речи · этимология — единой мелкой строкой под словом */
-.mf2-meta { margin: 1.2em 0 0; max-width: 64ch; font-family: var(--font-body);
-  font-size: 0.8rem; line-height: 1.55; letter-spacing: 0.01em; color: #4d4d4d; }
-.mf2-ipa-tr { letter-spacing: 0.06em; }
-.mf2-sep { margin: 0 0.55em; color: #a2a2a2; }
+/* МОНУМЕНТ: гигантское слово по центру сцены, обрезано краями (nowrap + overflow
+   сцены). Тёмный, но не абсолютно чёрный — манифест (чёрный) читается над ним. */
+.mf2-word { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%);
+  margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
+  line-height: 1; font-size: var(--aurea-fs); letter-spacing: -0.02em; white-space: nowrap;
+  color: #0c0c0c; will-change: transform; }
+.mf2-l { display: inline-block; will-change: transform; }
+
+/* транскрипция · часть речи · этимология — ОДНОЙ строкой сверху слева (без переносов) */
+.mf2-meta { position: absolute; left: var(--gutter); top: clamp(88px, 13vh, 140px); margin: 0;
+  font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.02em; color: #4d4d4d;
+  white-space: nowrap; will-change: transform, opacity; }
+.mf2-ipa-tr { letter-spacing: 0.08em; }
+.mf2-sep { margin: 0 0.5em; color: #b2b2b2; }
 .mf2-meta i { font-style: italic; }
 
-.mf2-manifesto { position: absolute; left: 58%; top: 46%; width: 35%; min-width: 21rem;
-  display: flex; flex-direction: column; gap: 1.5em; font-family: var(--font-body);
-  font-weight: 500; font-size: clamp(1.05rem, 0.98rem + 0.32vw, 1.22rem); line-height: 1.62; color: #1a1a1a;
-  will-change: transform; }
+/* манифест — врезается в верхний-правый контур слова; светлое гало для читаемости */
+.mf2-manifesto { position: absolute; right: var(--gutter); top: 19%; width: min(35%, 30rem);
+  display: flex; flex-direction: column; gap: 1.45em; font-family: var(--font-body);
+  font-weight: 500; font-size: clamp(1.02rem, 0.96rem + 0.3vw, 1.2rem); line-height: 1.62; color: #000;
+  text-shadow: 0 0 20px #fff, 0 0 9px #fff, 0 0 3px #fff, 0 0 1px #fff; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
+.js .mf2-ln { transform: translateY(112%); transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+.mf2-manifesto.is-in p:nth-child(1) .mf2-ln { transform: translateY(0); transition-delay: 0.02s; }
+.mf2-manifesto.is-in p:nth-child(2) .mf2-ln { transform: translateY(0); transition-delay: 0.12s; }
+.js .mf2-meta { opacity: 0; }
+.mf2-meta.is-in { opacity: 1; transform: none; }
 
-/* ── Motion: reveal по группам (скрытое состояние только при JS) ──
-   «Aurea» — побуквенно из-под маски (stagger), oversloot-кривая. */
-.js .mf2-l-in { transform: translateY(135%); transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
-.mf2-word.is-in .mf2-l-in { transform: translateY(0); }
-.mf2-word.is-in .mf2-l:nth-child(1) .mf2-l-in { transition-delay: 0s; }
-.mf2-word.is-in .mf2-l:nth-child(2) .mf2-l-in { transition-delay: 0.07s; }
-.mf2-word.is-in .mf2-l:nth-child(3) .mf2-l-in { transition-delay: 0.14s; }
-.mf2-word.is-in .mf2-l:nth-child(4) .mf2-l-in { transition-delay: 0.21s; }
-.mf2-word.is-in .mf2-l:nth-child(5) .mf2-l-in { transition-delay: 0.28s; }
-/* строка-статья — сдвиг слева-направо, с паузой после заголовка */
-.js .mf2-meta {
-  opacity: 0; transform: translateX(-24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
-.mf2-meta.is-in { opacity: 1; transform: none; transition-delay: 0.55s; }
-/* манифест — построчно из-под маски снизу, stagger */
-.js .mf2-ln { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-.mf2-manifesto.is-in p:nth-child(1) .mf2-ln { transform: translateY(0); transition-delay: 0.05s; }
-.mf2-manifesto.is-in p:nth-child(2) .mf2-ln { transform: translateY(0); transition-delay: 0.17s; }
 @media (prefers-reduced-motion: reduce) {
-  .js .mf2-l-in, .js .mf2-meta, .js .mf2-ln {
-    transition: none; opacity: 1; transform: none; }
+  .js .mf2-ln { transition: none; transform: none; }
+  .mf2-word { transform: translate(-50%, -50%); }
 }
 
-/* ── Мобильная (одна колонка, φ-пропорции, левая ось, драматургия сохранена) ── */
+/* ── Мобильная: монумент бледнее сверху, манифест внизу на чистом поле ── */
 @media (max-width: 760px) {
-  :root { --aurea-fs: clamp(2.8rem, 17vw, 5rem); }
-  .mf2-inner { min-height: 0; padding-top: 42vh; padding-bottom: clamp(6rem, 18vh, 12rem);
-    display: flex; flex-direction: column; }
-  .mf2-head, .mf2-manifesto { position: static; left: auto; top: auto; right: auto; width: auto; }
-  .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(7rem, 24vh, 13rem); }
+  :root { --aurea-fs: clamp(6rem, 42vw, 13rem); }
+  .mf2 { height: 220vh; }
+  .mf2-word { top: 44%; letter-spacing: -0.03em; }
+  .mf2-meta { left: 20px; right: 20px; top: clamp(80px, 11vh, 118px); white-space: normal; font-size: 0.68rem; }
+  .mf2-manifesto { left: 20px; right: 20px; top: auto; bottom: clamp(9vh, 15vh, 20vh); width: auto;
+    font-size: 1.04rem; }
 }

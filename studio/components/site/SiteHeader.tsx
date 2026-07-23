@@ -6,16 +6,15 @@ import { useEffect, useState } from "react";
 import { SITE } from "@/lib/seo/site";
 
 /*
-  ШАПКА — узкая верхняя панель, максимум воздуха (реф MONOLOG):
-  • лого AUREA слева — ВЕКТОРНЫЙ вордмарк (те же координаты, что 3D-надпись:
-    Λ без перекладины с точкой в контрформе, R с просветом), stroke 0.13, round;
-  • ЦЕНТР — текст-табы. На ГЛАВНОЙ спрятаны в hero, проявляются со стаггером при
-    прокрутке ко 2-му блоку (и гаснут при возврате в hero). На прочих страницах
-    hero нет — табы видны сразу;
-  • справа — «Обсудить проект»: без рамки, hover = вертикальный флип строки.
-  Десктоп: табы по центру, бургера НЕТ. Мобайл (≤880): бургер + оверлей.
-  mix-blend-difference → авто-контраст ч/б. Панель sticky, CLS=0 (место табов
-  зарезервировано даже когда они прозрачны).
+  ШАПКА — узкая верхняя панель (реф noth.in / MONOLOG):
+  • лого AUREA слева — ВЕКТОРНЫЙ вордмарк; при прокрутке сворачивается до Λ
+    (крупный акцент, вровень по весу с правой группой);
+  • справа — два элемента в ряд: «Обсудить проект» (CTA) и «меню» (строчными,
+    тем же весом) — открывает ПОЛНОЭКРАННЫЙ оверлей;
+  • оверлей: пункты крупным кеглем (Druk) слева друг под другом со стаггером,
+    внизу — контакты. Закрытие: «закрыть», Esc, клик по фону. Бургера нет —
+    одна механика на десктопе и мобиле.
+  mix-blend-difference → авто-контраст ч/б. Панель sticky, CLS=0.
 */
 const NAV = [
   { href: "/uslugi/", label: "Услуги" },
@@ -26,8 +25,7 @@ const NAV = [
   { href: "/kontakty/", label: "Контакты" },
 ];
 
-// Векторный вордмарк — полилинии по тем же координатам, что particle-надпись
-// (сгенерированы из той же геометрии; y отражён для SVG). viewBox по bbox слова.
+// Векторный вордмарк — полилинии по тем же координатам, что particle-надпись.
 function Logo() {
   return (
     <svg className="site-logo" viewBox="-2.175 -0.085 4.41 1.17" role="img" aria-label="AUREA"
@@ -52,24 +50,10 @@ function Logo() {
 export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const isHome = pathname === "/";
-  // на главной табы проявляются при прокрутке ко 2-му блоку; иначе — сразу видны
-  const [navShown, setNavShown] = useState(false);
+  const isContactPage = !!pathname && pathname.startsWith("/kontakty");
 
-  useEffect(() => setOpen(false), [pathname]);
-
-  // при прокрутке: логотип сворачивается в Λ, табы схлопываются в точки
+  // при прокрутке логотип сворачивается в Λ
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    if (!isHome) { setNavShown(true); return; }
-    setNavShown(false);
-    const onScroll = () => setNavShown(window.scrollY > window.innerHeight * 0.62);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [isHome]);
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.5);
     onScroll();
@@ -77,78 +61,82 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ── плавающая мобильная CTA (десктоп скрыт через CSS) ──
-  const [fabShow, setFabShow] = useState(false);   // прокрутили ~первый экран
-  const [formInView, setFormInView] = useState(false); // зона формы заявки видна
-  const isContactPage = !!pathname && pathname.startsWith("/kontakty");
+  // закрытие оверлея при смене маршрута; блокировка скролла; Esc
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
+  }, [open]);
 
+  // ── плавающая мобильная CTA ──
+  const [fabShow, setFabShow] = useState(false);
+  const [formInView, setFormInView] = useState(false);
   useEffect(() => {
     const onScroll = () => setFabShow(window.scrollY > window.innerHeight * 0.85);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
   useEffect(() => {
-    const target = document.getElementById("contact"); // прячем над формой заявки
+    const target = document.getElementById("contact");
     if (!target) { setFormInView(false); return; }
     const io = new IntersectionObserver((e) => setFormInView(e[0].isIntersecting), { rootMargin: "0px 0px -12% 0px" });
     io.observe(target);
     return () => io.disconnect();
   }, [pathname]);
-
   const fabIn = fabShow && !formInView && !open && !isContactPage;
 
   return (
     <>
-      <header className={`site-header${open ? " is-open" : ""}`}>
+      <header className="site-header">
         <div className="site-header-in">
           <Link href="/" className={`site-header-brand${scrolled ? " is-min" : ""}`} aria-label="AUREA — на главную">
             <span className="logo-clip"><Logo /></span>
           </Link>
 
-          <nav className={`site-nav${navShown ? " is-shown" : ""}${scrolled ? " is-dots" : ""}`} aria-label="Основная навигация">
-            {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="site-nav-l">
-                <span className="nav-dot" aria-hidden />
-                <span className="nav-txt">{n.label}</span>
-              </Link>
-            ))}
-          </nav>
-
-          <Link href="/kontakty/" className="site-header-cta">
-            <span className="cta-txt">Обсудить проект</span>
-          </Link>
-
-          <button
-            type="button"
-            className="site-burger"
-            aria-label={open ? "Закрыть меню" : "Открыть меню"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <span /><span /><span />
-          </button>
+          <div className="site-header-right">
+            <Link href="/kontakty/" className="site-header-cta">
+              <span className="cta-txt">Обсудить проект</span>
+            </Link>
+            <button
+              type="button"
+              className="site-menu-btn"
+              aria-label="Открыть меню"
+              aria-expanded={open}
+              aria-haspopup="dialog"
+              onClick={() => setOpen(true)}
+            >
+              меню
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className={`site-menu${open ? " is-open" : ""}`} aria-hidden={!open}>
-        <nav aria-label="Навигация">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} tabIndex={open ? undefined : -1}>
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="site-menu-foot">
-          <a href={`mailto:${SITE.contacts.email}`}>{SITE.contacts.email}</a>
-          <a href={SITE.contacts.telegram} target="_blank" rel="noopener">Telegram</a>
-          <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener">WhatsApp</a>
+      {/* ПОЛНОЭКРАННЫЙ ОВЕРЛЕЙ-МЕНЮ */}
+      <div className={`nav-overlay${open ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-hidden={!open} aria-label="Меню">
+        <button type="button" className="nav-overlay-bg" aria-label="Закрыть меню" tabIndex={open ? undefined : -1} onClick={() => setOpen(false)} />
+        <div className="nav-overlay-in">
+          <button type="button" className="nav-overlay-close" tabIndex={open ? undefined : -1} onClick={() => setOpen(false)}>закрыть</button>
+          <nav className="nav-overlay-list" aria-label="Разделы">
+            {NAV.map((n, i) => (
+              <Link key={n.href} href={n.href} className="nav-overlay-l" style={{ ["--i" as string]: i }} tabIndex={open ? undefined : -1}>
+                <span className="nav-overlay-l-in">{n.label}</span>
+              </Link>
+            ))}
+          </nav>
+          <div className="nav-overlay-foot">
+            <a href={SITE.contacts.telegram} target="_blank" rel="noopener">Telegram</a>
+            <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener">WhatsApp</a>
+            <a href={`mailto:${SITE.contacts.email}`}>{SITE.contacts.email}</a>
+          </div>
         </div>
       </div>
 
-      {/* Плавающая CTA — только мобайл (≤768px, CSS), появляется при скролле,
-          прячется в hero / над формой / на странице контактов / при меню. */}
+      {/* Плавающая CTA — только мобайл */}
       <Link
         href="/kontakty/"
         className={`mfab${fabIn ? " is-in" : ""}`}
