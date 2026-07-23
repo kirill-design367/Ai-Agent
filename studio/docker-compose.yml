@@ -24,11 +24,15 @@ services:
     expose:
       - "3000"                            # наружу не публикуем — только через nginx
     volumes:
-      # Персистентный кэш next/image (optimized) + ISR: переживает передеплой —
-      # картинки не переоптимизируются каждый раз (важно с приходом реальных
-      # изображений из IMAGE-BRIEF). Свежий named volume наследует владельца
-      # nextjs из образа (в Dockerfile каталог создан и chown'нут) → без EACCES.
-      - next-cache:/app/.next/cache
+      # Персистим ТОЛЬКО кэш оптимизатора next/image (.next/cache/images) —
+      # картинки не переоптимизируются каждый передеплой. КРИТИЧНО: НЕ монтируем
+      # весь .next/cache — иначе full-route/ISR-кэш переживает передеплой и
+      # затеняет свежие пререндеры (x-nextjs-cache: HIT отдаёт СТАРЫЙ HTML,
+      # блокирует SEO). Родительский .next/cache остаётся в writable-слое
+      # контейнера → чист при каждом деплое, HTML пересобирается из нового образа.
+      # Свежий named volume наследует владельца nextjs (в Dockerfile каталог
+      # /app/.next/cache/images создан и chown'нут) → без EACCES.
+      - next-image-cache:/app/.next/cache/images
     healthcheck:
       test:
         - CMD
@@ -76,4 +80,4 @@ services:
 volumes:
   certbot-conf:
   certbot-www:
-  next-cache:
+  next-image-cache:
