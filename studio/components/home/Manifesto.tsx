@@ -43,6 +43,9 @@ export default function Manifesto() {
 
     // ── ПАРАЛЛАКС по скроллу (только transform): левый блок почти стоит (apparent
     //    ~0.1× скорости страницы), манифест чуть быстрее (~0.28×) → блоки расходятся.
+    //    ТОЛЬКО десктоп: на мобиле острова статичны (одна колонка) — сдвиг transform
+    //    выталкивал текст за высоту секции и обрезал его + давал рывки при скролле.
+    if (window.matchMedia("(max-width: 760px)").matches) return () => io.disconnect();
     const head = el.querySelector<HTMLElement>(".mf2-head");
     const man = el.querySelector<HTMLElement>(".mf2-manifesto");
     let blockTop = 0, praf = 0, prunning = false;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/seo/site";
 
 /*
@@ -51,6 +51,8 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isContactPage = !!pathname && pathname.startsWith("/kontakty");
+  const panelRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   // при прокрутке логотип сворачивается в Λ
   const [scrolled, setScrolled] = useState(false);
@@ -61,15 +63,21 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // закрытие оверлея при смене маршрута; блокировка скролла; Esc
+  // закрытие панели при смене маршрута
   useEffect(() => setOpen(false), [pathname]);
+  // компактная панель: закрытие по Esc и клику ВНЕ панели/кнопки. Страница НЕ
+  // блокируется и не затемняется — остаётся живой (скролл под панелью работает).
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (panelRef.current?.contains(t) || btnRef.current?.contains(t)) return;
+      setOpen(false);
+    };
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("pointerdown", onDown, true);
     window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
+    return () => { document.removeEventListener("pointerdown", onDown, true); window.removeEventListener("keydown", onKey); };
   }, [open]);
 
   // ── плавающая мобильная CTA ──
@@ -103,12 +111,13 @@ export default function SiteHeader() {
               <span className="cta-txt">Обсудить проект</span>
             </Link>
             <button
+              ref={btnRef}
               type="button"
               className="site-menu-btn"
-              aria-label="Открыть меню"
+              aria-label={open ? "Закрыть меню" : "Открыть меню"}
               aria-expanded={open}
-              aria-haspopup="dialog"
-              onClick={() => setOpen(true)}
+              aria-haspopup="menu"
+              onClick={() => setOpen((v) => !v)}
             >
               меню
             </button>
@@ -116,23 +125,21 @@ export default function SiteHeader() {
         </div>
       </header>
 
-      {/* ПОЛНОЭКРАННЫЙ ОВЕРЛЕЙ-МЕНЮ */}
-      <div className={`nav-overlay${open ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-hidden={!open} aria-label="Меню">
-        <button type="button" className="nav-overlay-bg" aria-label="Закрыть меню" tabIndex={open ? undefined : -1} onClick={() => setOpen(false)} />
-        <div className="nav-overlay-in">
-          <button type="button" className="nav-overlay-close" tabIndex={open ? undefined : -1} onClick={() => setOpen(false)}>закрыть</button>
-          <nav className="nav-overlay-list" aria-label="Разделы">
-            {NAV.map((n, i) => (
-              <Link key={n.href} href={n.href} className="nav-overlay-l" style={{ ["--i" as string]: i }} tabIndex={open ? undefined : -1}>
-                <span className="nav-overlay-l-in">{n.label}</span>
-              </Link>
-            ))}
-          </nav>
-          <div className="nav-overlay-foot">
-            <a href={SITE.contacts.telegram} target="_blank" rel="noopener">Telegram</a>
-            <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener">WhatsApp</a>
-            <a href={`mailto:${SITE.contacts.email}`}>{SITE.contacts.email}</a>
-          </div>
+      {/* КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ — привязана к слову «меню», правый верхний угол.
+          Страница под ней не затемняется и остаётся живой. */}
+      <div ref={panelRef} className={`nav-panel${open ? " is-open" : ""}`} role="menu" aria-hidden={!open}>
+        <nav className="nav-panel-list" aria-label="Разделы">
+          {NAV.map((n, i) => (
+            <Link key={n.href} href={n.href} className="nav-panel-l" style={{ ["--i" as string]: i }} role="menuitem" tabIndex={open ? undefined : -1}>
+              {n.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="nav-panel-sep" aria-hidden />
+        <div className="nav-panel-foot">
+          <a href={SITE.contacts.telegram} target="_blank" rel="noopener" tabIndex={open ? undefined : -1}>Telegram</a>
+          <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener" tabIndex={open ? undefined : -1}>WhatsApp</a>
+          <a href={`mailto:${SITE.contacts.email}`} tabIndex={open ? undefined : -1}>{SITE.contacts.email}</a>
         </div>
       </div>
 
