@@ -350,13 +350,18 @@ export default function Hero3D() {
     // world 0 (центр слова) на ~76% высоты при scroll=0. Канвас не принадлежит
     // секциям → у частиц нет края на стыке hero↔manifesto.
     let W = 0, H = 0, wpp = 1, camCY = 0, dispersing = false;
+    // ЗАФИКСИРОВАННЫЕ размеры канваса (на iOS высота вьюпорта скачет при сворачивании
+    // адресной строки → без фиксации канвас пересчитывался и надпись ДРОЖАЛА). Берём
+    // размеры один раз и пересчитываем ТОЛЬКО при реальном изменении (поворот / смена
+    // ширины / крупное изменение высоты >15%), игнорируя дребезг адресной строки.
+    let lockW = 0, lockH = 0;
+    const captureSize = () => { lockW = Math.max(1, window.innerWidth); lockH = Math.max(1, window.innerHeight); };
     const baseDpr = () => Math.min(2, window.devicePixelRatio || 1);
     const applyRes = () => { renderer.setPixelRatio(baseDpr() * (dispersing ? 0.7 : 1)); renderer.setSize(W, H, false); };
     const resize = () => {
-      const vw = window.innerWidth, vh = window.innerHeight;
-      W = Math.max(1, vw); H = Math.max(1, vh);
+      W = lockW; H = lockH;                 // из зафиксированных значений (не из window каждый раз)
       applyRes();
-      wpp = 5.2 / vw;
+      wpp = 5.2 / W;
       const halfW = wpp * W / 2, halfH = wpp * H / 2;
       camCY = 0.26 * wpp * H;               // world 0 → ~76% высоты экрана
       cam.left = -halfW; cam.right = halfW; cam.top = camCY + halfH; cam.bottom = camCY - halfH;
@@ -396,7 +401,7 @@ export default function Hero3D() {
     const sync = () => { if (docVis && (window.scrollY || 0) < DISSOLVE * H) start(); else stop(); };
 
     // старт
-    build(); resize();
+    build(); captureSize(); resize();
     // курсор активен СРАЗУ по завершении сборки (без лишних таймаутов); адаптив выключен.
     if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.4, ease: "power2.out", onComplete: () => { ready = true; } }); uni.uBreath.value = 1; }
     else { ready = true; renderer.render(scene, cam); }
@@ -408,7 +413,20 @@ export default function Hero3D() {
     if (!coarse && !reduce) { window.addEventListener("pointermove", onMove, { passive: true }); el.addEventListener("pointerleave", onLeave); }
     if (!reduce) window.addEventListener("scroll", onScrollWake, { passive: true });
     document.addEventListener("visibilitychange", onVis);
-    let rt = 0; const onRe = () => { window.clearTimeout(rt); rt = window.setTimeout(() => { resize(); sync(); }, 200); };
+    // resize с debounce 300мс: реагируем ТОЛЬКО на реальные изменения — смену ширины
+    // (поворот экрана) или крупное изменение высоты (>15%). Мелкие скачки высоты
+    // (адресная строка iOS при скролле) игнорируем → канвас не дрожит.
+    let rt = 0;
+    const onRe = () => {
+      window.clearTimeout(rt);
+      rt = window.setTimeout(() => {
+        const nw = Math.max(1, window.innerWidth), nh = Math.max(1, window.innerHeight);
+        const widthChanged = nw !== lockW;
+        const bigHeightChange = Math.abs(nh - lockH) / lockH > 0.15;
+        if (widthChanged || bigHeightChange) { captureSize(); resize(); }
+        sync();
+      }, 300);
+    };
     window.addEventListener("resize", onRe);
 
     return () => {

@@ -32,20 +32,20 @@ export default function Manifesto() {
       items.forEach((i) => i.classList.add("is-in"));
       return;
     }
+    // Появление групп при входе в вьюпорт — работает и на мобиле, и на десктопе
+    // (лёгкие CSS-переходы, на скролл не влияют): AUREA побуквенно из-под маски,
+    // строка-статья сдвигом, манифест построчно из-под маски со stagger.
     const io = new IntersectionObserver((es) => {
       for (const e of es) if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
-    }, { rootMargin: "0px 0px -14% 0px", threshold: 0.25 });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.2 });
     const vh = window.innerHeight;
-    items.forEach((i) => {
-      if (i.getBoundingClientRect().top < vh * 0.82) i.classList.add("is-in");
-      else io.observe(i);
-    });
+    items.forEach((i) => io.observe(i));
 
-    // ── ПАРАЛЛАКС по скроллу (только transform): левый блок почти стоит (apparent
-    //    ~0.1× скорости страницы), манифест чуть быстрее (~0.28×) → блоки расходятся.
-    //    ТОЛЬКО десктоп: на мобиле острова статичны (одна колонка) — сдвиг transform
-    //    выталкивал текст за высоту секции и обрезал его + давал рывки при скролле.
-    if (window.matchMedia("(max-width: 760px)").matches) return () => io.disconnect();
+    // ── ПАРАЛЛАКС по скроллу (только transform) — ТОЛЬКО десктоп: острова расходятся
+    //    по вертикали. На мобиле (одна колонка) параллакс выключен — сдвиг transform
+    //    выталкивал текст за высоту секции и резал его + давал рывки. Анимации
+    //    появления (выше) при этом остаются.
+    if (!window.matchMedia("(min-width: 761px)").matches) return () => io.disconnect();
     const head = el.querySelector<HTMLElement>(".mf2-head");
     const man = el.querySelector<HTMLElement>(".mf2-manifesto");
     let blockTop = 0, praf = 0, prunning = false;

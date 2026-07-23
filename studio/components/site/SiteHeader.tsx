@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { SITE } from "@/lib/seo/site";
 
 /*
   ШАПКА — узкая верхняя панель (реф noth.in / MONOLOG):
@@ -126,21 +125,20 @@ export default function SiteHeader() {
       </header>
 
       {/* КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ — привязана к слову «меню», правый верхний угол.
-          Страница под ней не затемняется и остаётся живой. */}
+          Только разделы (контакты есть в футере и CTA). Пункты появляются из-под
+          маски (как реверсы по сайту), hover — вертикальный masked-flip. Страница
+          под панелью не затемняется и остаётся живой. */}
       <div ref={panelRef} className={`nav-panel${open ? " is-open" : ""}`} role="menu" aria-hidden={!open}>
         <nav className="nav-panel-list" aria-label="Разделы">
           {NAV.map((n, i) => (
             <Link key={n.href} href={n.href} className="nav-panel-l" style={{ ["--i" as string]: i }} role="menuitem" tabIndex={open ? undefined : -1}>
-              {n.label}
+              <span className="nav-flip">
+                <span className="nav-flip-t">{n.label}</span>
+                <span className="nav-flip-t nav-flip-t--copy" aria-hidden>{n.label}</span>
+              </span>
             </Link>
           ))}
         </nav>
-        <div className="nav-panel-sep" aria-hidden />
-        <div className="nav-panel-foot">
-          <a href={SITE.contacts.telegram} target="_blank" rel="noopener" tabIndex={open ? undefined : -1}>Telegram</a>
-          <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener" tabIndex={open ? undefined : -1}>WhatsApp</a>
-          <a href={`mailto:${SITE.contacts.email}`} tabIndex={open ? undefined : -1}>{SITE.contacts.email}</a>
-        </div>
       </div>
 
       {/* Плавающая CTA — только мобайл */}

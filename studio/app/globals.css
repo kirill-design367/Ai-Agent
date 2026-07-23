@@ -146,40 +146,42 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-menu-btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
   background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform var(--dur-2) var(--ease); }
 .site-menu-btn:hover::after { transform: scaleX(1); transform-origin: left; }
+/* фокус: для мыши — без браузерной обводки; для клавиатуры — фирменное подчёркивание */
+.site-menu-btn:focus { outline: none; }
+.site-menu-btn:focus-visible::after { transform: scaleX(1); transform-origin: left; }
 @media (prefers-reduced-motion: reduce) { .cta-txt { transition: none; } }
 
-/* ── КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ (реф noth.in): небольшая карточка у слова «меню»,
-   правый верхний угол. Белый фон, тонкая тень/рамка. Мягкое раскрытие сверху вниз
-   + fade, пункты со стаггером. Страница НЕ затемняется и остаётся живой. Закрытие
-   — повторный клик, Esc, клик вне панели. НЕ внутри mix-blend-difference шапки. */
-.nav-panel { position: fixed; z-index: 250; top: calc(var(--header-h) - 22px); right: var(--gutter);
-  width: min(300px, 84vw); background: #fff; color: #0a0a0a;
-  border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 14px;
-  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.07);
-  padding: 10px; transform-origin: top right;
-  opacity: 0; transform: translateY(-10px) scale(0.985); visibility: hidden; pointer-events: none;
+/* ── КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ (реф noth.in): небольшая карточка у слова «меню».
+   ОТДЕЛЕНИЕ БЕЗ «попапа»: без тени и без рамки по периметру — только тонкий
+   УГОЛОК (линии слева и снизу), как архитектурная засечка; фон чистый белый.
+   Пункты появляются из-под маски со стаггером; hover — вертикальный masked-flip
+   (одна механика с ревизами по сайту). Страница под панелью живая, не затемнена.
+   Не внутри mix-blend-difference шапки. */
+.nav-panel { position: fixed; z-index: 250; top: calc(var(--header-h) - 18px); right: var(--gutter);
+  width: min(272px, 82vw); background: #fff; color: #0a0a0a;
+  border: 0; border-left: 1px solid rgba(0, 0, 0, 0.18); border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+  box-shadow: none; padding: 18px 6px 16px 20px; transform-origin: top right;
+  opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
     visibility 0s linear 0.4s; }
 .nav-panel.is-open { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition-delay: 0s, 0s, 0s; }
 .nav-panel-list { display: flex; flex-direction: column; }
-.nav-panel-l { display: block; padding: 8px 12px; border-radius: 9px; color: #0a0a0a;
-  font-family: var(--font-body); font-weight: 600; font-size: 1.02rem; letter-spacing: 0.005em;
-  opacity: 0; transform: translateY(7px);
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s var(--ease); }
-.nav-panel.is-open .nav-panel-l { opacity: 1; transform: none; transition-delay: calc(0.05s + var(--i) * 0.04s); }
-.nav-panel-l:hover { background: rgba(0, 0, 0, 0.05); }
-.nav-panel-sep { height: 1px; margin: 9px 8px; background: rgba(0, 0, 0, 0.10); }
-.nav-panel-foot { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 2px 12px 6px;
-  font-family: var(--font-body); font-size: 0.8rem; color: #8a8a8a;
-  opacity: 0; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.nav-panel.is-open .nav-panel-foot { opacity: 1; transition-delay: 0.24s; }
-.nav-panel-foot a { color: #555; transition: color var(--dur-1); }
-.nav-panel-foot a:hover { color: #0a0a0a; }
-@media (max-width: 760px) { .nav-panel { width: min(80vw, 320px); } }
+/* пункт = маска появления; внутри — masked-flip на hover/фокус */
+.nav-panel-l { display: block; overflow: hidden; padding: 5px 8px 5px 0; color: #0a0a0a;
+  font-family: var(--font-body); font-weight: 600; font-size: 1.06rem; letter-spacing: 0.005em; outline: none; }
+.nav-flip { display: block; overflow: hidden; position: relative;
+  transform: translateY(140%); transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+.nav-panel.is-open .nav-flip { transform: translateY(0); transition-delay: calc(0.06s + var(--i) * 0.045s); }
+.nav-flip-t { display: block; line-height: 1.5; transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.nav-flip-t--copy { position: absolute; top: 0; left: 0; transform: translateY(100%); color: #6b6b6b; }
+.nav-panel-l:hover .nav-flip-t, .nav-panel-l:focus-visible .nav-flip-t { transform: translateY(-100%); }
+.nav-panel-l:hover .nav-flip-t--copy, .nav-panel-l:focus-visible .nav-flip-t--copy { transform: translateY(0); }
+@media (max-width: 760px) { .nav-panel { width: min(78vw, 300px); } .nav-panel-l { font-size: 1.12rem; } }
 @media (prefers-reduced-motion: reduce) {
   .nav-panel { transition: opacity 0.2s linear, visibility 0s linear 0.2s; transform: none; }
   .nav-panel.is-open { transition-delay: 0s; }
-  .nav-panel-l, .nav-panel-foot { transition: opacity 0.2s linear; transform: none; }
+  .nav-flip { transition: opacity 0.2s linear; transform: none; }
+  .nav-flip-t { transition: none; }
 }
 
 /* ── ПЛАВАЮЩАЯ CTA (только мобайл ≤768) — доступ к контакту при скролле ── */
@@ -603,10 +605,11 @@ textarea.field { resize: vertical; min-height: 4em; }
 .mf2-sep { margin: 0 0.5em; color: #b2b2b2; }
 .mf2-meta i { font-style: italic; }
 
-/* манифест — отдельная колонка справа на чистом белом (RF Dewi) */
+/* манифест — отдельная колонка справа на чистом белом (RF Dewi). Кегль −10%,
+   line-height плотнее, цвет #000 (оптическая плотность, т.к. у шрифта только Regular). */
 .mf2-manifesto { position: absolute; left: 58%; top: 46%; width: 35%; min-width: 21rem;
-  display: flex; flex-direction: column; gap: 1.5em; font-family: var(--font-manifest), var(--font-body);
-  font-weight: 400; font-size: clamp(1.06rem, 0.98rem + 0.34vw, 1.26rem); line-height: 1.62; color: #1a1a1a;
+  display: flex; flex-direction: column; gap: 1.4em; font-family: var(--font-manifest), var(--font-body);
+  font-weight: 400; font-size: clamp(0.95rem, 0.88rem + 0.3vw, 1.14rem); line-height: 1.48; color: #000;
   will-change: transform; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
@@ -644,5 +647,5 @@ textarea.field { resize: vertical; min-height: 4em; }
     transform: none !important; }
   .mf2-meta { white-space: normal; }
   .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(6rem, 20vh, 11rem);
-    padding-bottom: clamp(2rem, 6vh, 4rem); }
+    padding-bottom: clamp(2rem, 6vh, 4rem); font-size: 0.94rem; }
 }
