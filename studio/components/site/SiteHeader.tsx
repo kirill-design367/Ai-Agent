@@ -63,6 +63,28 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
 
+  // ── плавающая мобильная CTA (десктоп скрыт через CSS) ──
+  const [fabShow, setFabShow] = useState(false);   // прокрутили ~первый экран
+  const [formInView, setFormInView] = useState(false); // зона формы заявки видна
+  const isContactPage = !!pathname && pathname.startsWith("/kontakty");
+
+  useEffect(() => {
+    const onScroll = () => setFabShow(window.scrollY > window.innerHeight * 0.85);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const target = document.getElementById("contact"); // прячем над формой заявки
+    if (!target) { setFormInView(false); return; }
+    const io = new IntersectionObserver((e) => setFormInView(e[0].isIntersecting), { rootMargin: "0px 0px -12% 0px" });
+    io.observe(target);
+    return () => io.disconnect();
+  }, [pathname]);
+
+  const fabIn = fabShow && !formInView && !open && !isContactPage;
+
   return (
     <>
       <header className={`site-header${open ? " is-open" : ""}`}>
@@ -109,6 +131,17 @@ export default function SiteHeader() {
           <a href={SITE.contacts.whatsapp} target="_blank" rel="noopener">WhatsApp</a>
         </div>
       </div>
+
+      {/* Плавающая CTA — только мобайл (≤768px, CSS), появляется при скролле,
+          прячется в hero / над формой / на странице контактов / при меню. */}
+      <Link
+        href="/kontakty/"
+        className={`mfab${fabIn ? " is-in" : ""}`}
+        aria-hidden={!fabIn}
+        tabIndex={fabIn ? undefined : -1}
+      >
+        Обсудить проект
+      </Link>
     </>
   );
 }

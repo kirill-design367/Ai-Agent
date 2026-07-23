@@ -191,6 +191,22 @@ input, textarea, select { font: inherit; color: inherit; }
 :root:has(.site-menu.is-open) { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .site-menu { transition: none; } .site-menu a { opacity: 1; transform: none; transition: none; } }
 
+/* ── ПЛАВАЮЩАЯ CTA (только мобайл ≤768) — доступ к контакту при скролле ── */
+.mfab { position: fixed; z-index: 150;
+  right: max(16px, env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom));
+  display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 22px;
+  background: var(--ink); color: var(--paper); border-radius: 999px;
+  font-family: var(--font-body); font-weight: 600; font-size: 0.92rem; letter-spacing: 0.01em; white-space: nowrap;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.20);
+  opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.mfab.is-in { opacity: 1; transform: none; pointer-events: auto; }
+.mfab.is-in:active { transform: scale(0.97); }
+@media (min-width: 769px) { .mfab { display: none; } }
+/* при открытом бургер-меню — прячем, чтобы не перекрывать пункты */
+:root:has(.site-menu.is-open) .mfab { opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .mfab { transition: none; transform: none; } .mfab.is-in { transform: none; } }
+
 /* ═══════════════ КНОПКИ — тихая роскошь, живой отклик ═══════════════ */
 .pill, .pg-btn, .btn { position: relative; display: inline-flex; align-items: center; gap: 0.6em; overflow: hidden;
   font-family: var(--font-body); font-weight: 600; font-size: var(--fs-0); letter-spacing: 0.01em;
