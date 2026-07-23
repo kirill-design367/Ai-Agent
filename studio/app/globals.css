@@ -424,6 +424,108 @@ textarea.field { resize: vertical; min-height: 4em; }
 @keyframes hxsc { 0%{transform:scaleY(.2);opacity:.3} 45%{transform:scaleY(1);opacity:.7} 100%{transform:scaleY(.2);opacity:.3} }
 @media (max-width: 720px) { .hx-l2 { margin-left: 2rem; } .hx-l3 { margin-left: 0.5rem; } .hx-lead { margin-left: 0; } .hx-art-slot { opacity: 0.5; } }
 
+/* ═══════════════ БЛОК КЕЙСОВ (реф noth.in «WORKS») — чёрное полотно ═══════════════
+   Чёрный блок (#000) наезжает на белый: приходит снизу, sticky-дивайдер держит
+   экран, буквы «КЕЙСЫ» расходятся на scrub. Список строк с асимметричными превью
+   и параллаксом; hover — рост превью, притухание прочих, кастом-курсор «Смотреть». */
+.cs { position: relative; z-index: 3; background: #000; color: #fff; overflow: clip; isolation: isolate; }
+.cs a { color: inherit; }
+
+/* — Разделитель «КЕЙСЫ» (sticky, буквы расходятся) — */
+.cs-div-wrap { position: relative; height: 180vh; }
+.cs-divider { position: sticky; top: 0; height: 100svh; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cs-word { margin: 0; display: flex; white-space: nowrap; font-family: var(--font-druk); font-weight: 800;
+  text-transform: uppercase; color: #fff; font-size: clamp(4rem, 21vw, 21rem); line-height: 1; letter-spacing: 0.01em; }
+.cs-w-l { display: inline-block; will-change: transform, opacity; }
+.cs-div-sub { margin: 1.6rem 0 0; font-family: var(--font-body); font-size: 0.78rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #6f6f6f; }
+
+/* — Список кейсов — */
+.cs-list { list-style: none; margin: 0; padding: 0; position: relative; z-index: 1;
+  max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+.cs-row { position: relative; }
+.cs-row.is-dim { opacity: 0.35; }
+.cs-row { transition: opacity 0.5s var(--ease); }
+.cs-link { display: block; position: relative; min-height: 64vh; padding: 11vh 0 6vh; text-decoration: none; }
+@media (hover: hover) { .cs-link { cursor: none; } }
+.cs-num { display: inline-block; font-family: var(--font-body); font-weight: 600; font-size: 0.82rem;
+  letter-spacing: 0.12em; color: #7a7a7a; }
+.cs-name { margin: 0.35em 0 0; font-family: var(--font-druk); font-weight: 800; text-transform: uppercase;
+  color: #fff; font-size: clamp(2.4rem, 7.4vw, 6.8rem); line-height: 0.96; letter-spacing: 0.004em; max-width: 62%;
+  transition: letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.cs-sub { margin: 1.1em 0 0; font-family: var(--font-body); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.2rem);
+  line-height: 1.4; color: #9a9a9a; max-width: 34ch; }
+.cs-tag { position: absolute; top: 11vh; right: 0; font-family: var(--font-body); font-size: 0.78rem;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #b8b8b8; text-align: right; }
+.cs-recreated { color: #5f5f5f; text-transform: none; letter-spacing: 0.01em; }
+.cs-line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: rgba(255, 255, 255, 0.16);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+.cs-rv.is-in .cs-line { transform: scaleX(1); }
+/* превью — асимметрично сбоку, параллакс (translateY задаёт JS на .cs-media) */
+.cs-media { position: absolute; top: 8vh; width: var(--mw); will-change: transform; pointer-events: none; z-index: 2; }
+.side-r .cs-media { right: 1.5%; }
+.side-l .cs-media { left: 1.5%; }
+.cs-media-in { display: block; position: relative; width: 100%; overflow: hidden; background: #111; }
+.cs-media-in img { object-fit: cover; }
+/* сторона текста напротив превью (асимметрия): media справа → текст слева и наоборот */
+.side-l .cs-link { text-align: right; }
+.side-l .cs-name, .side-l .cs-sub { margin-left: auto; }
+.side-l .cs-tag { right: auto; left: 0; text-align: left; }
+
+/* появление строк (из-под сдвига со stagger) + превью с масштабом */
+.js .cs-rv .cs-num, .js .cs-rv .cs-name, .js .cs-rv .cs-sub, .js .cs-rv .cs-tag {
+  opacity: 0; transform: translateY(40px); transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
+.cs-rv.is-in .cs-num, .cs-rv.is-in .cs-name, .cs-rv.is-in .cs-sub, .cs-rv.is-in .cs-tag { opacity: 1; transform: none; }
+.cs-rv.is-in .cs-num { transition-delay: 0.02s; } .cs-rv.is-in .cs-name { transition-delay: 0.08s; }
+.cs-rv.is-in .cs-sub { transition-delay: 0.16s; } .cs-rv.is-in .cs-tag { transition-delay: 0.22s; }
+.js .cs-rv .cs-media-in { opacity: 0; transform: scale(1.09); transition: opacity 0.9s var(--ease), transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.cs-rv.is-in .cs-media-in { opacity: 1; transform: none; transition-delay: 0.1s; }
+.cs-div-sub { opacity: 0; transition: opacity 0.8s var(--ease) 0.2s; }
+.cs-div-sub.is-in { opacity: 1; }
+
+/* hover строки: имя разряжается, превью растёт */
+.cs-row:hover .cs-name { letter-spacing: 0.045em; }
+.cs-row:hover .cs-media-in { transform: scale(1.05); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* низ блока */
+.cs-foot { position: relative; z-index: 1; max-width: var(--maxw); margin: clamp(4rem, 10vh, 9rem) auto 0;
+  padding: 0 var(--gutter) clamp(6rem, 14vh, 12rem); }
+.cs-all { display: inline-flex; align-items: center; gap: 0.5em; font-family: var(--font-body); font-weight: 600;
+  font-size: clamp(1.1rem, 2vw, 1.6rem); color: #fff; position: relative; }
+.cs-all span { transition: transform 0.4s var(--ease); }
+.cs-all:hover span { transform: translateX(6px); }
+.cs-all::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: left; transition: transform 0.5s var(--ease); }
+.cs-all:hover::after { transform: scaleX(1); }
+
+/* кастомный курсор «Смотреть →» */
+.cs-cursor { position: fixed; top: 0; left: 0; z-index: 400; width: 92px; height: 92px; border-radius: 50%;
+  background: #fff; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none; opacity: 0; will-change: transform, opacity; }
+.cs-cursor-t { font-family: var(--font-body); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.02em; }
+.cs-cursor-a { font-size: 1rem; line-height: 1; margin-top: 3px; }
+@media (hover: none) { .cs-cursor { display: none; } .cs-link { cursor: pointer; } }
+
+/* — Мобильная — */
+@media (max-width: 760px) {
+  .cs-div-wrap { height: 130vh; }
+  .cs-word { font-size: clamp(3rem, 27vw, 8rem); }
+  .cs-link { min-height: auto; padding: 8vh 0 5vh; text-align: left; }
+  .cs-name { max-width: 100%; font-size: clamp(2rem, 12vw, 4.4rem); }
+  .cs-sub { max-width: 100%; margin-left: 0; }
+  .cs-tag { position: static; display: block; margin-top: 0.9em; text-align: left; }
+  .side-l .cs-link { text-align: left; }
+  .side-l .cs-name, .side-l .cs-sub { margin-left: 0; }
+  .cs-media { position: relative; top: auto; left: auto; right: auto; width: 72vw; margin: 1.6em 0 0; }
+  .side-r .cs-media { margin-left: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .cs-rv .cs-num, .js .cs-rv .cs-name, .js .cs-rv .cs-sub, .js .cs-rv .cs-tag,
+  .js .cs-rv .cs-media-in, .cs-div-sub { opacity: 1; transform: none; transition: none; }
+  .cs-line { transform: scaleX(1); }
+}
+
 /* ═══════════════ БЛОК 4.3 — КЕЙСЫ НА ГЛАВНОЙ (Akoya, парение) ═══════════════ */
 .wk { position: relative; padding: var(--sp-section) 0; overflow: clip; }
 .wk-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: clamp(2rem,6vh,5rem); }

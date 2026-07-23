@@ -1,11 +1,10 @@
-import Link from "next/link";
-import Image from "next/image";
 import { Suspense } from "react";
-import { getAllNiches, getAllCases } from "@/lib/content/loader";
+import { getAllNiches } from "@/lib/content/loader";
 import HubGrid, { type HubCard } from "@/components/pg/HubGrid";
 import Hero, { HeroV1 } from "@/components/home/Hero";
 import Hero3D from "@/components/home/Hero3D";
 import Manifesto from "@/components/home/Manifesto";
+import Cases from "@/components/home/Cases";
 import FounderBlock from "@/components/pg/FounderBlock";
 import TrustBlock from "@/components/pg/TrustBlock";
 import Testimonials from "@/components/pg/Testimonials";
@@ -20,28 +19,12 @@ import { SITE } from "@/lib/seo/site";
   Заголовок героя — блоки-слова (не инлайн-маски): пробелы гарантированы.
 */
 
-// раскладка парящих кейсов (реф Akoya): позиция, ширина, клип-фигура, наклон, скорость дрейфа
-const SHAPES = [
-  { clip: "polygon(0 6%, 100% 0, 96% 92%, 4% 100%)", left: "1%", top: "0%", w: "30vw", rot: -5, drift: 0.10 },
-  { clip: "polygon(4% 0, 100% 8%, 100% 100%, 0 90%)", left: "39%", top: "26%", w: "34vw", rot: 4, drift: -0.06 },
-  { clip: "polygon(0 0, 100% 4%, 92% 100%, 6% 96%)", left: "70%", top: "2%", w: "26vw", rot: 7, drift: 0.14 },
-  { clip: "polygon(0 10%, 100% 0, 100% 90%, 0 100%)", left: "10%", top: "54%", w: "28vw", rot: -3, drift: -0.09 },
-  { clip: "polygon(6% 0, 100% 6%, 94% 100%, 0 94%)", left: "50%", top: "60%", w: "30vw", rot: 6, drift: 0.08 },
-] as const;
-
 export default function HomeLite() {
   const niches: HubCard[] = getAllNiches().map((n) => ({
     href: `/dlya-biznesa/${n.slug}/`,
     kicker: "Ниша",
     title: n.title,
     desc: n.metaDescription,
-  }));
-  const cases = getAllCases().slice(0, SHAPES.length).map((c, i) => ({
-    href: `/keisy/${c.slug}/`,
-    title: c.title,
-    type: c.siteType,
-    cover: c.cover,
-    ...SHAPES[i],
   }));
 
   return (
@@ -55,35 +38,8 @@ export default function HomeLite() {
       {/* ══ 02 — MANIFESTO (словарная статья; заменил «Что я делаю») ══ */}
       <Manifesto />
 
-      {/* ══ КЕЙСЫ — ПАРЯЩИЕ ФИГУРЫ (реф Akoya) ══ */}
-      <section className="wk">
-        <div className="pg-wrap">
-          <div className="wk-head">
-            <p className="pg-hero-kicker">02 — Работы</p>
-            <Link href="/keisy/" className="link-u" data-magnetic>Все кейсы →</Link>
-          </div>
-        </div>
-        <div className="pg-wrap">
-          <div className="wk-stage">
-            {cases.map((c) => (
-              <Link
-                key={c.href}
-                href={c.href}
-                className="wk-item"
-                data-magnetic
-                data-drift={c.drift}
-                style={{ left: c.left, top: c.top, width: c.w }}
-              >
-                <span className="wk-name" style={{ left: 0, top: "-1.7em" }}>{c.title}</span>
-                <span className="wk-shape" style={{ clipPath: c.clip, transform: `rotate(${c.rot}deg)`, aspectRatio: "3 / 2" }}>
-                  {c.cover && <Image src={c.cover} alt="" width={560} height={373} />}
-                </span>
-                <span className="wk-type" style={{ right: 0, bottom: "-1.7em" }}>{c.type}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ══ КЕЙСЫ — чёрное полотно, реф noth.in «WORKS» ══ */}
+      <Cases />
 
       {/* ══ НИШИ ══ */}
       <section className="pg-hub">
