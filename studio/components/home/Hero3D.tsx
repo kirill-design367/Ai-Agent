@@ -156,7 +156,7 @@ export default function Hero3D() {
       uTime: { value: 0 }, uEnter: { value: reduce ? 1 : 0 }, uBreath: { value: reduce ? 0 : 1 },
       uScroll: { value: 0 }, uMouse: { value: new THREE.Vector2(9e3, 9e3) },
       uRepel: { value: 0.03 }, uRepelR: { value: 0.28 }, // слабее и компактнее — лёгкое расступание
-      uFadeY0: { value: -3 }, uFadeY1: { value: -5 },   // нижнее затухание (низ канваса)
+      uFadeY0: { value: -1.0 }, uFadeY1: { value: -2.7 }, // нижнее затухание по мировой Y — рано и плавно (частицы догорают в верх 2-го блока)
       uFadeTop0: { value: 0.7 }, uFadeTop1: { value: 1.9 }, // верхнее затухание (над облаком)
       uKeepFrac: { value: 1.05 },  // адаптив: доля частиц (>1 = все видны; хвост гаснет масштабом→0 при снижении)
     };
@@ -360,9 +360,8 @@ export default function Hero3D() {
       camCY = wpp * ((yTarget - rect.top) - H / 2);        // world-Y центра слова = 0
       cam.left = -halfW; cam.right = halfW; cam.top = camCY + halfH; cam.bottom = camCY - halfH;
       cam.updateProjectionMatrix();
-      // затухание нижних ~30% высоты канваса (мировая Y)
-      uni.uFadeY0.value = camCY - halfH * 0.4;
-      uni.uFadeY1.value = camCY - halfH;
+      // нижнее затухание — по фиксированной мировой Y (uFadeY0/uFadeY1 в uni), не
+      // по краю канваса: облако растворяется рано и плавно, без ровной линии на стыке.
       // кэш раскладки в координатах документа (для прогресса скролла и курсора)
       const sy = window.scrollY || 0;
       heroTopDoc = hero.top + sy; heroH = (el.parentElement || el).clientHeight || 1;
