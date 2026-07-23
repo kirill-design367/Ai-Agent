@@ -137,51 +137,56 @@ input, textarea, select { font: inherit; color: inherit; }
 /* правая группа: CTA «Обсудить проект» + «меню» (тем же весом). hover CTA —
    мягкое раскрытие трекинга; «меню» — вычерчиваемое подчёркивание. */
 .site-header-right { margin-left: auto; display: inline-flex; align-items: baseline; gap: clamp(0.9rem, 2vw, 2rem); }
-.site-header-cta { border: 0; background: none; box-shadow: none; font-weight: 600; font-size: 0.85rem; }
-.cta-txt { display: inline-block; letter-spacing: 0.02em;
-  transition: letter-spacing 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
-.site-header-cta:hover .cta-txt, .site-header-cta:active .cta-txt { letter-spacing: 0.2em; }
-.site-menu-btn { position: relative; border: 0; padding: 0; background: none; color: inherit; cursor: pointer;
+.site-header-cta { border: 0; background: none; box-shadow: none; font-weight: 600; font-size: 0.85rem; outline: none; }
+.site-menu-btn { border: 0; padding: 0; background: none; color: inherit; cursor: pointer; outline: none;
   font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
-.site-menu-btn::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
-  background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform var(--dur-2) var(--ease); }
-.site-menu-btn:hover::after { transform: scaleX(1); transform-origin: left; }
-/* фокус: для мыши — без браузерной обводки; для клавиатуры — фирменное подчёркивание */
-.site-menu-btn:focus { outline: none; }
-.site-menu-btn:focus-visible::after { transform: scaleX(1); transform-origin: left; }
-@media (prefers-reduced-motion: reduce) { .cta-txt { transition: none; } }
+.site-header-cta:focus, .site-menu-btn:focus { outline: none; }
+
+/* ── ЕДИНЫЙ masked-flip для интерактивного текста (CTA, «меню», пункты меню):
+   на hover/фокус текст сдвигается по вертикали под маской, его дублёр приходит
+   снизу. Одна механика на весь сайт. Амплитуда сдержанная (маска = кегль, а не
+   вся строка), кривая мягкая, длительность спокойная, без scale/сдвига по X. */
+.flip { display: inline-block; overflow: hidden; position: relative; vertical-align: bottom; }
+.flip-i { display: block; line-height: 1.05; transition: transform 0.52s cubic-bezier(0.25, 1, 0.5, 1); }
+.flip-i--copy { position: absolute; inset: 0; transform: translateY(100%); }
+.site-header-cta:hover .flip-i, .site-header-cta:focus-visible .flip-i,
+.site-menu-btn:hover .flip-i, .site-menu-btn:focus-visible .flip-i,
+.nav-panel-l:hover .flip-i, .nav-panel-l:focus-visible .flip-i { transform: translateY(-100%); }
+.site-header-cta:hover .flip-i--copy, .site-header-cta:focus-visible .flip-i--copy,
+.site-menu-btn:hover .flip-i--copy, .site-menu-btn:focus-visible .flip-i--copy,
+.nav-panel-l:hover .flip-i--copy, .nav-panel-l:focus-visible .flip-i--copy { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .flip-i { transition: none; } }
 
 /* ── КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ (реф noth.in): небольшая карточка у слова «меню».
-   ОТДЕЛЕНИЕ БЕЗ «попапа»: без тени и без рамки по периметру — только тонкий
-   УГОЛОК (линии слева и снизу), как архитектурная засечка; фон чистый белый.
-   Пункты появляются из-под маски со стаггером; hover — вертикальный masked-flip
-   (одна механика с ревизами по сайту). Страница под панелью живая, не затемнена.
-   Не внутри mix-blend-difference шапки. */
-.nav-panel { position: fixed; z-index: 250; top: calc(var(--header-h) - 18px); right: var(--gutter);
-  width: min(272px, 82vw); background: #fff; color: #0a0a0a;
-  border: 0; border-left: 1px solid rgba(0, 0, 0, 0.18); border-bottom: 1px solid rgba(0, 0, 0, 0.18);
-  box-shadow: none; padding: 18px 6px 16px 20px; transform-origin: top right;
+   БЕЗ рамки и тени вообще. Отделяется только ЛИНИЯМИ-РАЗДЕЛИТЕЛЯМИ под каждым
+   пунктом (1px, почти чёрные #1a1a1a), которые ВЫЧЕРЧИВАЮТСЯ слева направо при
+   раскрытии со стаггером — вместе с появлением пунктов. hover пункта — тот же
+   masked-flip, что у CTA. Страница под панелью живая, не затемнена. */
+.nav-panel { position: fixed; z-index: 250; top: calc(var(--header-h) - 16px); right: var(--gutter);
+  width: min(272px, 82vw); background: transparent; color: #0a0a0a;
+  border: 0; box-shadow: none; padding: 12px 2px 2px 2px; transform-origin: top right;
   opacity: 0; transform: translateY(-8px); visibility: hidden; pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
     visibility 0s linear 0.4s; }
 .nav-panel.is-open { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition-delay: 0s, 0s, 0s; }
 .nav-panel-list { display: flex; flex-direction: column; }
-/* пункт = маска появления; внутри — masked-flip на hover/фокус */
-.nav-panel-l { display: block; overflow: hidden; padding: 5px 8px 5px 0; color: #0a0a0a;
+.nav-panel-l { position: relative; display: block; padding: 11px 6px; color: #0a0a0a;
   font-family: var(--font-body); font-weight: 600; font-size: 1.06rem; letter-spacing: 0.005em; outline: none; }
-.nav-flip { display: block; overflow: hidden; position: relative;
-  transform: translateY(140%); transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
-.nav-panel.is-open .nav-flip { transform: translateY(0); transition-delay: calc(0.06s + var(--i) * 0.045s); }
-.nav-flip-t { display: block; line-height: 1.5; transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
-.nav-flip-t--copy { position: absolute; top: 0; left: 0; transform: translateY(100%); color: #6b6b6b; }
-.nav-panel-l:hover .nav-flip-t, .nav-panel-l:focus-visible .nav-flip-t { transform: translateY(-100%); }
-.nav-panel-l:hover .nav-flip-t--copy, .nav-panel-l:focus-visible .nav-flip-t--copy { transform: translateY(0); }
-@media (max-width: 760px) { .nav-panel { width: min(78vw, 300px); } .nav-panel-l { font-size: 1.12rem; } }
+/* линия-разделитель под пунктом — вычерчивается слева направо при раскрытии */
+.nav-panel-l::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: #1a1a1a; transform: scaleX(0); transform-origin: left;
+  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1); }
+.nav-panel.is-open .nav-panel-l::after { transform: scaleX(1); transition-delay: calc(0.05s + var(--i) * 0.05s); }
+/* появление пункта (flip-контейнер) — вместе с линией, со стаггером */
+.nav-panel-l .flip { opacity: 0; transform: translateY(45%);
+  transition: opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+.nav-panel.is-open .nav-panel-l .flip { opacity: 1; transform: none; transition-delay: calc(0.05s + var(--i) * 0.05s); }
+@media (max-width: 760px) { .nav-panel { width: min(78vw, 300px); } .nav-panel-l { font-size: 1.12rem; padding: 13px 6px; } }
 @media (prefers-reduced-motion: reduce) {
   .nav-panel { transition: opacity 0.2s linear, visibility 0s linear 0.2s; transform: none; }
   .nav-panel.is-open { transition-delay: 0s; }
-  .nav-flip { transition: opacity 0.2s linear; transform: none; }
-  .nav-flip-t { transition: none; }
+  .nav-panel-l::after { transition: none; }
+  .nav-panel-l .flip { transition: opacity 0.2s linear; transform: none; }
 }
 
 /* ── ПЛАВАЮЩАЯ CTA (только мобайл ≤768) — доступ к контакту при скролле ── */
@@ -563,7 +568,13 @@ textarea.field { resize: vertical; min-height: 4em; }
 /* ГЛОБАЛЬНЫЙ FIXED-канвас во весь вьюпорт: не принадлежит секциям → у частиц нет
    края на стыке блоков. z-index 0: над фонами секций (in-flow), под текстом
    (позиционированный z≥1) и под шапкой (z 200). pointer-events:none. */
-.ph { position: fixed; inset: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none; }
+.ph { position: fixed; inset: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none;
+  will-change: transform; transform: translateZ(0); }
+/* ТАЧ (iOS): fixed-канвас дёргается при инерционном скролле → делаем его absolute,
+   он едет вместе с документом нативно (компоситор), дрожать нечему. */
+@media (hover: none) {
+  .ph { position: absolute; inset: auto; top: 0; left: 0; height: 100svh; }
+}
 .ph-gl { display: block; width: 100%; height: 100%; }
 
 /* Кинематографичный вход сцены (вместо прелоадера): манифест построчно снизу,
@@ -587,10 +598,12 @@ textarea.field { resize: vertical; min-height: 4em; }
 :root { --aurea-fs: clamp(2.6rem, 6vw, 7rem); }
 .mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
 .mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
-  padding-inline: var(--gutter); min-height: 200vh; }
+  padding-inline: var(--gutter); min-height: 250vh; }
 
-/* Левый остров: AUREA + одна строка-статья, левый край на 4.5%, база ~30%. */
-.mf2-head { position: absolute; left: 4.5%; top: 26%; will-change: transform; }
+/* Левый остров: AUREA + строка-статья. AUREA опущена (top 58%): между полным
+   растворением частиц hero (~70vh прокрутки) и появлением слова остаётся ~75vh
+   чистого воздуха — заметная пауза. */
+.mf2-head { position: absolute; left: 4.5%; top: 46%; will-change: transform; }
 .mf2-word { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
   line-height: 1; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
 /* маска побуквенной анимации — с верт. запасом (padding+neg.margin), чтобы
@@ -605,12 +618,13 @@ textarea.field { resize: vertical; min-height: 4em; }
 .mf2-sep { margin: 0 0.5em; color: #b2b2b2; }
 .mf2-meta i { font-style: italic; }
 
-/* манифест — отдельная колонка справа на чистом белом (RF Dewi). Кегль −10%,
-   line-height плотнее, цвет #000 (оптическая плотность, т.к. у шрифта только Regular). */
-.mf2-manifesto { position: absolute; left: 58%; top: 46%; width: 35%; min-width: 21rem;
-  display: flex; flex-direction: column; gap: 1.4em; font-family: var(--font-manifest), var(--font-body);
-  font-weight: 400; font-size: clamp(0.95rem, 0.88rem + 0.3vw, 1.14rem); line-height: 1.48; color: #000;
-  will-change: transform; }
+/* манифест — отдельная колонка справа на чистом белом (RF Dewi). Кегль ещё −9%,
+   line-height плотнее, цвет #000 + очень лёгкий text-stroke и отрицательный трекинг
+   для оптической плотности (без синтетического bold — у RF Dewi только Regular). */
+.mf2-manifesto { position: absolute; left: 58%; top: 64%; width: 35%; min-width: 21rem;
+  display: flex; flex-direction: column; gap: 1.35em; font-family: var(--font-manifest), var(--font-body);
+  font-weight: 400; font-size: clamp(0.86rem, 0.8rem + 0.28vw, 1.04rem); line-height: 1.46; color: #000;
+  letter-spacing: -0.005em; -webkit-text-stroke: 0.3px currentColor; will-change: transform; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
 
@@ -647,5 +661,5 @@ textarea.field { resize: vertical; min-height: 4em; }
     transform: none !important; }
   .mf2-meta { white-space: normal; }
   .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(6rem, 20vh, 11rem);
-    padding-bottom: clamp(2rem, 6vh, 4rem); font-size: 0.94rem; }
+    padding-bottom: clamp(2rem, 6vh, 4rem); font-size: 0.86rem; }
 }

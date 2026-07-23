@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /*
   ШАПКА — узкая верхняя панель (реф noth.in / MONOLOG):
@@ -23,6 +23,17 @@ const NAV = [
   { href: "/o-studii/", label: "О студии" },
   { href: "/kontakty/", label: "Контакты" },
 ];
+
+// Единый masked-flip для интерактивного текста (CTA «Обсудить проект», «меню»,
+// пункты меню): один компонент → одна механика на весь сайт.
+function Flip({ children }: { children: ReactNode }) {
+  return (
+    <span className="flip">
+      <span className="flip-i">{children}</span>
+      <span className="flip-i flip-i--copy" aria-hidden>{children}</span>
+    </span>
+  );
+}
 
 // Векторный вордмарк — полилинии по тем же координатам, что particle-надпись.
 function Logo() {
@@ -107,7 +118,7 @@ export default function SiteHeader() {
 
           <div className="site-header-right">
             <Link href="/kontakty/" className="site-header-cta">
-              <span className="cta-txt">Обсудить проект</span>
+              <Flip>Обсудить проект</Flip>
             </Link>
             <button
               ref={btnRef}
@@ -118,24 +129,21 @@ export default function SiteHeader() {
               aria-haspopup="menu"
               onClick={() => setOpen((v) => !v)}
             >
-              меню
+              <Flip>меню</Flip>
             </button>
           </div>
         </div>
       </header>
 
       {/* КОМПАКТНАЯ ПАНЕЛЬ-МЕНЮ — привязана к слову «меню», правый верхний угол.
-          Только разделы (контакты есть в футере и CTA). Пункты появляются из-под
-          маски (как реверсы по сайту), hover — вертикальный masked-flip. Страница
-          под панелью не затемняется и остаётся живой. */}
+          Только разделы. Без рамки/тени — под каждым пунктом линия-разделитель,
+          вычерчивается при раскрытии со стаггером. hover — тот же masked-flip, что
+          у CTA. Страница под панелью не затемняется и остаётся живой. */}
       <div ref={panelRef} className={`nav-panel${open ? " is-open" : ""}`} role="menu" aria-hidden={!open}>
         <nav className="nav-panel-list" aria-label="Разделы">
           {NAV.map((n, i) => (
             <Link key={n.href} href={n.href} className="nav-panel-l" style={{ ["--i" as string]: i }} role="menuitem" tabIndex={open ? undefined : -1}>
-              <span className="nav-flip">
-                <span className="nav-flip-t">{n.label}</span>
-                <span className="nav-flip-t nav-flip-t--copy" aria-hidden>{n.label}</span>
-              </span>
+              <Flip>{n.label}</Flip>
             </Link>
           ))}
         </nav>

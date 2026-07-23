@@ -380,16 +380,23 @@ export default function Hero3D() {
     const tick = () => {
       const scrollPx = window.scrollY || 0;    // одно чтение на кадр (не forced reflow)
       uni.uTime.value = performance.now() * 0.001;
-      // курсор → world (канвас в 0,0 вьюпорта, отталкивание считается до scroll-сдвига)
+      // ТАЧ (iOS): облако НЕ привязываем к scrollY per-frame — канвас на мобиле
+      // position:absolute и едет с документом нативно (компоситор), без дрожания
+      // на инерционной прокрутке. На десктопе облако едет вверх через uScrollWorld.
+      const scrollWorld = coarse ? 0 : scrollPx * wpp;
+      // курсор → world. Частицы визуально сдвинуты вверх на scrollWorld (шейдер
+      // прибавляет его к _base.y ПОСЛЕ отталкивания), поэтому мировую Y курсора
+      // корректируем на −scrollWorld — иначе после прокрутки реакция уходит ВЫШЕ
+      // курсора. Теперь отклик точно под курсором на любой высоте прокрутки.
       if (!coarse && ready) {
-        if (hasPointer) { tmvx = (pointerX - W / 2) * wpp; tmvy = camCY + (H / 2 - pointerY) * wpp; }
+        if (hasPointer) { tmvx = (pointerX - W / 2) * wpp; tmvy = camCY + (H / 2 - pointerY) * wpp - scrollWorld; }
         else { tmvx = 9e3; tmvy = 9e3; }
         mvx += (tmvx - mvx) * 0.12; mvy += (tmvy - mvy) * 0.12; uni.uMouse.value.set(mvx, mvy);
       }
-      // прогресс разлёта + вертикальный ход облака привязаны к прокрутке страницы
+      // прогресс разлёта привязан к прокрутке; вертикальный ход облака — только десктоп
       const st = Math.min(1, scrollPx / (0.85 * H));
       scrollCur += (st - scrollCur) * 0.12; uni.uScroll.value = scrollCur;
-      uni.uScrollWorld.value = scrollPx * wpp;
+      uni.uScrollWorld.value = scrollWorld;
       // 0.7× во время активного скролла (в движении незаметно)
       const moving = scrollCur > 0.01 && scrollCur < 0.99;
       if (moving !== dispersing) { dispersing = moving; applyRes(); }
