@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SITE } from "@/lib/seo/site";
 
 /*
@@ -51,38 +51,8 @@ export default function SiteHeader() {
   const isHome = pathname === "/";
   // на главной табы проявляются при прокрутке ко 2-му блоку; иначе — сразу видны
   const [navShown, setNavShown] = useState(false);
-  const ctaRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => setOpen(false), [pathname]);
-
-  // CTA-линза: овал увеличивает текст под курсором, следует за ним с инерцией,
-  // плавно раскрывается/схлопывается. На тач-устройствах отключена.
-  useEffect(() => {
-    const cta = ctaRef.current;
-    if (!cta || !window.matchMedia("(hover: hover)").matches) return;
-    const ERX = 45, ERY = 27.5; // радиусы овала (ш≈90px, в≈55px)
-    let lx = 0, ly = 0, tlx = 0, tly = 0, r = 0, tr = 0, raf = 0, live = false;
-    const set = () => {
-      cta.style.setProperty("--lx", lx.toFixed(1) + "px");
-      cta.style.setProperty("--ly", ly.toFixed(1) + "px");
-      cta.style.setProperty("--erx", (ERX * r).toFixed(2) + "px");
-      cta.style.setProperty("--ery", (ERY * r).toFixed(2) + "px");
-    };
-    const loop = () => {
-      lx += (tlx - lx) * 0.25; ly += (tly - ly) * 0.25; r += (tr - r) * 0.16;
-      set();
-      if (Math.abs(tr - r) > 0.002 || tr > 0 || Math.abs(tlx - lx) > 0.3) raf = requestAnimationFrame(loop);
-      else { live = false; r = 0; set(); }
-    };
-    const kick = () => { if (!live) { live = true; raf = requestAnimationFrame(loop); } };
-    const onEnter = (e: PointerEvent) => { const b = cta.getBoundingClientRect(); lx = tlx = e.clientX - b.left; ly = tly = e.clientY - b.top; tr = 1; kick(); };
-    const onMove = (e: PointerEvent) => { const b = cta.getBoundingClientRect(); tlx = e.clientX - b.left; tly = e.clientY - b.top; tr = 1; kick(); };
-    const onLeave = () => { tr = 0; kick(); };
-    cta.addEventListener("pointerenter", onEnter);
-    cta.addEventListener("pointermove", onMove);
-    cta.addEventListener("pointerleave", onLeave);
-    return () => { cancelAnimationFrame(raf); cta.removeEventListener("pointerenter", onEnter); cta.removeEventListener("pointermove", onMove); cta.removeEventListener("pointerleave", onLeave); };
-  }, []);
 
   useEffect(() => {
     if (!isHome) { setNavShown(true); return; }
@@ -109,11 +79,8 @@ export default function SiteHeader() {
             ))}
           </nav>
 
-          <Link href="/kontakty/" className="site-header-cta" ref={ctaRef}>
-            <span className="cta-lens">
-              <span className="cta-base">Обсудить проект</span>
-              <span className="cta-mag" aria-hidden>Обсудить проект</span>
-            </span>
+          <Link href="/kontakty/" className="site-header-cta">
+            <span className="cta-txt">Обсудить проект</span>
           </Link>
 
           <button

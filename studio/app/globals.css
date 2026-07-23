@@ -127,17 +127,16 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-nav-l { position: relative; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
 .site-nav-l::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
 .site-nav-l:hover::after { transform: scaleX(1); }
-/* CTA — только текст: ни рамки, ни фона, ни тени, ни обрезки (никаких полос).
-   hover = овальная линза увеличивает текст под курсором (дубль scale 1.35,
-   обрезан эллипс-clip, центр следует за курсором с инерцией — JS). */
+/* CTA — только текст: ни рамки, ни фона, ни тени, ни обрезки. hover = мягкое
+   раскрытие трекинга (буквы «дышат») — сдержанный премиальный микро-жест без
+   лишних элементов; высота стабильна, симметрично при уходе, авторская кривая,
+   работает во всех браузерах (letter-spacing анимируем везде, вкл. Safari). */
 .site-header-cta { margin-left: auto; border: 0; background: none; box-shadow: none;
-  font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; }
-.cta-lens { position: relative; display: inline-block; }
-.cta-base { display: block; white-space: nowrap; }
-.cta-mag { position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: none;
-  transform-origin: var(--lx, 50%) var(--ly, 50%); transform: scale(1.35);
-  clip-path: ellipse(var(--erx, 0px) var(--ery, 0px) at var(--lx, 50%) var(--ly, 50%));
-  will-change: clip-path, transform; }
+  font-weight: 600; font-size: 0.85rem; }
+.cta-txt { display: inline-block; letter-spacing: 0.02em;
+  transition: letter-spacing 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+.site-header-cta:hover .cta-txt, .site-header-cta:active .cta-txt { letter-spacing: 0.2em; }
+@media (prefers-reduced-motion: reduce) { .cta-txt { transition: none; } }
 .site-burger { margin-left: var(--sp-4); width: 34px; height: 18px; position: relative; display: inline-flex; }
 .site-burger span { position: absolute; left: 0; width: 100%; height: 2px; background: currentColor; transition: transform var(--dur-2) var(--ease), opacity var(--dur-1); }
 .site-burger span:nth-child(1) { top: 0; } .site-burger span:nth-child(2) { top: 8px; } .site-burger span:nth-child(3) { top: 16px; }

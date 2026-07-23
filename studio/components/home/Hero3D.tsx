@@ -145,7 +145,7 @@ export default function Hero3D() {
     const uni = {
       uTime: { value: 0 }, uEnter: { value: reduce ? 1 : 0 }, uBreath: { value: reduce ? 0 : 1 },
       uScroll: { value: 0 }, uMouse: { value: new THREE.Vector2(9e3, 9e3) },
-      uRepel: { value: 0.06 }, uRepelR: { value: 0.5 },
+      uRepel: { value: 0.03 }, uRepelR: { value: 0.28 }, // слабее и компактнее — лёгкое расступание
       uFadeY0: { value: -3 }, uFadeY1: { value: -5 },   // нижнее затухание (низ канваса)
       uFadeTop0: { value: 0.7 }, uFadeTop1: { value: 1.9 }, // верхнее затухание (над облаком)
     };
@@ -346,19 +346,24 @@ export default function Hero3D() {
     let mvx = 9e3, mvy = 9e3, tmvx = 9e3, tmvy = 9e3;
     let scrollTarget = 0, scrollCur = 0, running = false, onScreen = false, docVis = true;
     let measured = false, frames = 0, tStart = 0;
+    // реакция на курсор — только после входной анимации (флаг ready); обработчик
+    // лишь пишет координаты (без физики), пересчёт — раз в кадр в rAF.
+    let ready = reduce, pointerX = 0, pointerY = 0, hasPointer = false;
 
-    const onMove = (e: PointerEvent) => {
-      const rect = el.getBoundingClientRect();
-      tmvx = (e.clientX - rect.left - W / 2) * wpp;
-      tmvy = camCY + (H / 2 - (e.clientY - rect.top)) * wpp;
-    };
-    const onLeave = () => { tmvx = 9e3; tmvy = 9e3; };
+    const onMove = (e: PointerEvent) => { if (!ready) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
+    const onLeave = () => { hasPointer = false; };
     const onScroll = () => { const r = el.getBoundingClientRect(); const h = (el.parentElement || el).clientHeight || 1; scrollTarget = Math.min(1, Math.max(0, (-(r.top) + 0) / h)); };
 
     const tick = () => {
       uni.uTime.value = performance.now() * 0.001;
-      if (!coarse) {
-        // инерционное следование курсора → хаотичное отталкивание в шейдере
+      if (!coarse && ready) {
+        // раз в кадр: последние координаты курсора → world (одно getBoundingClientRect)
+        if (hasPointer) {
+          const rect = el.getBoundingClientRect();
+          tmvx = (pointerX - rect.left - W / 2) * wpp;
+          tmvy = camCY + (H / 2 - (pointerY - rect.top)) * wpp;
+        } else { tmvx = 9e3; tmvy = 9e3; }
+        // инерционное следование → хаотичное отталкивание в шейдере
         mvx += (tmvx - mvx) * 0.12; mvy += (tmvy - mvy) * 0.12;
         uni.uMouse.value.set(mvx, mvy);
       }
@@ -383,7 +388,7 @@ export default function Hero3D() {
 
     // старт
     build(); resize();
-    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.5, ease: "power2.out" }); uni.uBreath.value = 1; }
+    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.5, ease: "power2.out", onComplete: () => { ready = true; } }); uni.uBreath.value = 1; }
     else { renderer.render(scene, cam); }
 
     const io = new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; sync(); }, { rootMargin: "160px 0px" });
