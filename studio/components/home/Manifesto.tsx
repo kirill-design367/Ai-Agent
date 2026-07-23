@@ -55,11 +55,11 @@ export default function Manifesto() {
     const ploop = () => {
       prunning = false;
       const prog = (window.scrollY || 0) - blockTop;
-      // левый остров почти стоит (apparent ~0.1× = k 0.9), манифест уезжает
-      // заметно быстрее, но всё ещё медленнее страницы (apparent ~0.4× = k 0.6)
-      // → острова расходятся. Потолок отпускает их, чтобы не наплыть на след. блок.
-      if (head) head.style.transform = `translate3d(0, ${clampY(prog, 0.9, 0.7).toFixed(1)}px, 0)`;
-      if (man) man.style.transform = `translate3d(0, ${clampY(prog, 0.6, 0.45).toFixed(1)}px, 0)`;
+      // мягкий параллакс: левый остров почти стоит (apparent ~0.15× = k 0.85),
+      // манифест чуть быстрее (apparent ~0.28× = k 0.72). Небольшие потолки, чтобы
+      // острова расходились деликатно и оставались в ОДНОМ визуальном поле.
+      if (head) head.style.transform = `translate3d(0, ${clampY(prog, 0.85, 0.34).toFixed(1)}px, 0)`;
+      if (man) man.style.transform = `translate3d(0, ${clampY(prog, 0.72, 0.26).toFixed(1)}px, 0)`;
     };
     const onParallax = () => { if (!prunning) { prunning = true; praf = requestAnimationFrame(ploop); } };
     ploop();

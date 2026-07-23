@@ -130,13 +130,13 @@ input, textarea, select { font: inherit; color: inherit; }
 .logo-clip { display: inline-block; overflow: hidden; width: 76px; line-height: 0;
   transition: width 0.5s var(--ease); }
 .lg-rest { transition: opacity 0.45s var(--ease); }
-/* при прокрутке остаётся только Λ, но КРУПНЕЕ (~2.3×) — полноценный знак бренда */
-.site-header-brand.is-min .logo-clip { width: 38px; }
-.site-header-brand.is-min .site-logo { height: 46px; }
+/* при прокрутке остаётся только Λ, крупным акцентом (сопоставима по весу с CTA) */
+.site-header-brand.is-min .logo-clip { width: 56px; }
+.site-header-brand.is-min .site-logo { height: 68px; }
 .site-header-brand.is-min .lg-rest { opacity: 0; }
 .site-nav { display: none; }
 .site-nav-l { position: relative; display: inline-flex; align-items: center; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
-.nav-dot { flex: none; width: 0; height: 5px; border-radius: 50%; background: currentColor; opacity: 0;
+.nav-dot { flex: none; width: 0; height: 3px; border-radius: 50%; background: currentColor; opacity: 0;
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .nav-txt { position: relative; display: inline-block; max-width: 9rem; overflow: hidden; white-space: nowrap;
   transition: max-width 0.62s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -179,14 +179,13 @@ input, textarea, select { font: inherit; color: inherit; }
   .site-nav.is-shown .site-nav-l:nth-child(4) { transition-delay: 0.17s; }
   .site-nav.is-shown .site-nav-l:nth-child(5) { transition-delay: 0.22s; }
   .site-nav.is-shown .site-nav-l:nth-child(6) { transition-delay: 0.27s; }
-  /* При прокрутке табы схлопываются в компактную группу точек (одна на пункт),
-     hover группы — плавно разворачивает обратно (реф noth.in «works»): пункты
-     стягиваются к центру НЕРАВНОМЕРНО — у каждого своя задержка (от краёв к
-     центру при сжатии, вразнобой при раскрытии), кривая одна, без резких
-     переключений. gap сжимается → слова наезжают друг на друга и гаснут в точки. */
-  .site-nav.is-dots { gap: 0.7rem; transition: gap 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  /* При прокрутке табы схлопываются в КОМПАКТНЫЙ, деликатный типографический знак
+     (ряд точек 3px, светлее — 0.5 currentColor, плотная группа), почти незаметный.
+     hover группы — плавно разворачивает: каждая точка ПРЕВРАЩАЕТСЯ в свой пункт
+     меню с неравномерной задержкой (реф noth.in «works»), без резких переключений. */
+  .site-nav.is-dots { gap: 0.34rem; transition: gap 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
   .site-nav.is-dots .nav-txt { max-width: 0; opacity: 0; }
-  .site-nav.is-dots .nav-dot { width: 5px; opacity: 1; }
+  .site-nav.is-dots .nav-dot { width: 3px; opacity: 0.5; }
   .site-nav.is-dots:hover { gap: clamp(1rem, 2vw, 2.4rem); }
   .site-nav.is-dots:hover .nav-txt { max-width: 9rem; opacity: 1; }
   .site-nav.is-dots:hover .nav-dot { width: 0; opacity: 0; }
@@ -636,41 +635,45 @@ textarea.field { resize: vertical; min-height: 4em; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ═══════════════ БЛОК 02 — MANIFESTO (словарная статья) ═══════════════
-   Разворот дорогого журнала: два смысловых острова, между ними тишина.
-   «Aurea» — заголовок словарной статьи слева сверху (кегль ~6vw, база ~38.2%
+   Разворот дорогого журнала: два смысловых острова в одном визуальном поле.
+   «Aurea» — заголовок словарной статьи слева сверху (кегль ~6vw, база ~30%
    высоты блока), под ней ОДНА мелкая строка (транскрипция·часть речи·этимология).
-   Манифест — правая нижняя зона (левый край 61.8%, верх ~56%), правый край НЕ
-   доходит до края экрана (колонка «висит»). Между островами — большая
-   диагональная пустота. Глубина ~265vh: над «Aurea» ~120vh воздуха (догорают
-   частицы hero), затем события разнесены по прокрутке (каждое — свой IO). */
+   Манифест — правее и выше (левый край 58%, верх ~46%), правый край НЕ доходит до
+   края экрана (колонка «висит»). Между островами — диагональная пустота. Глубина
+   ~200vh: над «Aurea» ~55-65vh воздуха (догорают частицы hero), события разнесены
+   по прокрутке (каждое — свой IO). Маска побуквенной анимации — с верт. запасом
+   (padding+neg.margin), чтобы верхушки глифов Antiqva не срезались. */
 :root { --aurea-fs: clamp(2.6rem, 6vw, 7rem); }
 .mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
 .mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
-  padding-inline: var(--gutter); min-height: 265vh; }
+  padding-inline: var(--gutter); min-height: 200vh; }
 
-/* Левый остров: AUREA + одна строка-статья, левый край на 4.5%, база ~38.2%. */
-.mf2-head { position: absolute; left: 4.5%; top: 34%; will-change: transform; }
+/* Левый остров: AUREA + одна строка-статья, левый край на 4.5%, база ~30%. */
+.mf2-head { position: absolute; left: 4.5%; top: 26%; will-change: transform; }
 .mf2-word { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
-  line-height: 0.9; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
-.mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom; }
+  line-height: 1; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
+/* маска с верт. запасом: padding даёт место восходящим/нисходящим элементам
+   глифов, отрицательный margin компенсирует, чтобы визуальное положение не сдвигалось */
+.mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom;
+  padding-top: 0.28em; padding-bottom: 0.12em; margin-top: -0.28em; margin-bottom: -0.12em; }
 .mf2-l-in { display: inline-block; }
 /* транскрипция · часть речи · этимология — единой мелкой строкой под словом */
-.mf2-meta { margin: 1.15em 0 0; max-width: 64ch; font-family: var(--font-body);
+.mf2-meta { margin: 1.2em 0 0; max-width: 64ch; font-family: var(--font-body);
   font-size: 0.8rem; line-height: 1.55; letter-spacing: 0.01em; color: #4d4d4d; }
 .mf2-ipa-tr { letter-spacing: 0.06em; }
 .mf2-sep { margin: 0 0.55em; color: #a2a2a2; }
 .mf2-meta i { font-style: italic; }
 
-.mf2-manifesto { position: absolute; left: 61.8%; top: 56%; width: 30%; min-width: 19rem;
-  display: flex; flex-direction: column; gap: 0.9em; font-family: var(--font-body);
-  font-weight: 500; font-size: clamp(1rem, 0.95rem + 0.3vw, 1.2rem); line-height: 1.55; color: #1a1a1a;
+.mf2-manifesto { position: absolute; left: 58%; top: 46%; width: 35%; min-width: 21rem;
+  display: flex; flex-direction: column; gap: 1.5em; font-family: var(--font-body);
+  font-weight: 500; font-size: clamp(1.05rem, 0.98rem + 0.32vw, 1.22rem); line-height: 1.62; color: #1a1a1a;
   will-change: transform; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
 
 /* ── Motion: reveal по группам (скрытое состояние только при JS) ──
    «Aurea» — побуквенно из-под маски (stagger), oversloot-кривая. */
-.js .mf2-l-in { transform: translateY(115%); transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
+.js .mf2-l-in { transform: translateY(135%); transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
 .mf2-word.is-in .mf2-l-in { transform: translateY(0); }
 .mf2-word.is-in .mf2-l:nth-child(1) .mf2-l-in { transition-delay: 0s; }
 .mf2-word.is-in .mf2-l:nth-child(2) .mf2-l-in { transition-delay: 0.07s; }
@@ -693,8 +696,8 @@ textarea.field { resize: vertical; min-height: 4em; }
 /* ── Мобильная (одна колонка, φ-пропорции, левая ось, драматургия сохранена) ── */
 @media (max-width: 760px) {
   :root { --aurea-fs: clamp(2.8rem, 17vw, 5rem); }
-  .mf2-inner { min-height: 0; padding-top: 62vh; padding-bottom: clamp(6rem, 18vh, 12rem);
+  .mf2-inner { min-height: 0; padding-top: 42vh; padding-bottom: clamp(6rem, 18vh, 12rem);
     display: flex; flex-direction: column; }
   .mf2-head, .mf2-manifesto { position: static; left: auto; top: auto; right: auto; width: auto; }
-  .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(8rem, 32vh, 16rem); }
+  .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(7rem, 24vh, 13rem); }
 }
