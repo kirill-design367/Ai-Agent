@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
-import { getAllServices, getAllNiches, getAllCases } from "@/lib/content/loader";
-import { formatPrice } from "@/lib/format";
+import { getAllNiches, getAllCases } from "@/lib/content/loader";
 import HubGrid, { type HubCard } from "@/components/pg/HubGrid";
 import Hero, { HeroV1 } from "@/components/home/Hero";
+import Manifesto from "@/components/home/Manifesto";
 import FounderBlock from "@/components/pg/FounderBlock";
 import TrustBlock from "@/components/pg/TrustBlock";
 import Testimonials from "@/components/pg/Testimonials";
@@ -29,16 +29,6 @@ const SHAPES = [
 ] as const;
 
 export default function HomeLite() {
-  const services: HubCard[] = getAllServices().map((s) => ({
-    href: `/uslugi/${s.slug}/`,
-    kicker: "Услуга",
-    title: s.title,
-    desc: s.metaDescription,
-    meta: [
-      s.priceFrom ? `от ${formatPrice(s.priceFrom)}` : "по договорённости",
-      ...(s.termFrom ? [s.termFrom] : []),
-    ],
-  }));
   const niches: HubCard[] = getAllNiches().map((n) => ({
     href: `/dlya-biznesa/${n.slug}/`,
     kicker: "Ниша",
@@ -60,14 +50,8 @@ export default function HomeLite() {
         <Hero />
       </Suspense>
 
-      {/* ══ УСЛУГИ ПОТОКОМ ══ */}
-      <section className="pg-hub">
-        <div className="pg-wrap">
-          <p className="pg-hero-kicker">01 — Услуги</p>
-          <h2 className="pg-h2">Что я делаю</h2>
-          <HubGrid cards={services} />
-        </div>
-      </section>
+      {/* ══ 02 — MANIFESTO (словарная статья; заменил «Что я делаю») ══ */}
+      <Manifesto />
 
       {/* ══ КЕЙСЫ — ПАРЯЩИЕ ФИГУРЫ (реф Akoya) ══ */}
       <section className="wk">
