@@ -321,8 +321,10 @@ export default function Hero3D() {
     };
 
     // размеры/камера: слово сохраняет кегль (5.2 world на ширину вьюпорта) и
-    // позицию (центр нижней полосы); канвас 150vh — низ гаснет по мировой Y.
+    // позицию (центр нижней полосы). Раскладка КЭШИРУЕТСЯ здесь (обновляется на
+    // resize) → в кадре ни scroll-колбэк, ни курсор не читают layout.
     let W = 0, H = 0, wpp = 1, camCY = 0;
+    let heroTopDoc = 0, heroH = 1, canvasTopDoc = 0, canvasLeft = 0;
     const resize = () => {
       const rect = el.getBoundingClientRect();
       const hero = (el.parentElement || el).getBoundingClientRect();
@@ -340,45 +342,54 @@ export default function Hero3D() {
       // затухание нижних ~30% высоты канваса (мировая Y)
       uni.uFadeY0.value = camCY - halfH * 0.4;
       uni.uFadeY1.value = camCY - halfH;
+      // кэш раскладки в координатах документа (для прогресса скролла и курсора)
+      const sy = window.scrollY || 0;
+      heroTopDoc = hero.top + sy; heroH = (el.parentElement || el).clientHeight || 1;
+      canvasTopDoc = rect.top + sy; canvasLeft = rect.left;
     };
 
     // ── интерактив + цикл ──
     let mvx = 9e3, mvy = 9e3, tmvx = 9e3, tmvy = 9e3;
-    let scrollTarget = 0, scrollCur = 0, running = false, onScreen = false, docVis = true;
-    let measured = false, frames = 0, tStart = 0;
-    // реакция на курсор — только после входной анимации (флаг ready); обработчик
-    // лишь пишет координаты (без физики), пересчёт — раз в кадр в rAF.
+    let scrollCur = 0, running = false, onScreen = false, docVis = true;
+    // фазы РАЗНЕСЕНЫ во времени, чтобы не совпасть в одном кадре: вход → пауза →
+    // включение курсора → пауза → финализация адаптива. uEnter — плавный uniform
+    // (без ветвления в шейдере, без #ifdef → нет перекомпиляции на границе).
+    let phase = reduce ? 2 : 0;   // 0=вход, 1=замер после входа, 2=обычный режим
+    let settleAt = 0, measStart = 0, measFrames = 0;
     let ready = reduce, pointerX = 0, pointerY = 0, hasPointer = false;
 
+    // обработчик курсора: только пишет координаты (без физики и layout), до ready — игнор
     const onMove = (e: PointerEvent) => { if (!ready) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
     const onLeave = () => { hasPointer = false; };
-    const onScroll = () => { const r = el.getBoundingClientRect(); const h = (el.parentElement || el).clientHeight || 1; scrollTarget = Math.min(1, Math.max(0, (-(r.top) + 0) / h)); };
 
     const tick = () => {
-      uni.uTime.value = performance.now() * 0.001;
+      const now = performance.now();
+      const sy = window.scrollY || 0;      // одно чтение позиции скролла на кадр
+      uni.uTime.value = now * 0.001;
+      // курсор → world из КЭША раскладки (никаких getBoundingClientRect в кадре)
       if (!coarse && ready) {
-        // раз в кадр: последние координаты курсора → world (одно getBoundingClientRect)
         if (hasPointer) {
-          const rect = el.getBoundingClientRect();
-          tmvx = (pointerX - rect.left - W / 2) * wpp;
-          tmvy = camCY + (H / 2 - (pointerY - rect.top)) * wpp;
+          const ctop = canvasTopDoc - sy;
+          tmvx = (pointerX - canvasLeft - W / 2) * wpp;
+          tmvy = camCY + (H / 2 - (pointerY - ctop)) * wpp;
         } else { tmvx = 9e3; tmvy = 9e3; }
-        // инерционное следование → хаотичное отталкивание в шейдере
         mvx += (tmvx - mvx) * 0.12; mvy += (tmvy - mvy) * 0.12;
         uni.uMouse.value.set(mvx, mvy);
       }
-      scrollCur += (scrollTarget - scrollCur) * 0.1; uni.uScroll.value = scrollCur;
+      // прогресс разлёта — из кэша (без layout), мягкая интерполяция (частицы догоняют)
+      const scrollTarget = Math.min(1, Math.max(0, (sy - heroTopDoc) / heroH));
+      scrollCur += (scrollTarget - scrollCur) * 0.09; uni.uScroll.value = scrollCur;
       renderer.render(scene, cam);
-      if (!measured) {
-        frames++; if (!tStart) tStart = performance.now();
-        const dt = performance.now() - tStart;
-        if (dt > 1500) {
-          measured = true; const fps = frames / (dt / 1000);
+      // разнос событий конца входа во времени (см. коммент выше)
+      if (phase === 0) {
+        if (settleAt && now > settleAt + 130) { ready = true; phase = 1; measStart = now; measFrames = 0; try { performance.mark("hero:live"); } catch { /* no-op */ } }
+      } else if (phase === 1) {
+        measFrames++;
+        if (now - measStart > 1600) {
+          const fps = measFrames / ((now - measStart) / 1000);
           const thr = coarse ? 40 : 52, tgt = coarse ? 46 : 58;
-          if (fps < thr && mesh) { // НЕ пересобираем — только урезаем хвост (ambient)
-            const factor = Math.max(0.5, Math.min(1, fps / tgt));
-            mesh.count = Math.max(keepMin, Math.floor(N * factor));
-          }
+          if (fps < thr && mesh) mesh.count = Math.max(keepMin, Math.floor(N * Math.max(0.5, Math.min(1, fps / tgt))));
+          phase = 2; try { performance.mark("hero:adaptive"); } catch { /* no-op */ }
         }
       }
     };
@@ -388,14 +399,15 @@ export default function Hero3D() {
 
     // старт
     build(); resize();
-    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.5, ease: "power2.out", onComplete: () => { ready = true; } }); uni.uBreath.value = 1; }
+    // конец входа НЕ включает курсор сразу — только отмечает время; курсор и
+    // адаптив включатся позже, в разных кадрах (см. фазовую машину в tick).
+    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.5, ease: "power2.out", onComplete: () => { settleAt = performance.now(); try { performance.mark("hero:enter-done"); } catch { /* no-op */ } } }); uni.uBreath.value = 1; }
     else { renderer.render(scene, cam); }
 
     const io = new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; sync(); }, { rootMargin: "160px 0px" });
     io.observe(el);
     const onVis = () => { docVis = document.visibilityState !== "hidden"; sync(); };
     if (!coarse && !reduce) { window.addEventListener("pointermove", onMove, { passive: true }); el.addEventListener("pointerleave", onLeave); }
-    if (!reduce) window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", onVis);
     let rt = 0; const onRe = () => { window.clearTimeout(rt); rt = window.setTimeout(resize, 200); };
     window.addEventListener("resize", onRe);
@@ -403,7 +415,7 @@ export default function Hero3D() {
     return () => {
       stop(); io.disconnect(); window.clearTimeout(rt);
       window.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave);
-      window.removeEventListener("scroll", onScroll); document.removeEventListener("visibilitychange", onVis);
+      document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("resize", onRe);
       mesh?.dispose(); sphere.dispose(); material.dispose(); matcap.dispose(); renderer.dispose();
     };
