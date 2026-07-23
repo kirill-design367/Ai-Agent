@@ -3,16 +3,21 @@
 import { useEffect, useRef } from "react";
 
 /*
-  БЛОК 02 — MANIFESTO как scroll-театр. «AUREA» здесь не заголовок, а МОНУМЕНТ:
-  гигантская антиква, обрезанная краями экрана (целиком не видна — глаз достраивает).
-  Сцена ПИНится (sticky) на время прокрутки блока: слово дрейфует по горизонтали и
-  масштабируется, буквы расходятся (per-letter параллакс) — надпись «читается»
-  движением. В диагональной пустоте за буквами всплывает 3D-объект (частицы hero,
-  тот же лак — на глобальном канвасе). Манифест врезается в верхний-правый контур
-  слова. Транскрипция — тонкой строкой сверху. reduce-motion — всё статично.
+  БЛОК 02 — MANIFESTO. Словарная статья, разворот дорогого журнала. Композиция по
+  φ: левый остров (Aurea ~6vw + одна мелкая строка «транскрипция·часть речи·
+  этимология», левый край 4.5%, база ~38.2% высоты) сверху слева; манифест — правая
+  нижняя зона (левый край 61.8%, верх ~56%, правый край не доходит до края экрана).
+  Между островами — большая диагональная пустота. Глубина ~265vh: над Aurea ~120vh
+  воздуха (догорают частицы hero), события разнесены по прокрутке (каждое — свой IO).
+  Появление: «Aurea» побуквенно из-под маски, строка-статья сдвигом слева-направо
+  (с паузой), манифест построчно из-под маски. Параллакс (только transform): левый
+  остров почти стоит, манифест уезжает быстрее → расходятся. reduce-motion — сразу.
 
-  Шрифт «Aurea» — Antiqva (капитель, по закрытой теме шрифтов), намеренно капсом.
-  Сохранено для отдельной секции: «Хорошие бренды общаются. Великие бренды удивляют.»
+  Шрифт «Aurea» — Antiqva (капитель/unicase, по закрытой теме шрифтов): строчные
+  нарисованы в высоту прописных, поэтому слово набирается капителью — намеренно.
+
+  Сохранено для отдельной секции (убрано отсюда по ТЗ):
+    «Хорошие бренды общаются. Великие бренды удивляют.»
 */
 const WORD = ["A", "u", "r", "e", "a"];
 
@@ -22,87 +27,67 @@ export default function Manifesto() {
   useEffect(() => {
     const el = root.current;
     if (!el) return;
-    const word = el.querySelector<HTMLElement>(".mf2-word");
-    const letters = Array.from(el.querySelectorAll<HTMLElement>(".mf2-l"));
-    const meta = el.querySelector<HTMLElement>(".mf2-meta");
+    const items = Array.from(el.querySelectorAll<HTMLElement>(".mf2-rv"));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      items.forEach((i) => i.classList.add("is-in"));
+      return;
+    }
+    const io = new IntersectionObserver((es) => {
+      for (const e of es) if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
+    }, { rootMargin: "0px 0px -14% 0px", threshold: 0.25 });
+    const vh = window.innerHeight;
+    items.forEach((i) => {
+      if (i.getBoundingClientRect().top < vh * 0.82) i.classList.add("is-in");
+      else io.observe(i);
+    });
+
+    // ── ПАРАЛЛАКС по скроллу (только transform): левый блок почти стоит (apparent
+    //    ~0.1× скорости страницы), манифест чуть быстрее (~0.28×) → блоки расходятся.
+    const head = el.querySelector<HTMLElement>(".mf2-head");
     const man = el.querySelector<HTMLElement>(".mf2-manifesto");
-    const reveals = Array.from(el.querySelectorAll<HTMLElement>(".mf2-rv"));
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) { reveals.forEach((r) => r.classList.add("is-in")); return; }
-
-    // прогресс p (0..1) по пути пиннинга сцены: от входа блока до его выхода.
-    let raf = 0, running = false, vh = window.innerHeight;
-    let secTop = 0, secH = 0;
-    const measure = () => {
-      const r = el.getBoundingClientRect();
-      secTop = r.top + (window.scrollY || 0);
-      secH = el.offsetHeight;
-      vh = window.innerHeight;
-    };
+    let blockTop = 0, praf = 0, prunning = false;
+    const measure = () => { blockTop = el.getBoundingClientRect().top + (window.scrollY || 0); };
     measure();
-
-    const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
-    const cen = (WORD.length - 1) / 2;
-
-    const apply = () => {
-      running = false;
-      const y = window.scrollY || 0;
-      // сцена пинится, пока (secTop) уходит вверх на (secH - vh)
-      const p = clamp01((y - secTop) / Math.max(1, secH - vh));
-
-      // слово: горизонтальный дрейф + масштаб (входит компактным, вырастает,
-      // уезжает влево — открывая обрезанные края поочерёдно).
-      const driftX = (0.5 - p) * 14;            // +7vw → -7vw
-      const scale = 0.9 + p * 0.2;              // 0.9 → 1.1
-      if (word) word.style.transform = `translate(-50%, -50%) translateX(${driftX.toFixed(2)}vw) scale(${scale.toFixed(3)})`;
-      // буквы расходятся от центра по мере прокрутки (per-letter параллакс)
-      letters.forEach((l, i) => {
-        const sp = (i - cen) * p * 2.1;          // vw наружу
-        l.style.transform = `translateX(${sp.toFixed(2)}vw)`;
-      });
-
-      // транскрипция — проявляется рано и держится
-      if (meta) {
-        const mp = clamp01((p - 0.04) / 0.16);
-        meta.style.opacity = String(mp);
-        meta.style.transform = `translateX(${((1 - mp) * -26).toFixed(1)}px)`;
-      }
-      // манифест — врезается позже, построчно (через CSS is-in по порогу)
-      if (man) {
-        const mp = clamp01((p - 0.24) / 0.22);
-        if (mp > 0.02) man.classList.add("is-in"); else man.classList.remove("is-in");
-        man.style.setProperty("--mp", mp.toFixed(3));
-      }
+    // сильный пин (почти стоит), но с ПОТОЛКОМ: после ~полэкрана скролла элемент
+    // «отпускается» и уезжает вместе со страницей → не наплывает на след. блок.
+    const clampY = (prog: number, k: number, cap: number) =>
+      Math.max(-0.25 * vh, Math.min(cap * vh, prog * k));
+    const ploop = () => {
+      prunning = false;
+      const prog = (window.scrollY || 0) - blockTop;
+      // мягкий параллакс: левый остров почти стоит (apparent ~0.15× = k 0.85),
+      // манифест чуть быстрее (apparent ~0.28× = k 0.72). Небольшие потолки, чтобы
+      // острова расходились деликатно и оставались в ОДНОМ визуальном поле.
+      if (head) head.style.transform = `translate3d(0, ${clampY(prog, 0.85, 0.34).toFixed(1)}px, 0)`;
+      if (man) man.style.transform = `translate3d(0, ${clampY(prog, 0.72, 0.26).toFixed(1)}px, 0)`;
     };
-    const onScroll = () => { if (!running) { running = true; raf = requestAnimationFrame(apply); } };
-    apply();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    const onResize = () => { measure(); apply(); };
-    window.addEventListener("resize", onResize);
+    const onParallax = () => { if (!prunning) { prunning = true; praf = requestAnimationFrame(ploop); } };
+    ploop();
+    window.addEventListener("scroll", onParallax, { passive: true });
+    window.addEventListener("resize", measure);
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+      io.disconnect(); cancelAnimationFrame(praf);
+      window.removeEventListener("scroll", onParallax); window.removeEventListener("resize", measure);
     };
   }, []);
 
   return (
     <section ref={root} className="mf2" aria-labelledby="mf2-title" data-no-reveal>
-      <div className="mf2-stage">
-        <h2 className="mf2-word" id="mf2-title" aria-label="Aurea">
-          {WORD.map((ch, i) => (
-            <span className="mf2-l" key={i} aria-hidden>{ch}</span>
-          ))}
-        </h2>
-
-        {/* транскрипция · часть речи · этимология — одной строкой */}
-        <p className="mf2-meta mf2-rv">
-          <span className="mf2-ipa-tr">[au·re·a]</span>
-          <span className="mf2-sep" aria-hidden>·</span>существительное
-          <span className="mf2-sep" aria-hidden>·</span>от&nbsp;лат. <i>aureus</i> — «золотой», «ценный», «совершенный»
-        </p>
+      <div className="mf2-inner">
+        <div className="mf2-head">
+          <h2 className="mf2-word mf2-rv" id="mf2-title" aria-label="Aurea">
+            {WORD.map((ch, i) => (
+              <span className="mf2-l" key={i} aria-hidden><span className="mf2-l-in">{ch}</span></span>
+            ))}
+          </h2>
+          {/* транскрипция · часть речи · этимология — одной мелкой строкой */}
+          <p className="mf2-meta mf2-rv">
+            <span className="mf2-ipa-tr">[au·re·a]</span>
+            <span className="mf2-sep" aria-hidden>·</span>существительное
+            <span className="mf2-sep" aria-hidden>·</span>от&nbsp;лат. <i>aureus</i> — «золотой», «ценный», «совершенный»
+          </p>
+        </div>
 
         <div className="mf2-manifesto mf2-rv">
           <p><span className="mf2-ln">

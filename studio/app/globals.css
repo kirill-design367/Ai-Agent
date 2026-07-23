@@ -574,56 +574,71 @@ textarea.field { resize: vertical; min-height: 4em; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* ═══════════════ БЛОК 02 — MANIFESTO (scroll-театр) ═══════════════
-   «AUREA» — не заголовок, а МОНУМЕНТ: гигантская антиква край-в-край, обрезанная
-   вьюпортом (целиком не видна). Сцена пинится (sticky) на ~140vh прокрутки: слово
-   дрейфует по X и растёт, буквы расходятся (per-letter), в пустоте всплывает
-   3D-объект (глобальный канвас). Манифест врезается в верхний-правый контур слова,
-   транскрипция — тонкой строкой сверху. Управление — JS (rAF, прогресс пиннинга). */
-:root { --aurea-fs: clamp(9rem, 33vw, 40rem); }
-.mf2 { position: relative; height: 240vh; background: #ffffff; color: #000; }
-.mf2-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; z-index: 1; }
+/* ═══════════════ БЛОК 02 — MANIFESTO (словарная статья) ═══════════════
+   Разворот дорогого журнала, обычная прокрутка (без pin/sticky, без 3D): левый
+   остров (AUREA умеренного кегля + одна мелкая строка-статья, левый край 4.5%,
+   база ~30%) сверху слева; манифест — отдельной колонкой справа на ЧИСТОМ белом
+   (не поверх букв). Между островами — диагональная пустота. Глубина ~200vh,
+   события проявляются по прокрутке (каждое — свой IO), мягкий вертикальный
+   параллакс островов (только transform). Абзац манифеста — шрифт RF Dewi
+   (--font-manifest); остальной текст сайта — Rooftop. */
+:root { --aurea-fs: clamp(2.6rem, 6vw, 7rem); }
+.mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
+.mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
+  padding-inline: var(--gutter); min-height: 200vh; }
 
-/* МОНУМЕНТ: гигантское слово по центру сцены, обрезано краями (nowrap + overflow
-   сцены). Тёмный, но не абсолютно чёрный — манифест (чёрный) читается над ним. */
-.mf2-word { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%);
-  margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
-  line-height: 1; font-size: var(--aurea-fs); letter-spacing: -0.02em; white-space: nowrap;
-  color: #0c0c0c; will-change: transform; }
-.mf2-l { display: inline-block; will-change: transform; }
-
-/* транскрипция · часть речи · этимология — ОДНОЙ строкой сверху слева (без переносов) */
-.mf2-meta { position: absolute; left: var(--gutter); top: clamp(88px, 13vh, 140px); margin: 0;
-  font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.02em; color: #4d4d4d;
-  white-space: nowrap; will-change: transform, opacity; }
+/* Левый остров: AUREA + одна строка-статья, левый край на 4.5%, база ~30%. */
+.mf2-head { position: absolute; left: 4.5%; top: 26%; will-change: transform; }
+.mf2-word { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
+  line-height: 1; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
+/* маска побуквенной анимации — с верт. запасом (padding+neg.margin), чтобы
+   верхушки глифов Antiqva не срезались; визуальное положение не меняется */
+.mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom;
+  padding-top: 0.28em; padding-bottom: 0.12em; margin-top: -0.28em; margin-bottom: -0.12em; }
+.mf2-l-in { display: inline-block; }
+/* транскрипция · часть речи · этимология — ОДНОЙ строкой без переносов (десктоп) */
+.mf2-meta { margin: 1.2em 0 0; font-family: var(--font-body);
+  font-size: 0.72rem; line-height: 1.5; letter-spacing: 0.02em; color: #4d4d4d; white-space: nowrap; }
 .mf2-ipa-tr { letter-spacing: 0.08em; }
 .mf2-sep { margin: 0 0.5em; color: #b2b2b2; }
 .mf2-meta i { font-style: italic; }
 
-/* манифест — врезается в верхний-правый контур слова; светлое гало для читаемости */
-.mf2-manifesto { position: absolute; right: var(--gutter); top: 19%; width: min(35%, 30rem);
-  display: flex; flex-direction: column; gap: 1.45em; font-family: var(--font-body);
-  font-weight: 500; font-size: clamp(1.02rem, 0.96rem + 0.3vw, 1.2rem); line-height: 1.62; color: #000;
-  text-shadow: 0 0 20px #fff, 0 0 9px #fff, 0 0 3px #fff, 0 0 1px #fff; }
+/* манифест — отдельная колонка справа на чистом белом (RF Dewi) */
+.mf2-manifesto { position: absolute; left: 58%; top: 46%; width: 35%; min-width: 21rem;
+  display: flex; flex-direction: column; gap: 1.5em; font-family: var(--font-manifest), var(--font-body);
+  font-weight: 400; font-size: clamp(1.06rem, 0.98rem + 0.34vw, 1.26rem); line-height: 1.62; color: #1a1a1a;
+  will-change: transform; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
-.js .mf2-ln { transform: translateY(112%); transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
-.mf2-manifesto.is-in p:nth-child(1) .mf2-ln { transform: translateY(0); transition-delay: 0.02s; }
-.mf2-manifesto.is-in p:nth-child(2) .mf2-ln { transform: translateY(0); transition-delay: 0.12s; }
-.js .mf2-meta { opacity: 0; }
-.mf2-meta.is-in { opacity: 1; transform: none; }
 
+/* ── Motion: reveal по группам (скрытое состояние только при JS) ──
+   «Aurea» — побуквенно из-под маски (stagger), oversloot-кривая. */
+.js .mf2-l-in { transform: translateY(135%); transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
+.mf2-word.is-in .mf2-l-in { transform: translateY(0); }
+.mf2-word.is-in .mf2-l:nth-child(1) .mf2-l-in { transition-delay: 0s; }
+.mf2-word.is-in .mf2-l:nth-child(2) .mf2-l-in { transition-delay: 0.07s; }
+.mf2-word.is-in .mf2-l:nth-child(3) .mf2-l-in { transition-delay: 0.14s; }
+.mf2-word.is-in .mf2-l:nth-child(4) .mf2-l-in { transition-delay: 0.21s; }
+.mf2-word.is-in .mf2-l:nth-child(5) .mf2-l-in { transition-delay: 0.28s; }
+/* строка-статья — сдвиг слева-направо, с паузой после заголовка */
+.js .mf2-meta {
+  opacity: 0; transform: translateX(-24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.mf2-meta.is-in { opacity: 1; transform: none; transition-delay: 0.55s; }
+/* манифест — построчно из-под маски снизу, stagger */
+.js .mf2-ln { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.mf2-manifesto.is-in p:nth-child(1) .mf2-ln { transform: translateY(0); transition-delay: 0.05s; }
+.mf2-manifesto.is-in p:nth-child(2) .mf2-ln { transform: translateY(0); transition-delay: 0.17s; }
 @media (prefers-reduced-motion: reduce) {
-  .js .mf2-ln { transition: none; transform: none; }
-  .mf2-word { transform: translate(-50%, -50%); }
+  .js .mf2-l-in, .js .mf2-meta, .js .mf2-ln {
+    transition: none; opacity: 1; transform: none; }
 }
 
-/* ── Мобильная: монумент бледнее сверху, манифест внизу на чистом поле ── */
+/* ── Мобильная (одна колонка, левая ось, драматургия сохранена) ── */
 @media (max-width: 760px) {
-  :root { --aurea-fs: clamp(6rem, 42vw, 13rem); }
-  .mf2 { height: 220vh; }
-  .mf2-word { top: 44%; letter-spacing: -0.03em; }
-  .mf2-meta { left: 20px; right: 20px; top: clamp(80px, 11vh, 118px); white-space: normal; font-size: 0.68rem; }
-  .mf2-manifesto { left: 20px; right: 20px; top: auto; bottom: clamp(9vh, 15vh, 20vh); width: auto;
-    font-size: 1.04rem; }
+  :root { --aurea-fs: clamp(2.8rem, 17vw, 5rem); }
+  .mf2-inner { min-height: 0; padding-top: 42vh; padding-bottom: clamp(6rem, 18vh, 12rem);
+    display: flex; flex-direction: column; }
+  .mf2-head, .mf2-manifesto { position: static; left: auto; top: auto; right: auto; width: auto; }
+  .mf2-meta { white-space: normal; }
+  .mf2-manifesto { min-width: 0; width: 100%; max-width: 40ch; margin-top: clamp(7rem, 24vh, 13rem); }
 }

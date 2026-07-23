@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import CookieConsent from "@/components/kit/CookieConsent";
 import Atmosphere from "@/components/kit/Atmosphere";
 import SiteMotion from "@/components/kit/SiteMotion";
@@ -11,10 +12,17 @@ import { SITE } from "@/lib/seo/site";
 import "./globals.css";
 
 /*
-  Типосистема: Druk Cyr (дисплей) + Dexa Round (текст/UI). Self-host @font-face
-  в globals.css, woff2 в /public/fonts. Два цвета — чёрный и белый.
-  Preload — дисплей Druk Super (LCP-заголовок героя) + Dexa Regular (тело).
-*/
+  Типосистема: Druk (дисплей/мощь) + Antiqva (капитель-акцент) + Rooftop (текст/UI).
+  Self-host @font-face в globals.css, woff2 в /public/fonts. Два цвета — ч/б.
+  Отдельно: RF Dewi (self-host через next/font/local, subset кириллица, swap) —
+  ТОЛЬКО для абзаца манифеста в блоке 02 (переменная --font-manifest). */
+const manifestFont = localFont({
+  src: "./fonts/rfdewi-regular.woff2",
+  weight: "400",
+  style: "normal",
+  display: "swap",
+  variable: "--font-manifest",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -36,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru">
+    <html lang="ru" className={manifestFont.variable}>
       <head>
         {/* Preload шрифтов: Antiqva (заголовки/LCP-манифест) + Rooftop (тело) */}
         <link rel="preload" href="/fonts/antiqva-regular.woff2" as="font" type="font/woff2" crossOrigin="" />
