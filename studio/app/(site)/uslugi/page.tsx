@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getAllServices } from "@/lib/content/loader";
 import { buildMetadata } from "@/lib/seo/meta";
 import { breadcrumbLd } from "@/lib/seo/jsonld";
-import { formatPrice } from "@/lib/format";
+import { servicePrice, formatPrice } from "@/content/pricing";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/pg/Breadcrumbs";
 import PageHero from "@/components/pg/PageHero";
@@ -29,7 +29,7 @@ export default function UslugiHub() {
     title: s.title,
     desc: s.metaDescription,
     meta: [
-      s.priceFrom ? `от ${formatPrice(s.priceFrom)}` : "по договорённости",
+      servicePrice(s.slug) != null ? `от ${formatPrice(servicePrice(s.slug)!)}` : "по договорённости",
       ...(s.termFrom ? [s.termFrom] : []),
     ],
   }));

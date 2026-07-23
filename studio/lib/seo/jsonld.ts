@@ -1,4 +1,5 @@
 import { SITE, canonical } from "./site";
+import { servicePrice } from "@/content/pricing";
 import type { NicheDoc, ServiceDoc, CaseDoc, ArticleDoc } from "@/lib/content/schema";
 import type { Loaded } from "@/lib/content/loader";
 
@@ -76,6 +77,7 @@ export function faqLd(faq: { q: string; a: string }[]): Json | null {
 
 /** Service + Offer для страницы услуги (§6.2). Цена в RUB. Offer — если есть цена. */
 export function serviceLd(doc: Loaded<ServiceDoc>): Json {
+  const priceFrom = servicePrice(doc.slug); // цена из единого источника (правило №2)
   return {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -85,15 +87,15 @@ export function serviceLd(doc: Loaded<ServiceDoc>): Json {
     provider: { "@id": SITE.org.id },
     areaServed: "RU",
     url: canonical(`/uslugi/${doc.slug}`),
-    ...(doc.priceFrom
+    ...(priceFrom != null
       ? {
           offers: {
             "@type": "Offer",
-            price: doc.priceFrom,
+            price: priceFrom,
             priceCurrency: "RUB",
             priceSpecification: {
               "@type": "PriceSpecification",
-              minPrice: doc.priceFrom,
+              minPrice: priceFrom,
               priceCurrency: "RUB",
             },
           },

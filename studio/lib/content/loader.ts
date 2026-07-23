@@ -10,6 +10,36 @@ import {
   type CaseDoc,
   type ArticleDoc,
 } from "./schema";
+import { PRICE, formatPrice, type PriceId } from "@/content/pricing";
+
+/*
+  ПОДСТАНОВКА ЦЕН (правило проекта №2). В .mdx коммерческая цифра пишется токеном,
+  а не литералом — единый источник цен content/pricing.ts. Токены:
+    {price:landing} → «30 000 ₽»   {from:landing} → «от 30 000 ₽»   {From:landing} → «От 30 000 ₽»
+  Резолвятся во ВСЕХ строковых полях (metaDescription, lead, includes, faq…) и в
+  теле MDX — здесь, в загрузчике, до рендера. Неизвестный id — падение на билде.
+*/
+const PRICE_TOKEN = /\{(price|from|From):([A-Za-z]+)\}/g;
+function resolvePriceTokens(s: string, where: string): string {
+  return s.replace(PRICE_TOKEN, (_m, kind: string, id: string) => {
+    if (!(id in PRICE)) {
+      throw new Error(`Неизвестный id цены «${id}» в токене {${kind}:${id}} (${where}). Допустимые: ${Object.keys(PRICE).join(", ")}.`);
+    }
+    const money = formatPrice(PRICE[id as PriceId]);
+    return kind === "from" ? `от ${money}` : kind === "From" ? `От ${money}` : money;
+  });
+}
+/** Глубоко проходит строки в объекте/массиве и резолвит токены цен. */
+function deepResolve<T>(value: T, where: string): T {
+  if (typeof value === "string") return resolvePriceTokens(value, where) as unknown as T;
+  if (Array.isArray(value)) return value.map((v) => deepResolve(v, where)) as unknown as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) out[k] = deepResolve(v, where);
+    return out as T;
+  }
+  return value;
+}
 
 /*
   ЗАГРУЗЧИК КОНТЕНТА — читает .mdx-файлы из /content, валидирует frontmatter по
@@ -58,7 +88,10 @@ export function getDoc<T extends ContentType>(
           .join("\n")
     );
   }
-  return { ...(parsed.data as object), slug, body: content.trim() } as Loaded<
+  const where = `${CONTENT_DIRS[type]}/${slug}.mdx`;
+  const resolved = deepResolve(parsed.data as object, where);
+  const body = resolvePriceTokens(content.trim(), where);
+  return { ...resolved, slug, body } as Loaded<
     import("zod").infer<(typeof contentSchemas)[T]>
   >;
 }

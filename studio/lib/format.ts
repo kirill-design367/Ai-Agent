@@ -1,7 +1,6 @@
-/** «30000» → «30 000 ₽» (неразрывные пробелы для тысяч). */
-export function formatPrice(n: number): string {
-  return `${n.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
-}
+// Форматирование цены живёт в едином источнике цен (правило проекта №2).
+// Реэкспорт — чтобы существующие импорты `@/lib/format` продолжали работать.
+export { formatPrice } from "@/content/pricing";
 
 /** ISO YYYY-MM-DD → «16 июля 2026». */
 export function formatDate(iso: string): string {

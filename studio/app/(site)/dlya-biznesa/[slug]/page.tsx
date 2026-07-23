@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getNiche, getAllNiches, getService, getCase } from "@/lib/content/loader";
+import { servicePrice } from "@/content/pricing";
 import { buildMetadata } from "@/lib/seo/meta";
 import { breadcrumbLd, nicheServiceLd, faqLd } from "@/lib/seo/jsonld";
 import JsonLd from "@/components/seo/JsonLd";
@@ -49,9 +50,10 @@ export default async function NichePage({
   const doc = getNiche(slug);
   if (!doc) notFound();
 
-  // Тариф-основа: срок и (при отсутствии переопределения) цена/состав/факторы.
+  // Тариф-основа: срок и состав из услуги; цена — из единого источника
+  // content/pricing.ts по slug тарифа ниши (правило проекта №2).
   const service = getService(doc.service);
-  const priceFrom = doc.priceFrom ?? service?.priceFrom ?? 0;
+  const priceFrom = servicePrice(doc.service) ?? 0;
   const term = service?.termFrom;
   const includes = service?.includes;
   const factors = doc.priceFactors ?? service?.priceFactors ?? [];

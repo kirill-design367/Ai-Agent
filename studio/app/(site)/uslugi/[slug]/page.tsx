@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getService, getAllServices } from "@/lib/content/loader";
+import { servicePrice } from "@/content/pricing";
 import { buildMetadata } from "@/lib/seo/meta";
 import { breadcrumbLd, serviceLd, faqLd } from "@/lib/seo/jsonld";
 import JsonLd from "@/components/seo/JsonLd";
@@ -46,6 +47,9 @@ export default async function ServicePage({
   const doc = getService(slug);
   if (!doc) notFound();
 
+  // Цена — из единого источника content/pricing.ts по slug (правило проекта №2).
+  const priceFrom = servicePrice(doc.slug);
+
   const crumbs = [
     { name: "Главная", path: "/" },
     { name: "Услуги", path: "/uslugi/" },
@@ -61,16 +65,16 @@ export default async function ServicePage({
         kicker="Услуга"
         h1={doc.h1}
         lead={doc.lead}
-        priceFrom={doc.priceFrom}
+        priceFrom={priceFrom}
         term={doc.termFrom}
       />
 
       <div className="sec--light">
-        {(doc.priceFrom != null || doc.includes.length > 0) && (
+        {(priceFrom != null || doc.includes.length > 0) && (
           <PriceBlock
-            priceFrom={doc.priceFrom}
+            priceFrom={priceFrom}
             term={doc.termFrom}
-            heading={doc.priceFrom != null ? "Стоимость и что входит" : "Что входит"}
+            heading={priceFrom != null ? "Стоимость и что входит" : "Что входит"}
             includes={doc.includes}
             factors={doc.priceFactors}
           />

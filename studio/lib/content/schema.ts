@@ -68,9 +68,8 @@ const priceFactor = z.object({
 export const serviceSchema = base.extend({
   type: z.literal("service"),
   h1: z.string().min(1),
-  // «от N ₽» + «от N дней» — цифры выполнимы в худшем реалистичном случае (§2.6).
-  // Необязательны: услуга-поддержка не тарифицируется «от N».
-  priceFrom: z.number().int().positive().optional(),
+  // Цена — НЕ во frontmatter (правило проекта №2): резолвится по slug из
+  // content/pricing.ts (SERVICE_PRICE). Здесь остаётся только срок.
   termFrom: z.string().optional(), // «от 3 дней»
   lead: z.array(z.string().min(1)).min(1), // прямой ответ в первых абзацах (§7.1)
   includes: z.array(z.string().min(1)).default([]), // «что входит в базовую стоимость»
@@ -96,12 +95,9 @@ const solutionStep = z.object({
 export const nicheSchema = base.extend({
   type: z.literal("niche"),
   h1: z.string().min(1), // «Создание сайтов для {ниша}»
-  // Тариф-основа ниши — из него по умолчанию берём цену/срок/расшифровку.
+  // Тариф-основа ниши — из него берём цену/срок/расшифровку (цена — по этому
+  // slug из content/pricing.ts, правило проекта №2; во frontmatter цены нет).
   service: z.enum(["landing", "korporativnyi-sait", "internet-magazin"]),
-  // Переопределение цены ниши. ПРАВИЛО: показанная цена не должна противоречить
-  // составу решения на этой же странице (напр. если решение строится вокруг
-  // калькулятора-модуля, «от» отражает вариант с ним, а priceNote разводит варианты).
-  priceFrom: z.number().int().positive().optional(), // переопределяет priceFrom тарифа
   priceNote: z.string().optional(), // разведение вариантов цены (база vs с модулем)
   // Нишевая таблица «что влияет на цену». Если задана — используется вместо тарифной.
   // Первая строка = ключевой модуль ниши (напр. калькулятор).
