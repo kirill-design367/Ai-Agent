@@ -80,9 +80,11 @@ export default function SiteHeader() {
           </nav>
 
           <Link href="/kontakty/" className="site-header-cta" data-magnetic>
-            <span className="cta-flip">
-              <span className="cta-flip-in">Обсудить проект</span>
-              <span className="cta-flip-in" aria-hidden>Обсудить проект</span>
+            <span className="cta-vp">
+              <span className="cta-track">
+                <span className="cta-row">Обсудить проект <span className="cta-arr" aria-hidden>→</span></span>
+                <span className="cta-row" aria-hidden>Обсудить проект <span className="cta-arr">→</span></span>
+              </span>
             </span>
           </Link>
 

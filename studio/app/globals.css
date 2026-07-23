@@ -127,15 +127,18 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-nav-l { position: relative; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
 .site-nav-l::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
 .site-nav-l:hover::after { transform: scaleX(1); }
-/* CTA — без рамки; hover = вертикальный флип строки (маска) + лёгкий подъём/масштаб */
-.site-header-cta { margin-left: auto; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em;
-  line-height: 1; padding: 6px 2px; transform: translateZ(0);
-  transition: transform 0.46s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
-.cta-flip { position: relative; display: block; overflow: hidden; }
-.cta-flip-in { display: block; transition: transform 0.46s cubic-bezier(0.16, 1, 0.3, 1); }
-.cta-flip-in + .cta-flip-in { position: absolute; left: 0; top: 100%; }
-.site-header-cta:hover, .site-header-cta:active { transform: scale(1.03) translateY(-1px); }
-.site-header-cta:hover .cta-flip-in, .site-header-cta:active .cta-flip-in { transform: translateY(-100%); }
+/* CTA — только текст: ни рамки, ни фона, ни тени. hover/тач = вертикальный флип
+   (маска ровно в одну строку, две копии друг под другом, сдвиг на −1 строку;
+   без opacity и абсолютного позиционирования → куски текста не проступают). */
+.site-header-cta { margin-left: auto; border: 0; background: none; box-shadow: none;
+  font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; display: inline-flex; align-items: center; }
+.cta-vp { display: block; overflow: hidden; height: 1.3em; }
+.cta-track { display: flex; flex-direction: column; transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.cta-row { display: flex; align-items: center; gap: 0.42em; height: 1.3em; line-height: 1.3; white-space: nowrap; }
+.cta-arr { display: inline-block; transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.site-header-cta:hover .cta-track, .site-header-cta:active .cta-track { transform: translateY(-1.3em); }
+.site-header-cta:hover .cta-arr, .site-header-cta:active .cta-arr { transform: translateX(5px); }
+@media (prefers-reduced-motion: reduce) { .cta-track, .cta-arr { transition: none; } }
 .site-burger { margin-left: var(--sp-4); width: 34px; height: 18px; position: relative; display: inline-flex; }
 .site-burger span { position: absolute; left: 0; width: 100%; height: 2px; background: currentColor; transition: transform var(--dur-2) var(--ease), opacity var(--dur-1); }
 .site-burger span:nth-child(1) { top: 0; } .site-burger span:nth-child(2) { top: 8px; } .site-burger span:nth-child(3) { top: 16px; }
@@ -539,16 +542,18 @@ textarea.field { resize: vertical; min-height: 4em; }
 .hxf-lead { font-family: var(--font-display); font-weight: 500; text-transform: none;
   font-size: clamp(1.25rem, 0.9rem + 1.9vw, 2.1rem); line-height: 1.18; letter-spacing: 0.005em; margin: 0; text-wrap: balance; }
 .hxf-sub { margin: clamp(0.9rem, 2.4vh, 1.5rem) auto 0; max-width: 34rem;
-  font-size: clamp(0.95rem, 0.86rem + 0.42vw, 1.12rem); line-height: 1.56; letter-spacing: 0.018em; color: var(--fg-2); text-wrap: balance; }
+  font-size: clamp(0.95rem, 0.86rem + 0.42vw, 1.12rem); line-height: 1.56; letter-spacing: 0.018em;
+  color: #4d4d4d; text-wrap: balance; } /* ~70% чёрного — уверенно читаемо, WCAG AA (7.5:1) */
 
 /* HERO-надпись — 3D-облако сфер (Three.js) в полосе снизу, край-в-край.
    Высота полосы фиксирована (CLS = 0); канвас декоративный, aria-hidden. */
-/* Оверскан: канвас шире (−12vw по бокам) и выше/ниже полосы (12vh вверх, 16vh
-   вниз) — облако без видимых границ, частицы уходят за кадр и в след. блок.
-   z-index 0 (под манифестом z-index 2); pointer-events:none. JS повторяет эти
-   же величины (12vw/12vh/16vh), чтобы слово сохранило кегль и позицию. */
-.ph { position: absolute; left: -12vw; right: -12vw; bottom: -16vh;
-  height: calc(var(--ph-band) + 28vh); z-index: 0; pointer-events: none; }
+/* Канвас БЕЗ границ: шире (−12vw) и очень высокий (150vh) — уходит далеко за низ
+   hero (у родителей нет overflow:hidden). Частицы гаснут по мировой Y в нижних
+   ~30% канваса → ровного края нет ни при каком скролле. Верх полосы совпадает
+   с прежним (band+12vh над словом); z-index 0 (под манифестом z-index 2). */
+.ph { position: absolute; left: -12vw; right: -12vw;
+  bottom: calc(var(--ph-band) + 12vh - 150vh); height: 150vh;
+  z-index: 0; pointer-events: none; }
 .ph-gl { display: block; width: 100%; height: 100%; }
 
 /* Кинематографичный вход сцены (вместо прелоадера): манифест построчно снизу,
