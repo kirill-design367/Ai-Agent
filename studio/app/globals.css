@@ -158,13 +158,23 @@ input, textarea, select { font: inherit; color: inherit; }
   display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
 .site-menu-wrap:hover .site-menu-drop, .site-menu-wrap:focus-within .site-menu-drop,
 .site-menu-wrap.is-open .site-menu-drop { pointer-events: auto; }
+/* пункт — ссылка БЕЗ подчёркивания ни в одном состоянии (только текст + разрядка) */
 .site-menu-item { position: relative; display: block; overflow: hidden; padding: 7px 0; text-align: right; color: inherit; }
+.site-menu-item, .site-menu-item:hover, .site-menu-item:focus, .site-menu-item:focus-visible,
+.site-menu-item:active, .site-menu-item:visited { text-decoration: none; }
+/* transform (появление) со стаггером; letter-spacing (разрядка на hover) — без задержки */
 .site-menu-item-in { display: block; font-family: var(--font-body); font-weight: 600; font-size: 0.95rem;
   letter-spacing: 0.01em; white-space: nowrap; transform: translateY(150%);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--ri) * 0.05s); }
+  transition-property: transform, letter-spacing;
+  transition-duration: 0.5s, 0.42s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--ri) * 0.05s), 0s; }
 .site-menu-wrap:hover .site-menu-item-in, .site-menu-wrap:focus-within .site-menu-item-in,
-.site-menu-wrap.is-open .site-menu-item-in { transform: translateY(0); transition-delay: calc(var(--i) * 0.05s); }
-/* линия-разделитель под пунктом — проявляется вместе с пунктом (тем же стаггером) */
+.site-menu-wrap.is-open .site-menu-item-in { transform: translateY(0); transition-delay: calc(var(--i) * 0.05s), 0s; }
+/* при наведении на пункт — ТОЛЬКО разрядка трекинга (как у «Обсудить проект»), без подчёркивания */
+.site-menu-item:hover .site-menu-item-in, .site-menu-item:focus-visible .site-menu-item-in { letter-spacing: 0.1em; }
+/* линия-РАЗДЕЛИТЕЛЬ под пунктом (часть композиции) — вычерчивается при РАСКРЫТИИ
+   со стаггером; на наведение отдельного пункта НЕ реагирует (не подчёркивание). */
 .site-menu-item::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: currentColor; transform: scaleX(0); transform-origin: right;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--ri) * 0.05s); }
