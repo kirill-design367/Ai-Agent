@@ -13,9 +13,12 @@
    болда (иерархия — кеглем). */
 @font-face { font-family:"Antiqva"; font-weight:400 900; font-style:normal; font-display:swap; src:url("/fonts/antiqva-regular.woff2") format("woff2"); }
 @font-face { font-family:"Rooftop"; font-weight:400 900; font-style:normal; font-display:swap; src:url("/fonts/rooftop-regular.woff2") format("woff2"); }
+@font-face { font-family:"Druk"; font-weight:500 900; font-style:normal; font-display:swap; src:url("/fonts/druk-super.woff2") format("woff2"); }
 
 :root {
-  --font-display: "Antiqva", Georgia, "Times New Roman", serif;
+  /* РОВНО ТРИ шрифта: Druk (заголовки/мощь), Antiqva (капитель-акцент), Rooftop (текст). */
+  --font-druk: "Druk", "Antiqva", sans-serif;
+  --font-display: "Antiqva", "Druk", sans-serif; /* капитель-акцент (без системных fallback) */
   --font-body: "Rooftop", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* ── ЦВЕТОВОЙ ЗАКОН: чёрный + белый, серые — смеси ── */
@@ -123,10 +126,20 @@ input, textarea, select { font: inherit; color: inherit; }
 .site-logo-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-left: 4px; align-self: flex-end; margin-bottom: 0.18em; }
 .site-header-brand { color: inherit; }
 .site-header-brand.is-hidden { opacity: 0; pointer-events: none; }
+/* Логотип при прокрутке сворачивается до Λ: клип по ширине + растворение остальных */
+.logo-clip { display: inline-block; overflow: hidden; width: 76px; line-height: 0;
+  transition: width 0.5s var(--ease); }
+.lg-rest { transition: opacity 0.45s var(--ease); }
+.site-header-brand.is-min .logo-clip { width: 16px; }
+.site-header-brand.is-min .lg-rest { opacity: 0; }
 .site-nav { display: none; }
-.site-nav-l { position: relative; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
-.site-nav-l::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
-.site-nav-l:hover::after { transform: scaleX(1); }
+.site-nav-l { position: relative; display: inline-flex; align-items: center; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; letter-spacing: 0.01em; color: inherit; padding: 6px 0; white-space: nowrap; }
+.nav-dot { flex: none; width: 0; height: 5px; border-radius: 50%; background: currentColor; opacity: 0;
+  transition: width 0.4s var(--ease), opacity 0.4s var(--ease); }
+.nav-txt { position: relative; display: inline-block; max-width: 9rem; overflow: hidden; white-space: nowrap;
+  transition: max-width 0.45s var(--ease), opacity 0.35s var(--ease); }
+.nav-txt::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform var(--dur-2) var(--ease); }
+.site-nav-l:hover .nav-txt::after { transform: scaleX(1); }
 /* CTA — только текст: ни рамки, ни фона, ни тени, ни обрезки. hover = мягкое
    раскрытие трекинга (буквы «дышат») — сдержанный премиальный микро-жест без
    лишних элементов; высота стабильна, симметрично при уходе, авторская кривая,
@@ -164,6 +177,15 @@ input, textarea, select { font: inherit; color: inherit; }
   .site-nav.is-shown .site-nav-l:nth-child(4) { transition-delay: 0.17s; }
   .site-nav.is-shown .site-nav-l:nth-child(5) { transition-delay: 0.22s; }
   .site-nav.is-shown .site-nav-l:nth-child(6) { transition-delay: 0.27s; }
+  /* при прокрутке табы схлопываются в точки (одна на пункт); hover группы —
+     плавно разворачивает обратно в полноценное меню; уход — снова точки. */
+  .site-nav.is-dots { gap: 0.8rem; transition: gap 0.4s var(--ease); }
+  .site-nav.is-dots .site-nav-l { transition-delay: 0s; }
+  .site-nav.is-dots .nav-txt { max-width: 0; opacity: 0; }
+  .site-nav.is-dots .nav-dot { width: 5px; opacity: 1; }
+  .site-nav.is-dots:hover { gap: clamp(1rem, 2vw, 2.4rem); }
+  .site-nav.is-dots:hover .nav-txt { max-width: 9rem; opacity: 1; }
+  .site-nav.is-dots:hover .nav-dot { width: 0; opacity: 0; }
 }
 @media (min-width: 881px) and (prefers-reduced-motion: reduce) {
   .site-nav .site-nav-l { transition: opacity 0.2s linear; transform: none; }
@@ -567,8 +589,10 @@ textarea.field { resize: vertical; min-height: 4em; }
    (−120vh под hero) — у родителей нет overflow:hidden. Частицы гаснут по мировой
    Y и снизу (низ канваса), и сверху (над облаком) → ровного края нет ни сверху,
    ни снизу, ни при каком скролле. z-index 0 (под манифестом z-index 2). */
-.ph { position: absolute; left: -12vw; right: -12vw; top: -8vh; bottom: -150vh;
-  z-index: 0; pointer-events: none; }
+/* ГЛОБАЛЬНЫЙ FIXED-канвас во весь вьюпорт: не принадлежит секциям → у частиц нет
+   края на стыке блоков. z-index 0: над фонами секций (in-flow), под текстом
+   (позиционированный z≥1) и под шапкой (z 200). pointer-events:none. */
+.ph { position: fixed; inset: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none; }
 .ph-gl { display: block; width: 100%; height: 100%; }
 
 /* Кинематографичный вход сцены (вместо прелоадера): манифест построчно снизу,
@@ -588,16 +612,15 @@ textarea.field { resize: vertical; min-height: 4em; }
    группы проявляются в свои моменты прокрутки (каждая своим IO).
    --mf-serif: mixed-case антиква для словоформы и пуанта (Antiqva — капитель без
    строчных, поэтому здесь Georgia-стек; заменить при наличии брендовой антиквы). */
-/* --mf-serif: mixed-case антиква словоформы (Antiqva — капитель без строчных). */
-:root { --mf-serif: Georgia, "Times New Roman", serif; --aurea-fs: clamp(4.5rem, 13vw, 16rem); }
+:root { --aurea-fs: clamp(4.5rem, 13vw, 16rem); }
 .mf2 { position: relative; background: #ffffff; color: #000; overflow: clip; }
 .mf2-inner { position: relative; z-index: 1; max-width: var(--maxw); margin-inline: auto;
   padding-inline: var(--gutter); min-height: 180vh; }
 
-/* Единый левый блок: Aurea + транскрипция + этимология, левый край на 8%,
-   отступы по φ; база «Aurea» ~38.2% высоты блока (top подобран под кегль). */
-.mf2-head { position: absolute; left: 8%; top: 29%; }
-.mf2-word { margin: 0; font-family: var(--mf-serif); font-weight: 500; text-transform: none;
+/* Единый левый блок: AUREA + транскрипция + этимология, левый край на 4.5%,
+   отступы по φ; воздух над AUREA ~65vh (частицы hero догорают). */
+.mf2-head { position: absolute; left: 4.5%; top: 36%; will-change: transform; }
+.mf2-word { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: none;
   line-height: 0.9; font-size: var(--aurea-fs); letter-spacing: -0.01em; color: #000; white-space: nowrap; }
 .mf2-l { display: inline-block; overflow: hidden; vertical-align: bottom; }
 .mf2-l-in { display: inline-block; }
@@ -608,9 +631,10 @@ textarea.field { resize: vertical; min-height: 4em; }
   font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1rem); line-height: 1.55; color: #4d4d4d; }
 .mf2-etym i { font-style: italic; }
 
-.mf2-manifesto { position: absolute; left: 61.8%; top: 61.8%; width: 30%; min-width: 21rem;
+.mf2-manifesto { position: absolute; left: 61.8%; top: 50%; width: 38%; min-width: 22rem;
   display: flex; flex-direction: column; gap: 0.9em; font-family: var(--font-body);
-  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.22rem); line-height: 1.6; color: #1a1a1a; }
+  font-weight: 500; font-size: clamp(1.25rem, 1.1rem + 0.55vw, 1.55rem); line-height: 1.5; color: #1a1a1a;
+  will-change: transform; }
 .mf2-manifesto p { margin: 0; overflow: hidden; }
 .mf2-ln { display: block; }
 

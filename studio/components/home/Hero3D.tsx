@@ -154,7 +154,7 @@ export default function Hero3D() {
     const material = new THREE.MeshMatcapMaterial({ matcap, color: 0x0b0b0b, transparent: true });
     const uni = {
       uTime: { value: 0 }, uEnter: { value: reduce ? 1 : 0 }, uBreath: { value: reduce ? 0 : 1 },
-      uScroll: { value: 0 }, uMouse: { value: new THREE.Vector2(9e3, 9e3) },
+      uScroll: { value: 0 }, uScrollWorld: { value: 0 }, uMouse: { value: new THREE.Vector2(9e3, 9e3) },
       uRepel: { value: 0.03 }, uRepelR: { value: 0.28 }, // слабее и компактнее — лёгкое расступание
       uFadeY0: { value: -1.0 }, uFadeY1: { value: -2.7 }, // нижнее затухание по мировой Y — рано и плавно (частицы догорают в верх 2-го блока)
       uFadeTop0: { value: 0.7 }, uFadeTop1: { value: 1.9 }, // верхнее затухание (над облаком)
@@ -164,7 +164,7 @@ export default function Hero3D() {
       Object.assign(sh.uniforms, uni);
       sh.vertexShader = `
         attribute vec3 aHome; attribute vec3 aDrift; attribute vec3 aEject; attribute float aPhase; attribute float aFlow; attribute float aSpeed; attribute float aReact; attribute float aAng; attribute float aIndexN;
-        uniform float uTime, uEnter, uBreath, uScroll, uRepel, uRepelR, uFadeY0, uFadeY1, uFadeTop0, uFadeTop1, uKeepFrac; uniform vec2 uMouse;
+        uniform float uTime, uEnter, uBreath, uScroll, uScrollWorld, uRepel, uRepelR, uFadeY0, uFadeY1, uFadeTop0, uFadeTop1, uKeepFrac; uniform vec2 uMouse;
         varying float vFade;
       ` + sh.vertexShader;
       sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
@@ -189,6 +189,9 @@ export default function Hero3D() {
         // индивидуальная скорость/дрожь → возвращаются вразнобой
         float _wob = 0.8 + 0.2 * sin(uTime * (aSpeed * 1.6 + 0.6) + aPhase);
         _base.xy += _dir * (_fall * uRepel * aReact * _wob);
+        // глобальный fixed-канвас: облако едет ВВЕРХ вместе с прокруткой страницы
+        // (после отталкивания, чтобы курсор в покое совпадал с частицами).
+        _base.y += uScrollWorld;
       `);
       sh.vertexShader = sh.vertexShader.replace("#include <project_vertex>", `
         vec4 mvPosition = vec4(transformed, 1.0);
@@ -217,7 +220,7 @@ export default function Hero3D() {
 
     // порядок слоёв: важное первым (word → точки → концы → пыль → ambient),
     // адаптив урезает mesh.count с ХВОСТА — сначала гаснет ambient, буквы целы.
-    let N = 0, keepMin = 0;
+    let N = 0;
     const outward = (x: number, y: number) => { const dx = x - CX, dy = y - CY, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l] as const; };
 
     const lite = new URLSearchParams(location.search).has("lite");
@@ -225,11 +228,13 @@ export default function Hero3D() {
       if (mesh) { group.remove(mesh); mesh.dispose(); }
       const dm = (coarse ? 0.5 : 1) * (lite ? 0.14 : 1);
       const R = (n: number) => Math.max(1, Math.round(n * dm));
-      const nMain = R(10000), nDot = R(200), nEject = R(600), nDust = R(4200), nField = R(3800);
+      // фикс. количество (адаптив отключён — ничего не пропадает после сборки);
+      // умеренная плотность ради стабильных 60fps на глобальном fixed-канвасе.
+      const nMain = R(8000), nDot = R(180), nEject = R(500), nDust = R(3000), nField = R(2600);
       N = nMain + nDot * 2 + nDust + nEject + nField;
       // порядок буфера: силуэт букв (main+dots+dust) — В ГОЛОВЕ, ambient-хвост
       // (eject+field) — В КОНЦЕ. Адаптив гасит только хвост, буквы неприкосновенны.
-      keepMin = nMain + nDot * 2 + nDust;
+      // силуэт букв (main+dots+dust) в голове буфера, ambient-хвост (eject+field) в конце.
       const home = new Float32Array(N * 3), drift = new Float32Array(N * 3), eject = new Float32Array(N * 3);
       const phase = new Float32Array(N), flow = new Float32Array(N), scl = new Float32Array(N), spd = new Float32Array(N);
       const react = new Float32Array(N), ang = new Float32Array(N), idxN = new Float32Array(N);
@@ -341,116 +346,75 @@ export default function Hero3D() {
       group.add(mesh);
     };
 
-    // размеры/камера: слово сохраняет кегль (5.2 world на ширину вьюпорта) и
-    // позицию (центр нижней полосы). Раскладка КЭШИРУЕТСЯ здесь (обновляется на
-    // resize) → в кадре ни scroll-колбэк, ни курсор не читают layout.
+    // ГЛОБАЛЬНЫЙ FIXED-КАНВАС во весь вьюпорт: слово 5.2 world на ширину экрана,
+    // world 0 (центр слова) на ~76% высоты при scroll=0. Канвас не принадлежит
+    // секциям → у частиц нет края на стыке hero↔manifesto.
     let W = 0, H = 0, wpp = 1, camCY = 0, dispersing = false;
-    let heroTopDoc = 0, heroH = 1, canvasTopDoc = 0, canvasLeft = 0;
     const baseDpr = () => Math.min(2, window.devicePixelRatio || 1);
-    const applyRes = () => { renderer.setPixelRatio(baseDpr() * (dispersing ? 0.72 : 1)); renderer.setSize(W, H, false); };
+    const applyRes = () => { renderer.setPixelRatio(baseDpr() * (dispersing ? 0.7 : 1)); renderer.setSize(W, H, false); };
     const resize = () => {
-      const rect = el.getBoundingClientRect();
-      const hero = (el.parentElement || el).getBoundingClientRect();
-      W = Math.max(1, rect.width); H = Math.max(1, rect.height);
-      applyRes();
       const vw = window.innerWidth, vh = window.innerHeight;
-      wpp = 5.2 / vw;                       // world-единиц на пиксель вьюпорта
+      W = Math.max(1, vw); H = Math.max(1, vh);
+      applyRes();
+      wpp = 5.2 / vw;
       const halfW = wpp * W / 2, halfH = wpp * H / 2;
-      const bandPx = Math.min(0.425 * vw, 0.66 * vh);     // видимая полоса слова
-      // десктоп — слово ниже (+6vh, пауза под манифестом); мобайл — выше (−4vh),
-      // иначе на узком экране надпись уходит слишком низко.
-      const yTarget = hero.bottom - bandPx * 0.5 + (vw <= 480 ? -0.04 : 0.06) * vh;
-      camCY = wpp * ((yTarget - rect.top) - H / 2);        // world-Y центра слова = 0
+      camCY = 0.26 * wpp * H;               // world 0 → ~76% высоты экрана
       cam.left = -halfW; cam.right = halfW; cam.top = camCY + halfH; cam.bottom = camCY - halfH;
       cam.updateProjectionMatrix();
-      // нижнее затухание — по фиксированной мировой Y (uFadeY0/uFadeY1 в uni), не
-      // по краю канваса: облако растворяется рано и плавно, без ровной линии на стыке.
-      // кэш раскладки в координатах документа (для прогресса скролла и курсора)
-      const sy = window.scrollY || 0;
-      heroTopDoc = hero.top + sy; heroH = (el.parentElement || el).clientHeight || 1;
-      canvasTopDoc = rect.top + sy; canvasLeft = rect.left;
     };
 
     // ── интерактив + цикл ──
     let mvx = 9e3, mvy = 9e3, tmvx = 9e3, tmvy = 9e3;
-    let scrollCur = 0, running = false, onScreen = false, docVis = true;
-    // фазы РАЗНЕСЕНЫ во времени, чтобы не совпасть в одном кадре: вход → пауза →
-    // включение курсора → пауза → финализация адаптива. uEnter — плавный uniform
-    // (без ветвления в шейдере, без #ifdef → нет перекомпиляции на границе).
-    let phase = reduce ? 2 : 0;   // 0=вход, 1=замер после входа, 2=обычный режим
-    let settleAt = 0, measStart = 0, measFrames = 0;
+    let scrollCur = 0, running = false, docVis = true;
     let ready = reduce, pointerX = 0, pointerY = 0, hasPointer = false;
+    const DISSOLVE = 1.25;                  // за столько высот экрана облако растворилось → рендер стоп
 
-    // обработчик курсора: только пишет координаты (без физики и layout); до ready
-    // и когда герой ушёл с экрана — игнор (обработчик де-факто отключён вне hero).
-    const onMove = (e: PointerEvent) => { if (!ready || !onScreen) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
+    const onMove = (e: PointerEvent) => { if (!ready) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
     const onLeave = () => { hasPointer = false; };
 
     const tick = () => {
-      const now = performance.now();
-      const sy = window.scrollY || 0;      // одно чтение позиции скролла на кадр
-      uni.uTime.value = now * 0.001;
-      // курсор → world из КЭША раскладки (никаких getBoundingClientRect в кадре)
+      const scrollPx = window.scrollY || 0;    // одно чтение на кадр (не forced reflow)
+      uni.uTime.value = performance.now() * 0.001;
+      // курсор → world (канвас в 0,0 вьюпорта, отталкивание считается до scroll-сдвига)
       if (!coarse && ready) {
-        if (hasPointer) {
-          const ctop = canvasTopDoc - sy;
-          tmvx = (pointerX - canvasLeft - W / 2) * wpp;
-          tmvy = camCY + (H / 2 - (pointerY - ctop)) * wpp;
-        } else { tmvx = 9e3; tmvy = 9e3; }
-        mvx += (tmvx - mvx) * 0.12; mvy += (tmvy - mvy) * 0.12;
-        uni.uMouse.value.set(mvx, mvy);
+        if (hasPointer) { tmvx = (pointerX - W / 2) * wpp; tmvy = camCY + (H / 2 - pointerY) * wpp; }
+        else { tmvx = 9e3; tmvy = 9e3; }
+        mvx += (tmvx - mvx) * 0.12; mvy += (tmvy - mvy) * 0.12; uni.uMouse.value.set(mvx, mvy);
       }
-      // прогресс разлёта — из кэша (без layout), мягкая интерполяция (частицы догоняют)
-      const scrollTarget = Math.min(1, Math.max(0, (sy - heroTopDoc) / heroH));
-      scrollCur += (scrollTarget - scrollCur) * 0.09; uni.uScroll.value = scrollCur;
-      // на время разлёта — рендер в 0.72× (в движении незаметно, кадры дешевле); гистерезис
-      if (!dispersing && scrollCur > 0.06) { dispersing = true; applyRes(); }
-      else if (dispersing && scrollCur < 0.02) { dispersing = false; applyRes(); }
+      // прогресс разлёта + вертикальный ход облака привязаны к прокрутке страницы
+      const st = Math.min(1, scrollPx / (0.85 * H));
+      scrollCur += (st - scrollCur) * 0.12; uni.uScroll.value = scrollCur;
+      uni.uScrollWorld.value = scrollPx * wpp;
+      // 0.7× во время активного скролла (в движении незаметно)
+      const moving = scrollCur > 0.01 && scrollCur < 0.99;
+      if (moving !== dispersing) { dispersing = moving; applyRes(); }
       renderer.render(scene, cam);
-      // разнос событий конца входа во времени (см. коммент выше)
-      if (phase === 0) {
-        if (settleAt && now > settleAt + 130) { ready = true; phase = 1; measStart = now; measFrames = 0; try { performance.mark("hero:live"); } catch { /* no-op */ } }
-      } else if (phase === 1) {
-        measFrames++;
-        if (now - measStart > 1600) {                   // замер только в покое (после входа)
-          const fps = measFrames / ((now - measStart) / 1000);
-          const thr = coarse ? 40 : 52, tgt = coarse ? 46 : 58;
-          // гистерезис: режем только при ЯВНОМ недоборе (−4 fps ниже порога),
-          // и только ambient-хвост, ПЛАВНО (uKeepFrac 1→target за ~0.55с, масштаб→0).
-          if (fps < thr - 4 && mesh) {
-            const targetFrac = Math.max(keepMin / N + 0.02, Math.min(1, fps / tgt));
-            if (targetFrac < 0.97) gsap.to(uni.uKeepFrac, { value: targetFrac, duration: 0.55, ease: "power2.inOut" });
-          }
-          phase = 2; try { performance.mark("hero:adaptive"); } catch { /* no-op */ }
-        }
-      }
+      if (scrollPx > DISSOLVE * H) stop();      // облако растворилось → останавливаем rAF
     };
     const start = () => { if (running) return; running = true; gsap.ticker.add(tick); };
     const stop = () => { if (!running) return; running = false; gsap.ticker.remove(tick); };
-    const sync = () => { const w = onScreen && docVis; if (w) start(); else stop(); };
+    const sync = () => { if (docVis && (window.scrollY || 0) < DISSOLVE * H) start(); else stop(); };
 
     // старт
     build(); resize();
-    // конец входа НЕ включает курсор сразу — только отмечает время; курсор и
-    // адаптив включатся позже, в разных кадрах (см. фазовую машину в tick).
-    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.5, ease: "power2.out", onComplete: () => { settleAt = performance.now(); try { performance.mark("hero:enter-done"); } catch { /* no-op */ } } }); uni.uBreath.value = 1; }
-    else { renderer.render(scene, cam); }
+    // курсор активен СРАЗУ по завершении сборки (без лишних таймаутов); адаптив выключен.
+    if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.4, ease: "power2.out", onComplete: () => { ready = true; } }); uni.uBreath.value = 1; }
+    else { ready = true; renderer.render(scene, cam); }
+    sync();
 
-    // Наблюдаем СЕКЦИЮ героя (≈100vh), а не огромный канвас (150vh+): иначе
-    // канвас, перекрывающий 2-й блок, почти всегда «виден» → рендер не встаёт.
-    // Когда надпись ушла — rAF полностью остановлен (проверяемо через onScreen).
-    const io = new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; if (!onScreen) hasPointer = false; sync(); }, { rootMargin: "120px 0px" });
-    io.observe(el.parentElement || el);
     const onVis = () => { docVis = document.visibilityState !== "hidden"; sync(); };
+    // scroll-wake: когда стоп и вернулись к верху — снова запускаем (rAF, не в кадре)
+    const onScrollWake = () => { if (!running) sync(); };
     if (!coarse && !reduce) { window.addEventListener("pointermove", onMove, { passive: true }); el.addEventListener("pointerleave", onLeave); }
+    if (!reduce) window.addEventListener("scroll", onScrollWake, { passive: true });
     document.addEventListener("visibilitychange", onVis);
-    let rt = 0; const onRe = () => { window.clearTimeout(rt); rt = window.setTimeout(resize, 200); };
+    let rt = 0; const onRe = () => { window.clearTimeout(rt); rt = window.setTimeout(() => { resize(); sync(); }, 200); };
     window.addEventListener("resize", onRe);
 
     return () => {
-      stop(); io.disconnect(); window.clearTimeout(rt);
+      stop(); window.clearTimeout(rt);
       window.removeEventListener("pointermove", onMove); el.removeEventListener("pointerleave", onLeave);
-      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("scroll", onScrollWake); document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("resize", onRe);
       mesh?.dispose(); sphere.dispose(); material.dispose(); matcap.dispose(); renderer.dispose();
     };

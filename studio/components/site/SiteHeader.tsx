@@ -32,15 +32,19 @@ function Logo() {
   return (
     <svg className="site-logo" viewBox="-2.175 -0.085 4.41 1.17" role="img" aria-label="AUREA"
       fill="none" stroke="currentColor" strokeWidth="0.13" strokeLinejoin="round" strokeLinecap="round">
+      {/* Λ1 — остаётся при прокрутке */}
       <path d="M-2.09 1L-1.72 0L-1.35 1" />
-      <path d="M-1.12 0L-1.12 0.68L-1.115 0.732L-1.102 0.783L-1.08 0.83L-1.05 0.873L-1.013 0.91L-0.97 0.94L-0.923 0.962L-0.872 0.975L-0.82 0.98L-0.768 0.975L-0.717 0.962L-0.67 0.94L-0.627 0.91L-0.59 0.873L-0.56 0.83L-0.538 0.783L-0.525 0.732L-0.52 0.68L-0.52 0" />
-      <path d="M-0.23 1L-0.23 0L0.09 0L0.107 0.001L0.125 0.003L0.142 0.007L0.158 0.012L0.175 0.019L0.19 0.027L0.205 0.036L0.219 0.047L0.231 0.059L0.243 0.071L0.254 0.085L0.263 0.1L0.271 0.115L0.278 0.132L0.283 0.148L0.287 0.165L0.289 0.183L0.29 0.2L0.29 0.29L0.289 0.307L0.287 0.325L0.283 0.342L0.278 0.358L0.271 0.375L0.263 0.39L0.254 0.405L0.243 0.419L0.231 0.431L0.219 0.443L0.205 0.454L0.19 0.463L0.175 0.471L0.158 0.478L0.142 0.483L0.125 0.487L0.107 0.489L0.09 0.49L0.37 1" />
-      <path d="M0.64 1L0.64 0L1.19 0" />
-      <path d="M0.64 0.49L1.1 0.49" />
-      <path d="M0.64 1L1.19 1" />
-      <path d="M1.41 1L1.78 0L2.15 1" />
       <circle cx="-1.72" cy="0.73" r="0.055" fill="currentColor" stroke="none" />
-      <circle cx="1.78" cy="0.73" r="0.055" fill="currentColor" stroke="none" />
+      {/* остальные буквы — растворяются при прокрутке */}
+      <g className="lg-rest">
+        <path d="M-1.12 0L-1.12 0.68L-1.115 0.732L-1.102 0.783L-1.08 0.83L-1.05 0.873L-1.013 0.91L-0.97 0.94L-0.923 0.962L-0.872 0.975L-0.82 0.98L-0.768 0.975L-0.717 0.962L-0.67 0.94L-0.627 0.91L-0.59 0.873L-0.56 0.83L-0.538 0.783L-0.525 0.732L-0.52 0.68L-0.52 0" />
+        <path d="M-0.23 1L-0.23 0L0.09 0L0.107 0.001L0.125 0.003L0.142 0.007L0.158 0.012L0.175 0.019L0.19 0.027L0.205 0.036L0.219 0.047L0.231 0.059L0.243 0.071L0.254 0.085L0.263 0.1L0.271 0.115L0.278 0.132L0.283 0.148L0.287 0.165L0.289 0.183L0.29 0.2L0.29 0.29L0.289 0.307L0.287 0.325L0.283 0.342L0.278 0.358L0.271 0.375L0.263 0.39L0.254 0.405L0.243 0.419L0.231 0.431L0.219 0.443L0.205 0.454L0.19 0.463L0.175 0.471L0.158 0.478L0.142 0.483L0.125 0.487L0.107 0.489L0.09 0.49L0.37 1" />
+        <path d="M0.64 1L0.64 0L1.19 0" />
+        <path d="M0.64 0.49L1.1 0.49" />
+        <path d="M0.64 1L1.19 1" />
+        <path d="M1.41 1L1.78 0L2.15 1" />
+        <circle cx="1.78" cy="0.73" r="0.055" fill="currentColor" stroke="none" />
+      </g>
     </svg>
   );
 }
@@ -54,6 +58,9 @@ export default function SiteHeader() {
 
   useEffect(() => setOpen(false), [pathname]);
 
+  // при прокрутке: логотип сворачивается в Λ, табы схлопываются в точки
+  const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
     if (!isHome) { setNavShown(true); return; }
     setNavShown(false);
@@ -62,6 +69,13 @@ export default function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.5);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // ── плавающая мобильная CTA (десктоп скрыт через CSS) ──
   const [fabShow, setFabShow] = useState(false);   // прокрутили ~первый экран
@@ -89,14 +103,15 @@ export default function SiteHeader() {
     <>
       <header className={`site-header${open ? " is-open" : ""}`}>
         <div className="site-header-in">
-          <Link href="/" className="site-header-brand" aria-label="AUREA — на главную">
-            <Logo />
+          <Link href="/" className={`site-header-brand${scrolled ? " is-min" : ""}`} aria-label="AUREA — на главную">
+            <span className="logo-clip"><Logo /></span>
           </Link>
 
-          <nav className={`site-nav${navShown ? " is-shown" : ""}`} aria-label="Основная навигация">
+          <nav className={`site-nav${navShown ? " is-shown" : ""}${scrolled ? " is-dots" : ""}`} aria-label="Основная навигация">
             {NAV.map((n) => (
               <Link key={n.href} href={n.href} className="site-nav-l">
-                {n.label}
+                <span className="nav-dot" aria-hidden />
+                <span className="nav-txt">{n.label}</span>
               </Link>
             ))}
           </nav>

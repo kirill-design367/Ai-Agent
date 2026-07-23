@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getAllNiches, getAllCases } from "@/lib/content/loader";
 import HubGrid, { type HubCard } from "@/components/pg/HubGrid";
 import Hero, { HeroV1 } from "@/components/home/Hero";
+import Hero3D from "@/components/home/Hero3D";
 import Manifesto from "@/components/home/Manifesto";
 import FounderBlock from "@/components/pg/FounderBlock";
 import TrustBlock from "@/components/pg/TrustBlock";
@@ -44,8 +45,9 @@ export default function HomeLite() {
   }));
 
   return (
-    <main id="content" className="site home">
-      {/* ══ HERO — 3D-облако (после гидратации); LCP = манифест/h1 (в SSR) ══ */}
+    <>
+      <main id="content" className="site home">
+      {/* ══ HERO — манифест/h1 (LCP в SSR); частицы AUREA — на глобальном канвасе ══ */}
       <Suspense fallback={<HeroV1 />}>
         <Hero />
       </Suspense>
@@ -100,6 +102,11 @@ export default function HomeLite() {
         <Contact />
         <Cta title="Обсудим ваш проект?" text={`Отвечу лично, обычно в течение пары часов. ${SITE.contacts.email}`} />
       </div>
-    </main>
+      </main>
+      {/* ГЛОБАЛЬНЫЙ FIXED-канвас частиц — ПОСЛЕ контента в DOM, чтобы в порядке
+          отрисовки лечь ПОВЕРХ белых фонов секций (позиц. z-auto), но ПОД текстом
+          (позиц. z≥1: манифест z2, mf2-inner z1) и шапкой (z200). */}
+      <Hero3D />
+    </>
   );
 }

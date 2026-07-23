@@ -1,7 +1,3 @@
-"use client";
-
-import Hero3D from "@/components/home/Hero3D";
-
 /*
   HERO — финальная спецификация (реф Active Theory / Lusion; вертикаль MONOLOG).
   Композиция сверху вниз:
@@ -27,7 +23,6 @@ function HeroInner() {
           работать на&nbsp;то, чтобы клиент выбрал вас.
         </p>
       </div>
-      <Hero3D />
     </section>
   );
 }

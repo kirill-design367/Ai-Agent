@@ -40,7 +40,33 @@ export default function Manifesto() {
       if (i.getBoundingClientRect().top < vh * 0.82) i.classList.add("is-in");
       else io.observe(i);
     });
-    return () => io.disconnect();
+
+    // ── ПАРАЛЛАКС по скроллу (только transform): левый блок почти стоит (apparent
+    //    ~0.1× скорости страницы), манифест чуть быстрее (~0.28×) → блоки расходятся.
+    const head = el.querySelector<HTMLElement>(".mf2-head");
+    const man = el.querySelector<HTMLElement>(".mf2-manifesto");
+    let blockTop = 0, praf = 0, prunning = false;
+    const measure = () => { blockTop = el.getBoundingClientRect().top + (window.scrollY || 0); };
+    measure();
+    // сильный пин (почти стоит), но с ПОТОЛКОМ: после ~полэкрана скролла элемент
+    // «отпускается» и уезжает вместе со страницей → не наплывает на след. блок.
+    const clampY = (prog: number, k: number, cap: number) =>
+      Math.max(-0.25 * vh, Math.min(cap * vh, prog * k));
+    const ploop = () => {
+      prunning = false;
+      const prog = (window.scrollY || 0) - blockTop;
+      if (head) head.style.transform = `translate3d(0, ${clampY(prog, 0.9, 0.5).toFixed(1)}px, 0)`;
+      if (man) man.style.transform = `translate3d(0, ${clampY(prog, 0.72, 0.34).toFixed(1)}px, 0)`;
+    };
+    const onParallax = () => { if (!prunning) { prunning = true; praf = requestAnimationFrame(ploop); } };
+    ploop();
+    window.addEventListener("scroll", onParallax, { passive: true });
+    window.addEventListener("resize", measure);
+
+    return () => {
+      io.disconnect(); cancelAnimationFrame(praf);
+      window.removeEventListener("scroll", onParallax); window.removeEventListener("resize", measure);
+    };
   }, []);
 
   return (
