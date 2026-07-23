@@ -59,11 +59,14 @@ function letterE(ox: number): Seg[] {
   const x0 = ox - 0.28;
   return [L(x0, 0, x0, 1), L(x0, 1, x0 + 0.55, 1), L(x0, 0.51, x0 + 0.46, 0.51), L(x0, 0, x0 + 0.55, 0)];
 }
-const WORD: Seg[] = [
-  ...lambda(-1.72), ...letterU(-0.82), ...letterR(0.06), ...letterE(0.92), ...lambda(1.78),
+// центры букв масштабируются множителем f (мобайл — шире промежутки), при этом
+// внутренняя форма и толщина штриха букв НЕ меняются (масштабируется только
+// расстановка центров относительно начала координат).
+const makeWord = (f: number): Seg[] => [
+  ...lambda(-1.72 * f), ...letterU(-0.82 * f), ...letterR(0.06 * f), ...letterE(0.92 * f), ...lambda(1.78 * f),
 ];
-const DOTS = [[-1.72, 0.27], [1.78, 0.27]] as const;
-const CX = 0.03, CY = 0.5; // центр слова → к началу координат
+const makeDots = (f: number) => [[-1.72 * f, 0.27], [1.78 * f, 0.27]] as const;
+const CY = 0.5; // вертикальный центр слова
 
 // ── 8-ступенчатая калибровка размера ВНУТРИ букв (микс, не зонами) ──
 // макс. размер уменьшен на ~30%; крупных ступеней (1–2) меньше, зерно средне-мелкое.
@@ -110,12 +113,19 @@ export default function Hero3D() {
     if (!el || !canvas) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarse = window.matchMedia("(hover: none)").matches;
+    const mobile = window.innerWidth <= 480;
 
     let renderer: THREE.WebGLRenderer;
     try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" }); }
     catch { return; }
     renderer.setClearAlpha(0);
 
+    // мобайл — межбуквенные промежутки шире на ~13% (растянуты центры, форма/штрих
+    // те же); слово остаётся с полями по краям (≈86% ширины вьюпорта).
+    const spread = mobile ? 1.05 : 1.0;
+    const WORD = makeWord(spread);
+    const DOTS = makeDots(spread);
+    const CX = 0.03 * spread; // центр слова по X
     const totalLen = WORD.reduce((s, g) => s + g.len, 0);
     // ── matcap: чёрный лак с узкой засветкой сверху ──
     const mc = document.createElement("canvas"); mc.width = mc.height = 256;
@@ -148,15 +158,20 @@ export default function Hero3D() {
       uRepel: { value: 0.03 }, uRepelR: { value: 0.28 }, // слабее и компактнее — лёгкое расступание
       uFadeY0: { value: -3 }, uFadeY1: { value: -5 },   // нижнее затухание (низ канваса)
       uFadeTop0: { value: 0.7 }, uFadeTop1: { value: 1.9 }, // верхнее затухание (над облаком)
+      uKeepFrac: { value: 1.05 },  // адаптив: доля частиц (>1 = все видны; хвост гаснет масштабом→0 при снижении)
     };
     material.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, uni);
       sh.vertexShader = `
-        attribute vec3 aHome; attribute vec3 aDrift; attribute vec3 aEject; attribute float aPhase; attribute float aFlow; attribute float aSpeed; attribute float aReact; attribute float aAng;
-        uniform float uTime, uEnter, uBreath, uScroll, uRepel, uRepelR, uFadeY0, uFadeY1, uFadeTop0, uFadeTop1; uniform vec2 uMouse;
+        attribute vec3 aHome; attribute vec3 aDrift; attribute vec3 aEject; attribute float aPhase; attribute float aFlow; attribute float aSpeed; attribute float aReact; attribute float aAng; attribute float aIndexN;
+        uniform float uTime, uEnter, uBreath, uScroll, uRepel, uRepelR, uFadeY0, uFadeY1, uFadeTop0, uFadeTop1, uKeepFrac; uniform vec2 uMouse;
         varying float vFade;
       ` + sh.vertexShader;
       sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+        // адаптив: ambient-хвост (aIndexN > uKeepFrac) плавно ужимается в ноль,
+        // с индивидуальным разбросом (aReact) → уходит вразнобой, без скачка.
+        float _cull = 1.0 - smoothstep(0.0, 0.05, (aIndexN - uKeepFrac) + (aReact - 1.0) * 0.02);
+        transformed *= _cull;
         vec3 _drift = aDrift * sin(uTime * aSpeed + aPhase) * (aFlow * uBreath);
         vec3 _far = aHome + aEject * 3.2;
         float _sc = smoothstep(0.08, 0.72, uScroll);
@@ -209,11 +224,13 @@ export default function Hero3D() {
       const dm = (coarse ? 0.5 : 1) * (lite ? 0.14 : 1);
       const R = (n: number) => Math.max(1, Math.round(n * dm));
       const nMain = R(10000), nDot = R(200), nEject = R(600), nDust = R(4200), nField = R(3800);
-      N = nMain + nDot * 2 + nEject + nDust + nField;
-      keepMin = nMain + nDot * 2; // минимум, ниже которого буквы теряются
+      N = nMain + nDot * 2 + nDust + nEject + nField;
+      // порядок буфера: силуэт букв (main+dots+dust) — В ГОЛОВЕ, ambient-хвост
+      // (eject+field) — В КОНЦЕ. Адаптив гасит только хвост, буквы неприкосновенны.
+      keepMin = nMain + nDot * 2 + nDust;
       const home = new Float32Array(N * 3), drift = new Float32Array(N * 3), eject = new Float32Array(N * 3);
       const phase = new Float32Array(N), flow = new Float32Array(N), scl = new Float32Array(N), spd = new Float32Array(N);
-      const react = new Float32Array(N), ang = new Float32Array(N);
+      const react = new Float32Array(N), ang = new Float32Array(N), idxN = new Float32Array(N);
       let i = 0;
       const put = (x: number, y: number, z: number, size: number, ejx: number, ejy: number, ejz: number, fl: number, sp: number) => {
         home[i * 3] = x - CX; home[i * 3 + 1] = y - CY; home[i * 3 + 2] = z;
@@ -222,6 +239,7 @@ export default function Hero3D() {
         phase[i] = Math.random() * 6.283; flow[i] = fl; scl[i] = size; spd[i] = sp;
         react[i] = 0.3 + Math.random() * 1.4;          // индивидуальный коэффициент реакции 0.3–1.7
         ang[i] = (Math.random() * 2 - 1) * 0.8727;      // угловое отклонение ±50°
+        idxN[i] = i / N;                                // нормированный индекс (для плавного адаптива хвоста)
         i++;
       };
       const sampleSeg = () => {
@@ -247,21 +265,21 @@ export default function Hero3D() {
           put(x, y, z, 0.0014 + (0.009 - 0.0014) * (1 - rr / 0.10), (x - dxc) * 2, (y - dyc) * 2, z * 2, 0.006, 0.45);
         }
       }
-      // 3) выбросы из концов штрихов (связь с буквами)
-      for (let k = 0; k < nEject; k++) {
-        const tp = tips[(Math.random() * tips.length) | 0]; const [ox, oy] = outward(tp[0], tp[1]);
-        const dist = Math.pow(Math.random(), 1.6) * 0.75, jx = ox + (Math.random() - 0.5) * 0.4, jy = oy + (Math.random() - 0.5) * 0.4;
-        const l = Math.hypot(jx, jy) || 1;
-        const x = tp[0] + (jx / l) * dist, y = tp[1] + (jy / l) * dist, z = (Math.random() - 0.5) * 0.2;
-        put(x, y, z, 0.008 - (0.008 - 0.001) * (dist / 0.75), (jx / l) * (0.8 + Math.random()), (jy / l) * (0.8 + Math.random()), (Math.random() - 0.5) * 1.2, 0.024, 0.55);
-      }
-      // 4) пыль, обнимающая буквы (плотность максимальна у надписи)
+      // 3) пыль, обнимающая буквы (силуэт; в голове буфера — не режется адаптивом)
       for (let k = 0; k < nDust; k++) {
         const p = sampleSeg(), th = Math.random() * 6.283, rr = 0.065 + (Math.random() - 0.5) * 0.03;
         const x = p.px - p.ty * rr * Math.cos(th), y = p.py + p.tx * rr * Math.cos(th), z = rr * Math.sin(th) + (Math.random() - 0.5) * 0.032;
         const [ox, oy] = outward(p.px, p.py);
         const s = 0.0013 + (0.007 - 0.0013) * Math.random();
         put(x, y, z, s, ox * (0.3 + Math.random() * 0.6), oy * (0.3 + Math.random() * 0.6), (Math.random() - 0.5) * 0.8, 0.016, speedFor(s));
+      }
+      // 4) выбросы из концов штрихов (ambient-хвост — режется первым)
+      for (let k = 0; k < nEject; k++) {
+        const tp = tips[(Math.random() * tips.length) | 0]; const [ox, oy] = outward(tp[0], tp[1]);
+        const dist = Math.pow(Math.random(), 1.6) * 0.75, jx = ox + (Math.random() - 0.5) * 0.4, jy = oy + (Math.random() - 0.5) * 0.4;
+        const l = Math.hypot(jx, jy) || 1;
+        const x = tp[0] + (jx / l) * dist, y = tp[1] + (jy / l) * dist, z = (Math.random() - 0.5) * 0.2;
+        put(x, y, z, 0.008 - (0.008 - 0.001) * (dist / 0.75), (jx / l) * (0.8 + Math.random()), (jy / l) * (0.8 + Math.random()), (Math.random() - 0.5) * 1.2, 0.024, 0.55);
       }
       // 5) КОМПОЗИЦИОННОЕ ПОЛЕ — кластеры по φ-зонам, асимметрия слева-снизу,
       //    гауссов разброс, 14% одиночек, пустоты между скоплениями.
@@ -316,6 +334,7 @@ export default function Hero3D() {
       gm.setAttribute("aSpeed", new THREE.InstancedBufferAttribute(spd, 1));
       gm.setAttribute("aReact", new THREE.InstancedBufferAttribute(react, 1));
       gm.setAttribute("aAng", new THREE.InstancedBufferAttribute(ang, 1));
+      gm.setAttribute("aIndexN", new THREE.InstancedBufferAttribute(idxN, 1));
       mesh.frustumCulled = false;
       group.add(mesh);
     };
@@ -335,7 +354,9 @@ export default function Hero3D() {
       wpp = 5.2 / vw;                       // world-единиц на пиксель вьюпорта
       const halfW = wpp * W / 2, halfH = wpp * H / 2;
       const bandPx = Math.min(0.425 * vw, 0.66 * vh);     // видимая полоса слова
-      const yTarget = hero.bottom - bandPx * 0.5 + 0.06 * vh; // центр слова ниже на ~6vh (больше паузы под манифестом)
+      // десктоп — слово ниже (+6vh, пауза под манифестом); мобайл — выше (−4vh),
+      // иначе на узком экране надпись уходит слишком низко.
+      const yTarget = hero.bottom - bandPx * 0.5 + (vw <= 480 ? -0.04 : 0.06) * vh;
       camCY = wpp * ((yTarget - rect.top) - H / 2);        // world-Y центра слова = 0
       cam.left = -halfW; cam.right = halfW; cam.top = camCY + halfH; cam.bottom = camCY - halfH;
       cam.updateProjectionMatrix();
@@ -358,8 +379,9 @@ export default function Hero3D() {
     let settleAt = 0, measStart = 0, measFrames = 0;
     let ready = reduce, pointerX = 0, pointerY = 0, hasPointer = false;
 
-    // обработчик курсора: только пишет координаты (без физики и layout), до ready — игнор
-    const onMove = (e: PointerEvent) => { if (!ready) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
+    // обработчик курсора: только пишет координаты (без физики и layout); до ready
+    // и когда герой ушёл с экрана — игнор (обработчик де-факто отключён вне hero).
+    const onMove = (e: PointerEvent) => { if (!ready || !onScreen) return; pointerX = e.clientX; pointerY = e.clientY; hasPointer = true; };
     const onLeave = () => { hasPointer = false; };
 
     const tick = () => {
@@ -385,10 +407,15 @@ export default function Hero3D() {
         if (settleAt && now > settleAt + 130) { ready = true; phase = 1; measStart = now; measFrames = 0; try { performance.mark("hero:live"); } catch { /* no-op */ } }
       } else if (phase === 1) {
         measFrames++;
-        if (now - measStart > 1600) {
+        if (now - measStart > 1600) {                   // замер только в покое (после входа)
           const fps = measFrames / ((now - measStart) / 1000);
           const thr = coarse ? 40 : 52, tgt = coarse ? 46 : 58;
-          if (fps < thr && mesh) mesh.count = Math.max(keepMin, Math.floor(N * Math.max(0.5, Math.min(1, fps / tgt))));
+          // гистерезис: режем только при ЯВНОМ недоборе (−4 fps ниже порога),
+          // и только ambient-хвост, ПЛАВНО (uKeepFrac 1→target за ~0.55с, масштаб→0).
+          if (fps < thr - 4 && mesh) {
+            const targetFrac = Math.max(keepMin / N + 0.02, Math.min(1, fps / tgt));
+            if (targetFrac < 0.97) gsap.to(uni.uKeepFrac, { value: targetFrac, duration: 0.55, ease: "power2.inOut" });
+          }
           phase = 2; try { performance.mark("hero:adaptive"); } catch { /* no-op */ }
         }
       }
@@ -404,8 +431,11 @@ export default function Hero3D() {
     if (!reduce) { gsap.to(uni.uEnter, { value: 1, duration: 1.5, ease: "power2.out", onComplete: () => { settleAt = performance.now(); try { performance.mark("hero:enter-done"); } catch { /* no-op */ } } }); uni.uBreath.value = 1; }
     else { renderer.render(scene, cam); }
 
-    const io = new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; sync(); }, { rootMargin: "160px 0px" });
-    io.observe(el);
+    // Наблюдаем СЕКЦИЮ героя (≈100vh), а не огромный канвас (150vh+): иначе
+    // канвас, перекрывающий 2-й блок, почти всегда «виден» → рендер не встаёт.
+    // Когда надпись ушла — rAF полностью остановлен (проверяемо через onScreen).
+    const io = new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; if (!onScreen) hasPointer = false; sync(); }, { rootMargin: "120px 0px" });
+    io.observe(el.parentElement || el);
     const onVis = () => { docVis = document.visibilityState !== "hidden"; sync(); };
     if (!coarse && !reduce) { window.addEventListener("pointermove", onMove, { passive: true }); el.addEventListener("pointerleave", onLeave); }
     document.addEventListener("visibilitychange", onVis);

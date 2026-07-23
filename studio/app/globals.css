@@ -137,7 +137,9 @@ input, textarea, select { font: inherit; color: inherit; }
   transition: letter-spacing 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
 .site-header-cta:hover .cta-txt, .site-header-cta:active .cta-txt { letter-spacing: 0.2em; }
 @media (prefers-reduced-motion: reduce) { .cta-txt { transition: none; } }
-.site-burger { margin-left: var(--sp-4); width: 34px; height: 18px; position: relative; display: inline-flex; }
+/* margin-left:auto → на мобиле бургер уходит к ПРАВОМУ краю (лого слева, между
+   ними пусто); правый отступ = --gutter (симметрично отступу лого слева). */
+.site-burger { margin-left: auto; width: 34px; height: 18px; position: relative; display: inline-flex; }
 .site-burger span { position: absolute; left: 0; width: 100%; height: 2px; background: currentColor; transition: transform var(--dur-2) var(--ease), opacity var(--dur-1); }
 .site-burger span:nth-child(1) { top: 0; } .site-burger span:nth-child(2) { top: 8px; } .site-burger span:nth-child(3) { top: 16px; }
 .site-header.is-open .site-burger span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
