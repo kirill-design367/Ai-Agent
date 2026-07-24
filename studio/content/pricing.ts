@@ -29,14 +29,19 @@ const ADDON = {
   calculator: 30000, // квиз-калькулятор цены (мебель/авто): +к корпоративному
 } as const;
 
-/** Все показываемые суммы по id. Производные варианты — из BASE + ADDON. */
+/** Все показываемые суммы по id. Производные варианты — ВЫЧИСЛЯЕМЫ из BASE + ADDON,
+    чтобы фразы «разница между X и Y» и «калькулятор за +N» оставались верны при
+    любой смене тарифов. */
 export const PRICE = {
   landing: BASE.landing,
   corporate: BASE.corporate,
   shop: BASE.shop,
   support: BASE.support,
-  // «база + квиз-калькулятор» — вариант для ниш мебель/авто (60 000 + 30 000).
-  corporateCalc: BASE.corporate + ADDON.calculator, // 90 000
+  // модуль квиз-калькулятора как отдельная сумма (токен {price:calculator}).
+  calculator: ADDON.calculator, // 30 000
+  // «база + квиз-калькулятор» — вариант для ниш мебель/авто. Не хранимое число,
+  // а сумма: при смене corporate/calculator пересчитается автоматически.
+  corporateCalc: BASE.corporate + ADDON.calculator, // = 90 000
 } as const;
 
 export type PriceId = keyof typeof PRICE;
@@ -76,6 +81,4 @@ export function fromPrice(id: PriceId, capital = false): string {
 }
 
 /** Допустимые к показу суммы (для сторожа check-prices.mjs). */
-export const ALLOWED_AMOUNTS: number[] = Array.from(
-  new Set<number>([...Object.values(PRICE), ...Object.values(ADDON)])
-);
+export const ALLOWED_AMOUNTS: number[] = Array.from(new Set<number>(Object.values(PRICE)));
