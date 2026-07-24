@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: "Разработка сайтов под ключ для бизнеса — студия AUREA",
   description: SITE.description,
+  // Подтверждение прав в Яндекс.Вебмастере (Next сам вставит <meta> в <head>).
+  verification: { yandex: "e4128ef6693a033e" },
 };
 
 export const viewport: Viewport = {
