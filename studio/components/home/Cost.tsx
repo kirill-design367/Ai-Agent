@@ -6,17 +6,16 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 import { PRICE, formatPrice } from "@/content/pricing";
 
 /*
-  БЛОК «СТОИМОСТЬ» — сразу после «Работы». Отвечает ОДНОЙ цифрой, не таблицей:
-  таблица ставит потолок и превращает авторскую студию в меню. Прайса по форматам
-  тут нет — блок ведёт на /uslugi/*.
-
-  Приёмы:
-   • слово «Стоимость» сидит верхом на шве чёрного (Работы) и белого (Стоимость):
-     mix-blend-difference переворачивает цвет сам на границе (моб. — blend off);
-   • список форматов — не ровный столбик: интервалы нарастают, последняя строка
-     уходит под правую колонку (сознательный слом сетки ровно один раз);
-   • порог — цифра из отдельных разрядов-столбцов, выезжает снизу одним движением
-     (не счётчик от нуля). Все числа — из content/pricing.ts, не хардкод.
+  БЛОК «СТОИМОСТЬ» — скролл-сцена (реф noth.in). Отвечает ОДНОЙ цифрой, не таблицей.
+  Сцена 1 — шапка («Стоимость» на шве ч/б + утверждение).
+  Сцена 2 — ПИН (ScrollTrigger pin + scrub, ~300vh): разряды выезжают снизу →
+    удержание (только цифра + спутники + линия + строка) → парковка (цифра
+    уменьшается и уезжает влево-вверх как заголовок).
+  Сцена 3 — контент после парковки: «что двигает цену» + навигация форматов +
+    замыкающая строка.
+  Весь текст ВСЕГДА в DOM (скрыт opacity/transform, не условным рендером) — робот
+  видит блок целиком. Мобильная/reduced-motion — без пина, обычный поток.
+  Числа — из content/pricing.ts (не хардкод).
 */
 
 const FORMATS = [
@@ -34,52 +33,102 @@ const DRIVERS = [
   "Языковые и региональные версии",
 ];
 
+const TOP_PAD = 104; // отступ припаркованной цифры от верха (ниже фикс-панели)
+
 export default function Cost() {
   const root = useRef<HTMLElement>(null);
 
-  // Числа — из единого источника (правило проекта №2), не хардкод в разметке.
+  // числа — из единого источника
   const numStr = formatPrice(PRICE.landing).replace(/\s*₽\s*$/, ""); // «50 000»
   const numChars = Array.from(numStr);
   const rangeLo = formatPrice(PRICE.corporate).replace(/\s*₽\s*$/, "");
-  const range = `${rangeLo}–${formatPrice(PRICE.shop)}`; // «120 000–250 000 ₽» (среднее тире)
-  const thresholdA11y = `от ${formatPrice(PRICE.landing)}`;
+  const range = `${rangeLo}–${formatPrice(PRICE.shop)}`; // «120 000–250 000 ₽»
+  const a11y = `от ${formatPrice(PRICE.landing)}`;
 
   useEffect(() => {
     registerGsap();
     const el = root.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return; // при reduce CSS показывает всё сразу (см. globals)
+    const mobile = window.matchMedia("(max-width: 860px)").matches;
 
-    const triggers: ScrollTrigger[] = [];
-    // Появления: ScrollTrigger включает CSS-класс, а хореографию (маска снизу
-    // вверх, stagger, easing) ведут transition'ы — надёжная под Lenis идиома
-    // этого сайта (Работы/Манифест). once — играем один раз.
-    const reveal = (sel: string, cls: string, start: string) => {
-      const t = el.querySelector(sel);
-      if (t) triggers.push(ScrollTrigger.create({ trigger: t, start, once: true, onEnter: () => el.classList.add(cls) }));
-    };
-    reveal(".st-formats", "st-in-fmt", "top 84%");   // 1. форматы — маска снизу
-    reveal(".st-price", "st-in-num", "top 80%");     // 3. «от» → разряды L→R → ₽
-    reveal(".st-drivers", "st-in-drv", "top 86%");   // 4. «что двигает цену»
-
-    // 5. Лёгкий разнос колонок: правая идёт на ~7% медленнее. Только десктоп.
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 861px)", () => {
-      const priceEl = el.querySelector<HTMLElement>(".st-price");
-      if (!priceEl) return;
-      gsap.fromTo(priceEl, { y: -30 }, {
-        y: 30, ease: "none",
-        scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+    // Мобильная / reduced: без пина. reduced — всё статикой (CSS). Мобильная —
+    // одно появление крупной цифры при входе в вьюпорт.
+    if (reduce || mobile) {
+      if (reduce) return;
+      const st = ScrollTrigger.create({
+        trigger: el, start: "top 62%", once: true,
+        onEnter: () => el.classList.add("st-in"),
       });
-    });
+      return () => st.kill();
+    }
 
-    return () => { triggers.forEach((t) => t.kill()); mm.revert(); };
+    // ДЕСКТОП — пин-сцена
+    el.classList.add("st-js"); // переключает CSS в раскладку сцены
+    const q = <T extends Element>(s: string) => el.querySelector(s) as T | null;
+    const stage = q<HTMLElement>(".st-stage");
+    const num = q<HTMLElement>(".st-num");
+    const sub = q<HTMLElement>(".st-sub");
+    const line = q<HTMLElement>(".st-line");
+    const after = q<HTMLElement>(".st-after");
+    const digits = el.querySelectorAll(".st-num-d");
+    const pre = q(".st-num-pre");
+    const cur = q(".st-num-cur");
+    if (!stage || !num || !sub || !line || !after) return;
+
+    const PARK = 0.16; // масштаб припаркованной цифры (~1/6)
+    const gutter = () => parseFloat(getComputedStyle(el).getPropertyValue("--gutter")) || 48;
+
+    const ctx = gsap.context(() => {
+      // Геометрия целиком на pixel x/y, transform-origin — центр (по умолчанию).
+      // Центрирование: ставим ЛЕВЫЙ-ВЕРХНИЙ угол так, чтобы центр попал куда нужно.
+      const sw = () => stage.clientWidth, sh = () => stage.clientHeight;
+      // База: число центрировано по X, чуть НИЖЕ центра по Y (воздуха сверху больше)
+      const setBase = () => {
+        gsap.set(num, { x: sw() / 2 - num.offsetWidth / 2, y: sh() * 0.54 - num.offsetHeight / 2, scale: 1 });
+        gsap.set(sub, { x: sw() / 2 - sub.offsetWidth / 2, y: sh() * 0.72 });
+        gsap.set(line, { x: sw() / 2 - line.offsetWidth / 2, y: sh() * 0.685, scaleX: 0, transformOrigin: "left center" });
+      };
+      setBase();
+      gsap.set(digits, { yPercent: 115 });
+      gsap.set([pre, cur], { autoAlpha: 0 });
+      gsap.set(sub, { autoAlpha: 0 });
+      gsap.set(after, { autoAlpha: 0, y: 28 });
+
+      // Парковка: центр уменьшенной цифры так, чтобы её левый-верхний угол = (gutter, TOP_PAD)
+      const numParkX = () => gutter() + (num.offsetWidth * PARK) / 2 - num.offsetWidth / 2;
+      const numParkY = () => TOP_PAD + (num.offsetHeight * PARK) / 2 - num.offsetHeight / 2;
+      const subParkX = () => gutter();
+      const subParkY = () => TOP_PAD + num.offsetHeight * PARK + 18;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: stage, start: "top top", end: "+=300%",
+          scrub: 0.5, pin: true, anticipatePin: 1, invalidateOnRefresh: true,
+          onRefresh: setBase, // пересчёт базы при resize/refresh
+        },
+      });
+
+      // ФАЗА 1 (0–0.24) — приход разрядов, слева направо, каждый одним движением
+      tl.to(pre, { autoAlpha: 1, duration: 0.05 }, 0.0)
+        .to(digits, { yPercent: 0, ease: "power3.out", duration: 0.16, stagger: 0.03 }, 0.01)
+        .to(cur, { autoAlpha: 1, duration: 0.05 }, 0.2)
+        // ФАЗА 2 (0.25–0.5) — удержание: линия, затем строка про серьёзные проекты
+        .to(line, { scaleX: 1, ease: "power2.inOut", duration: 0.1 }, 0.31)
+        .to(sub, { autoAlpha: 1, duration: 0.1 }, 0.4)
+        // ФАЗА 3 (0.5–1) — парковка цифры влево-вверх + проявление контента сцены 3
+        .to(num, { scale: PARK, x: numParkX, y: numParkY, ease: "power2.inOut", duration: 0.42 }, 0.52)
+        .to(sub, { x: subParkX, y: subParkY, ease: "power2.inOut", duration: 0.42 }, 0.52)
+        .to(line, { autoAlpha: 0, duration: 0.16 }, 0.52)
+        .to(after, { autoAlpha: 1, y: 0, ease: "power2.out", duration: 0.34 }, 0.62);
+    }, el);
+
+    return () => ctx.revert();
   }, []);
 
   return (
     <section id="stoimost" ref={root} className="st" aria-labelledby="st-title">
-      {/* шапка: «Стоимость» верхом на шве + утверждение справа */}
+      {/* СЦЕНА 1 — шапка на шве */}
       <h2 className="st-head" id="st-title">
         <span className="st-word">Стоимость</span>
         <span className="st-claim">
@@ -87,60 +136,56 @@ export default function Cost() {
         </span>
       </h2>
 
-      <div className="st-body">
-        {/* форматы — крупные ссылки, нарастающие интервалы */}
-        <ul className="st-formats">
-          {FORMATS.map((f, i) => (
-            <li key={f.href} style={{ ["--i" as string]: i }}
-              className={`st-fmt st-fmt--${i}${i === FORMATS.length - 1 ? " st-fmt--wide" : ""}`}>
-              <Link href={f.href} className="st-fmt-a">
-                <h3 className="st-fmt-h">
-                  <span className="st-fmt-in">{f.label}</span>
-                </h3>
-              </Link>
-            </li>
-          ))}
-        </ul>
+      {/* СЦЕНА 2+3 — пин-сцена */}
+      <div className="st-stage">
+        {/* число + линия + строка про серьёзные проекты */}
+        <p className="st-num" aria-label={a11y}>
+          <span className="st-num-pre" aria-hidden>от</span>
+          <span className="st-num-val" aria-hidden>
+            {(() => {
+              let d = -1;
+              return numChars.map((c, i) =>
+                /\d/.test(c) ? (
+                  <span key={i} className="st-num-col" style={{ ["--i" as string]: ++d }}>
+                    <span className="st-num-d">{c}</span>
+                  </span>
+                ) : (
+                  <span key={i} className="st-num-sp" aria-hidden />
+                )
+              );
+            })()}
+          </span>
+          <span className="st-num-cur" aria-hidden>₽</span>
+        </p>
+        <span className="st-line" aria-hidden />
+        <p className="st-sub">Проекты с серьёзной задачей — {range}</p>
 
-        {/* порог — самый крупный элемент блока */}
-        <div className="st-price">
-          <p className="st-num" aria-label={thresholdA11y}>
-            <span className="st-num-pre" aria-hidden>от</span>
-            <span className="st-num-val" aria-hidden>
-              {(() => {
-                let d = -1;
-                return numChars.map((c, i) =>
-                  /\d/.test(c) ? (
-                    <span key={i} className="st-num-col" style={{ ["--i" as string]: ++d }}>
-                      <span className="st-num-d">{c}</span>
-                    </span>
-                  ) : (
-                    <span key={i} className="st-num-sp" aria-hidden />
-                  )
-                );
-              })()}
-            </span>
-            <span className="st-num-cur" aria-hidden>₽</span>
-          </p>
-          <p className="st-sub">Проекты с серьёзной задачей — {range}</p>
-
+        {/* СЦЕНА 3 — контент после парковки (всегда в DOM) */}
+        <div className="st-after">
           <ul className="st-drivers">
             {DRIVERS.map((d, i) => (
-              <li key={i} className="st-drv" style={{ ["--i" as string]: i }}>{d}</li>
+              <li key={i} className="st-drv">{d}</li>
             ))}
           </ul>
-        </div>
-      </div>
 
-      {/* замыкающая строка во всю ширину */}
-      <div className="st-foot">
-        <p className="st-foot-t">
-          Точную цифру называю после короткого разговора о задаче — пятнадцать минут,
-          без брифа на сорок вопросов.
-        </p>
-        <Link href="/kontakty/" className="st-foot-link">
-          Обсудить проект <span aria-hidden>→</span>
-        </Link>
+          <nav className="st-nav" aria-label="Форматы сайтов">
+            {FORMATS.map((f) => (
+              <Link key={f.href} href={f.href} className="st-nav-a">
+                <h3 className="st-nav-h">{f.label}</h3>
+              </Link>
+            ))}
+          </nav>
+
+          <div className="st-foot">
+            <p className="st-foot-t">
+              Точную цифру называю после короткого разговора о задаче — пятнадцать минут,
+              без брифа на сорок вопросов.
+            </p>
+            <Link href="/kontakty/" className="st-foot-link">
+              Обсудить проект <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );

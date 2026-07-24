@@ -531,89 +531,63 @@ textarea.field { resize: vertical; min-height: 4em; }
 }
 
 
-/* ═══════════════ БЛОК «СТОИМОСТЬ» (после «Работы») ═══════════════ */
-/* Белое полотно. Слово «Стоимость» верхом на шве чёрного и белого: цвет
-   переворачивает mix-blend-difference. Порог — самый крупный элемент блока. */
-.st { position: relative; z-index: 3; background: #fff; color: #000;
-  overflow-x: clip;                     /* горизонт закрыт жёстко; вертикаль (слово-шов) видна */
-  isolation: isolate; padding-bottom: clamp(3.5rem, 8vh, 7rem); }
+/* ═══════════════ БЛОК «СТОИМОСТЬ» — скролл-сцена (реф noth.in) ═══════════════ */
+.st { position: relative; z-index: 3; background: #fff; color: #000; overflow-x: clip; isolation: isolate;
+  --st-band: clamp(6rem, 12vh, 9.5rem); }        /* высота чёрной полосы = где сидит шов */
+/* чёрная полоса вверху продолжает «Работы»: шов (и слово на нём) опускается НИЖЕ
+   фикс-панели — шапка на неё больше не налезает */
+.st::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: var(--st-band);
+  background: #000; z-index: 0; pointer-events: none; }
 
-/* ── шапка: слово-шов слева + утверждение справа ── */
-.st-head { position: relative; margin: 0 auto; max-width: var(--maxw); padding: 0 var(--gutter);
-  min-height: clamp(4.5rem, 10vw, 8.5rem);
+/* ── Сцена 1: шапка на шве ── */
+.st-head { position: relative; z-index: 2; margin: 0 auto; max-width: var(--maxw); padding: 0 var(--gutter);
+  min-height: calc(var(--st-band) + clamp(3.5rem, 9vh, 7rem));
   display: flex; justify-content: flex-end; align-items: flex-start; }
-.st-word { position: absolute; top: 0; left: var(--gutter); transform: translateY(-50%);
+.st-word { position: absolute; left: var(--gutter); top: var(--st-band); transform: translateY(-50%);
   margin: 0; font-family: var(--font-druk); font-weight: 800; text-transform: uppercase;
   font-size: clamp(2.4rem, 1rem + 6.6vw, 7rem); line-height: 0.86; letter-spacing: -0.025em;
   color: #fff; mix-blend-mode: difference; pointer-events: none; white-space: nowrap; }
-.st-claim { display: block; text-align: right; margin-top: clamp(1.3rem, 3.4vh, 2.8rem);
+.st-claim { display: block; text-align: right; margin-top: calc(var(--st-band) + clamp(1.4rem, 3.4vh, 2.8rem));
   font-family: var(--font-druk); font-weight: 800; letter-spacing: -0.005em;
   font-size: clamp(1.05rem, 0.72rem + 1.45vw, 1.95rem); line-height: 1.02; color: #000; max-width: 15ch; }
 
-/* ── тело: две колонки, НЕ по верху ── */
-.st-body { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto;
-  padding: clamp(2.4rem, 6vh, 5rem) var(--gutter) 0;
-  display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
-  column-gap: clamp(2rem, 6vw, 7rem); align-items: start; }
-/* тонкая вертикаль между колонками — смещена от центра, не доходит до краёв */
-.st-body::before { content: ""; position: absolute; left: 56%; top: clamp(3rem, 9vh, 7rem);
-  bottom: clamp(1rem, 4vh, 3rem); width: 1px; background: rgba(0, 0, 0, 0.16); }
+/* ── число + спутники ── */
+.st-num { display: flex; align-items: baseline; gap: 0; margin: 0; color: #000;
+  font-family: var(--font-druk); font-weight: 800; line-height: 0.82; letter-spacing: -0.035em; }
+.st-num-pre { align-self: flex-start; font-family: var(--font-display); font-weight: 500; text-transform: lowercase;
+  font-size: 0.085em; line-height: 1; margin-top: 0.14em; margin-right: 0.14em; letter-spacing: 0.02em; }
+.st-num-val { display: inline-flex; align-items: baseline; }
+.st-num-col { display: inline-block; width: 0.6em; overflow: hidden; text-align: center; }
+.st-num-d { display: inline-block; }
+.st-num-sp { display: inline-block; width: 0.13em; }                       /* тонкий пробел разрядов */
+.st-num-cur { font-family: var(--font-display); font-weight: 500; font-size: 0.12em; line-height: 1;
+  align-self: baseline; margin-left: 0.16em; letter-spacing: 0; }
 
-/* форматы — крупные ссылки, нарастающие интервалы (не ровный столбик) */
-.st-formats { grid-column: 1; list-style: none; margin: 0; padding: 0; }
-.st-fmt { display: block; }
-.st-fmt--1 { margin-top: clamp(0.5rem, 1.4vh, 1.1rem); }
-.st-fmt--2 { margin-top: clamp(1.2rem, 3.2vh, 2.6rem); }
-.st-fmt--3 { margin-top: clamp(2.2rem, 5.6vh, 4.6rem); }
-.st-fmt-a { display: inline-block; max-width: 100%; text-decoration: none; color: #000; position: relative; }
-.st-fmt-h { margin: 0; overflow: hidden; font-family: var(--font-druk); font-weight: 800;
-  text-transform: uppercase; white-space: nowrap; line-height: 0.98; letter-spacing: -0.022em;
-  font-size: clamp(1.9rem, 0.9rem + 4.6vw, 4.5rem); }
-.st-fmt-in { display: inline-block; will-change: transform; }
-/* последняя строка длиннее — уходит под правую колонку (сознательный слом сетки) */
-.st-fmt--wide { position: relative; z-index: 2; }
-.st-fmt--wide .st-fmt-a { max-width: none; }
-/* подчёркивание рисуется по наведению, по ширине текста */
-.st-fmt-a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.04em; height: 0.055em;
-  background: #000; transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease); }
-@media (hover: hover) {
-  .st-fmt-a { transition: opacity 0.4s var(--ease); }
-  /* тускнеют остальные ТОЛЬКО когда наведён конкретный формат (не пустой промежуток) */
-  .st-formats:has(.st-fmt-a:hover) .st-fmt-a:not(:hover) { opacity: 0.25; }
-  .st-fmt-a:hover::after { transform: scaleX(1); }
-}
+/* ── линия + строка про серьёзные проекты ── */
+.st-line { display: block; height: 1px; background: rgba(0, 0, 0, 0.55); }
+.st-sub { margin: 0; font-family: var(--font-body); font-weight: 500; color: #000; white-space: nowrap;
+  font-size: clamp(1rem, 0.9rem + 0.55vw, 1.35rem); line-height: 1.3; }
 
-/* ── правая колонка: порог ── */
-.st-price { grid-column: 2; margin-top: clamp(3.5rem, 12vh, 10rem); will-change: transform; }
-/* цифра — самый крупный элемент блока; размер подобран так, чтобы «от N ₽»
-   помещался в правую колонку целиком (ничего не подрезается) */
-.st-num { display: flex; align-items: flex-start; gap: 0.1em; margin: 0; color: #000;
-  font-family: var(--font-druk); font-weight: 800; line-height: 0.8; letter-spacing: -0.03em;
-  font-size: clamp(2.9rem, 0.6rem + 6.4vw, 7rem); }
-.st-num-pre { font-family: var(--font-display); font-weight: 500; text-transform: lowercase;
-  font-size: 0.22em; line-height: 1; margin-top: 0.2em; letter-spacing: 0; will-change: transform, opacity; }
-.st-num-val { display: inline-flex; align-items: flex-start; }
-.st-num-col { display: inline-block; width: 0.56em; overflow: hidden; text-align: center; }
-.st-num-d { display: inline-block; will-change: transform; }
-.st-num-sp { display: inline-block; width: 0.2em; }               /* разряд-пробел */
-.st-num-cur { font-size: 0.36em; line-height: 1; margin-top: 0.16em; margin-left: 0.04em;
-  letter-spacing: 0; will-change: transform, opacity; }           /* ₽ мельче, поднят к верху */
-/* вторая строка — читаемая, не «мелкий шрифт извинений» */
-.st-sub { margin: clamp(1.1rem, 2.6vh, 1.9rem) 0 0; font-family: var(--font-body); font-weight: 500;
-  font-size: clamp(1rem, 0.9rem + 0.55vw, 1.35rem); line-height: 1.32; color: #000; max-width: 15ch; }
-
-/* «что двигает цену» — ровный ритм, волосяные линии */
-.st-drivers { list-style: none; margin: clamp(2.2rem, 5.5vh, 3.6rem) 0 0; padding: 0; }
+/* ── «что двигает цену» ── */
+.st-drivers { list-style: none; margin: 0; padding: 0; }
 .st-drv { position: relative; padding: clamp(0.72rem, 1.7vh, 1.05rem) 0 clamp(0.72rem, 1.7vh, 1.05rem) 1.5em;
   border-top: 1px solid rgba(0, 0, 0, 0.14); font-family: var(--font-body); font-weight: 450;
-  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.12rem); line-height: 1.4; color: #000; will-change: transform, opacity; }
+  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.12rem); line-height: 1.4; color: #000; }
 .st-drv:last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.14); }
 .st-drv::before { content: ""; position: absolute; left: 0; top: 1.5em; width: 0.7em; height: 1px; background: #000; }
 
+/* ── форматы — ДЕМОТИРОВАНЫ до навигации (ANTIQVA капитель, средний кегль) ── */
+.st-nav { display: flex; flex-wrap: wrap; gap: 0.6em 2em; margin: clamp(1.8rem, 5vh, 3.2rem) 0 0; }
+.st-nav-a { text-decoration: none; color: #000; position: relative; }
+.st-nav-h { margin: 0; font-family: var(--font-display); font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.06em; font-size: clamp(0.92rem, 0.85rem + 0.4vw, 1.15rem); line-height: 1; }
+.st-nav-a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.35em; height: 1px; background: #000;
+  transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease); }
+@media (hover: hover) { .st-nav-a:hover::after { transform: scaleX(1); } }
+
 /* ── замыкающая строка ── */
-.st-foot { max-width: var(--maxw); margin: clamp(3rem, 8vh, 6rem) auto 0; padding: clamp(1.5rem, 4vh, 2.6rem) var(--gutter) 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.14); display: flex; flex-wrap: wrap; align-items: baseline;
-  justify-content: space-between; gap: 1.2rem 2rem; }
+.st-foot { margin: clamp(2rem, 5vh, 3.4rem) 0 0; display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 1rem 2rem; }
 .st-foot-t { margin: 0; font-family: var(--font-body); font-weight: 450; max-width: 44ch;
   font-size: clamp(1rem, 0.94rem + 0.4vw, 1.25rem); line-height: 1.42; color: #000; }
 .st-foot-link { position: relative; white-space: nowrap; text-decoration: none; color: #000;
@@ -622,42 +596,57 @@ textarea.field { resize: vertical; min-height: 4em; }
 .st-foot-link span { display: inline-block; transition: transform 0.4s var(--ease); }
 .st-foot-link:hover span { transform: translateX(6px); }
 
-/* ── появление: .js прячет до JS (без вспышки), ScrollTrigger включает .st-in-*,
-   а хореографию (маска, stagger, easing) ведут transition'ы ── */
-.js .st-fmt-in { transform: translateY(118%); transition: transform 0.9s var(--ease);
-  transition-delay: calc(var(--i, 0) * 0.08s); }
-.st-in-fmt .st-fmt-in { transform: translateY(0); }
-/* разряды — выезд снизу, сдвиг слева направо (после «от») */
-.js .st-num-d { transform: translateY(115%); transition: transform 0.9s var(--ease);
-  transition-delay: calc(0.14s + var(--i, 0) * 0.055s); }
-.st-in-num .st-num-d { transform: translateY(0); }
-.js .st-num-pre { opacity: 0; transform: translateY(45%);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
-.st-in-num .st-num-pre { opacity: 1; transform: none; }
-.js .st-num-cur { opacity: 0; transform: translateY(45%);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); transition-delay: 0.52s; }
-.st-in-num .st-num-cur { opacity: 1; transform: none; }
-.js .st-drv { opacity: 0; transform: translateY(22px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i, 0) * 0.06s); }
-.st-in-drv .st-drv { opacity: 1; transform: none; }
+/* ═══ БАЗОВАЯ РАСКЛАДКА (mobile / reduced / без JS): обычный поток ═══ */
+.st-stage { position: relative; max-width: var(--maxw); margin: 0 auto;
+  padding: clamp(3rem, 8vh, 6rem) var(--gutter) clamp(4rem, 10vh, 8rem); }
+.st-stage .st-num { font-size: clamp(3.2rem, 1rem + 15vw, 8rem); flex-wrap: nowrap; }
+.st-stage .st-line { margin: clamp(1.6rem, 4vh, 2.6rem) 0; transform: scaleX(1); }
+.st-stage .st-sub { white-space: normal; max-width: 26ch; }
+.st-stage .st-after { margin-top: clamp(2.6rem, 7vh, 4.5rem); }
+/* мобильное появление крупной цифры */
+.js .st:not(.st-js) .st-num, .js .st:not(.st-js) .st-sub, .js .st:not(.st-js) .st-after {
+  opacity: 0; transform: translateY(7%); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+.js .st:not(.st-js).st-in .st-num, .js .st:not(.st-js).st-in .st-sub, .js .st:not(.st-js).st-in .st-after {
+  opacity: 1; transform: none; }
+.js .st:not(.st-js).st-in .st-sub { transition-delay: 0.12s; }
+.js .st:not(.st-js).st-in .st-after { transition-delay: 0.2s; }
 
-/* ── мобильная: одна колонка, blend off, слом последней строки убран ── */
+/* ═══ ПИН-СЦЕНА (десктоп, .st-js): всё абсолютом внутри 100vh, gsap двигает ═══ */
+.st-js .st-stage { height: 100vh; height: 100svh; max-width: none; margin: 0; padding: 0; overflow: hidden; }
+/* полноэкранное число — упирается в края, чуть ниже оптического центра.
+   Позиция (центрирование и парковка) целиком на gsap (left/top=0). «от» и «₽» —
+   абсолютные спутники, чтобы РАЗРЯДЫ шли от края до края, а не были поджаты. */
+.st-js .st-num { position: absolute; left: 0; top: 0; white-space: nowrap;
+  font-size: 29vw; line-height: 0.8; letter-spacing: -0.055em; will-change: transform; }
+.st-js .st-num-col { width: 0.58em; }
+.st-js .st-num-sp { width: 0.09em; }
+.st-js .st-num-d { will-change: transform; }
+.st-js .st-num-pre { position: absolute; left: 0.04em; top: -0.04em; margin: 0; font-size: 0.072em; }
+.st-js .st-num-cur { position: absolute; left: calc(100% + 0.04em); bottom: 0.05em; margin: 0; font-size: 0.1em; }
+/* линия под числом (фаза 2) — позиция и scaleX на gsap */
+.st-js .st-line { position: absolute; left: 0; top: 0; width: min(62vw, 800px); height: 1px;
+  background: rgba(0, 0, 0, 0.6); will-change: transform; }
+/* строка про серьёзные проекты — позиция на gsap */
+.st-js .st-sub { position: absolute; left: 0; top: 0; text-align: left; white-space: nowrap; will-change: transform, opacity; }
+/* контент сцены 3 — под припаркованной зоной, скрыт до фазы 3 */
+.st-js .st-after { position: absolute; left: 0; right: 0; top: 0; margin: 0;
+  padding: clamp(190px, 27vh, 280px) var(--gutter) 0; max-width: var(--maxw); margin-inline: auto;
+  will-change: transform, opacity; }
+
+/* ── мобильная ── */
 @media (max-width: 860px) {
-  .st-head { display: block; min-height: 0; padding-top: clamp(2.6rem, 9vh, 4rem); }
-  .st-word { position: static; transform: none; mix-blend-mode: normal; color: #000;
-    display: block; margin-bottom: clamp(1rem, 3vh, 1.6rem); }
-  .st-claim { text-align: left; max-width: 22ch; margin-top: 0; }
-  .st-body { grid-template-columns: 1fr; padding-top: clamp(2.4rem, 7vh, 3.4rem); }
-  .st-body::before { display: none; }
-  .st-fmt-h { white-space: normal; }
-  .st-fmt--wide { z-index: auto; }
-  .st-price { grid-column: 1; margin-top: clamp(2.4rem, 8vh, 3.6rem); }
-  .st-sub { max-width: 26ch; }
-  .st-foot { flex-direction: column; }
+  .st { --st-band: clamp(4.5rem, 12vh, 7rem); }
+  /* padding-top (не margin — иначе схлопывается и уводит текст на чёрную полосу) */
+  .st-head { display: block; padding-top: calc(var(--st-band) + clamp(1.1rem, 3.5vh, 2rem)); }
+  .st-claim { text-align: left; max-width: 24ch; margin-top: 0; font-size: clamp(1.15rem, 5vw, 1.6rem); }
+  .st-sub { white-space: normal; }
+  .st-num { flex-wrap: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .js .st-fmt-in, .js .st-num-d { transform: none; transition: none; }
-  .js .st-num-pre, .js .st-num-cur, .js .st-drv { opacity: 1; transform: none; transition: none; }
+  /* всё статикой, всё видно (важно: перебиваем правило мобильного появления) */
+  .js .st .st-num, .js .st .st-sub, .js .st .st-after,
+  .js .st:not(.st-js) .st-num, .js .st:not(.st-js) .st-sub, .js .st:not(.st-js) .st-after {
+    opacity: 1 !important; transform: none !important; transition: none !important; }
 }
 
 

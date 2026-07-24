@@ -3,7 +3,7 @@
 import { ReactLenis, useLenis } from "lenis/react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { ScrollTrigger, registerGsap } from "@/lib/gsap";
+import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 /*
   Inertial smooth-scroll (Lenis) — the "expensive" weighted feel (Bible II.6).
@@ -21,11 +21,15 @@ function LenisGsapBridge() {
     // Keep ScrollTrigger in lockstep with Lenis on every frame.
     lenis.on("scroll", ScrollTrigger.update);
 
-    // ГЛАДКОСТЬ: держим ПРОСТУЮ связку — Lenis крутит свой RAF (autoRaf по умолч.),
-    // а ScrollTrigger обновляется на каждом событии скролла Lenis (выше). Драйв
-    // Lenis из gsap.ticker + lagSmoothing(0) убрали: под тяжёлой сценой «Процесса»
-    // (рой вопросов + комета) он снимал защиту от просадок кадров и добавлял лаги.
-    // Дрожание пиннингов уже устранено переводом порталов на CSS position:sticky.
+    // КАНОНИЧЕСКАЯ связка Lenis+GSAP: единый RAF-источник — gsap.ticker (Lenis
+    // запущен с autoRaf:false, см. ниже). Это ОБЯЗАТЕЛЬНО для гладкого
+    // ScrollTrigger pin+scrub (сцена «Стоимость»): pin и scrub привязаны к тому
+    // же тикеру, что и Lenis, поэтому не дрожат. lagSmoothing(0) — без «догоняния»
+    // после лага, иначе scrub рвётся. HomeUpgrade с тяжёлым «Процессом» больше не
+    // рендерится (главная = HomeLite), поэтому прежней просадки нет.
+    const rafDrive = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(rafDrive);
+    gsap.ticker.lagSmoothing(0);
 
     // Всегда стартуем с Hero. Скролл теперь на документе (root) — сбрасываем
     // window/documentElement/body и Lenis многократно, пока идёт прелоадер,
@@ -66,6 +70,7 @@ function LenisGsapBridge() {
 
     return () => {
       lenis.off("scroll", ScrollTrigger.update);
+      gsap.ticker.remove(rafDrive);
       stopForcing();
     };
   }, [lenis]);
@@ -77,6 +82,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
   return (
     <ReactLenis
       root
+      autoRaf={false}
       options={{
         duration: 1.2,
         // Premium expo easing (matches reference portfolios).
