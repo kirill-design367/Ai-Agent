@@ -5,6 +5,7 @@ import Hero, { HeroV1 } from "@/components/home/Hero";
 import Hero3D from "@/components/home/Hero3D";
 import Manifesto from "@/components/home/Manifesto";
 import Cases from "@/components/home/Cases";
+import Cost from "@/components/home/Cost";
 import FounderBlock from "@/components/pg/FounderBlock";
 import TrustBlock from "@/components/pg/TrustBlock";
 import Testimonials from "@/components/pg/Testimonials";
@@ -40,6 +41,9 @@ export default function HomeLite() {
 
       {/* ══ КЕЙСЫ — чёрное полотно, реф noth.in «WORKS» ══ */}
       <Cases />
+
+      {/* ══ СТОИМОСТЬ — одна цифра, слово на шве ч/б ══ */}
+      <Cost />
 
       {/* ══ НИШИ ══ */}
       <section className="pg-hub">

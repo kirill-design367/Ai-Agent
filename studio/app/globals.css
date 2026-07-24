@@ -531,6 +531,136 @@ textarea.field { resize: vertical; min-height: 4em; }
 }
 
 
+/* ═══════════════ БЛОК «СТОИМОСТЬ» (после «Работы») ═══════════════ */
+/* Белое полотно. Слово «Стоимость» верхом на шве чёрного и белого: цвет
+   переворачивает mix-blend-difference. Порог — самый крупный элемент блока. */
+.st { position: relative; z-index: 3; background: #fff; color: #000;
+  overflow-x: clip;                     /* горизонт закрыт жёстко; вертикаль (слово-шов) видна */
+  isolation: isolate; padding-bottom: clamp(3.5rem, 8vh, 7rem); }
+
+/* ── шапка: слово-шов слева + утверждение справа ── */
+.st-head { position: relative; margin: 0 auto; max-width: var(--maxw); padding: 0 var(--gutter);
+  min-height: clamp(4.5rem, 10vw, 8.5rem);
+  display: flex; justify-content: flex-end; align-items: flex-start; }
+.st-word { position: absolute; top: 0; left: var(--gutter); transform: translateY(-50%);
+  margin: 0; font-family: var(--font-druk); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(2.4rem, 1rem + 6.6vw, 7rem); line-height: 0.86; letter-spacing: -0.025em;
+  color: #fff; mix-blend-mode: difference; pointer-events: none; white-space: nowrap; }
+.st-claim { display: block; text-align: right; margin-top: clamp(1.3rem, 3.4vh, 2.8rem);
+  font-family: var(--font-druk); font-weight: 800; letter-spacing: -0.005em;
+  font-size: clamp(1.05rem, 0.72rem + 1.45vw, 1.95rem); line-height: 1.02; color: #000; max-width: 15ch; }
+
+/* ── тело: две колонки, НЕ по верху ── */
+.st-body { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto;
+  padding: clamp(2.4rem, 6vh, 5rem) var(--gutter) 0;
+  display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  column-gap: clamp(2rem, 6vw, 7rem); align-items: start; }
+/* тонкая вертикаль между колонками — смещена от центра, не доходит до краёв */
+.st-body::before { content: ""; position: absolute; left: 56%; top: clamp(3rem, 9vh, 7rem);
+  bottom: clamp(1rem, 4vh, 3rem); width: 1px; background: rgba(0, 0, 0, 0.16); }
+
+/* форматы — крупные ссылки, нарастающие интервалы (не ровный столбик) */
+.st-formats { grid-column: 1; list-style: none; margin: 0; padding: 0; }
+.st-fmt { display: block; }
+.st-fmt--1 { margin-top: clamp(0.5rem, 1.4vh, 1.1rem); }
+.st-fmt--2 { margin-top: clamp(1.2rem, 3.2vh, 2.6rem); }
+.st-fmt--3 { margin-top: clamp(2.2rem, 5.6vh, 4.6rem); }
+.st-fmt-a { display: inline-block; max-width: 100%; text-decoration: none; color: #000; position: relative; }
+.st-fmt-h { margin: 0; overflow: hidden; font-family: var(--font-druk); font-weight: 800;
+  text-transform: uppercase; white-space: nowrap; line-height: 0.98; letter-spacing: -0.022em;
+  font-size: clamp(1.9rem, 0.9rem + 4.6vw, 4.5rem); }
+.st-fmt-in { display: inline-block; will-change: transform; }
+/* последняя строка длиннее — уходит под правую колонку (сознательный слом сетки) */
+.st-fmt--wide { position: relative; z-index: 2; }
+.st-fmt--wide .st-fmt-a { max-width: none; }
+/* подчёркивание рисуется по наведению, по ширине текста */
+.st-fmt-a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.04em; height: 0.055em;
+  background: #000; transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease); }
+@media (hover: hover) {
+  .st-fmt-a { transition: opacity 0.4s var(--ease); }
+  /* тускнеют остальные ТОЛЬКО когда наведён конкретный формат (не пустой промежуток) */
+  .st-formats:has(.st-fmt-a:hover) .st-fmt-a:not(:hover) { opacity: 0.25; }
+  .st-fmt-a:hover::after { transform: scaleX(1); }
+}
+
+/* ── правая колонка: порог ── */
+.st-price { grid-column: 2; margin-top: clamp(3.5rem, 12vh, 10rem); will-change: transform; }
+/* цифра — самый крупный элемент блока; размер подобран так, чтобы «от N ₽»
+   помещался в правую колонку целиком (ничего не подрезается) */
+.st-num { display: flex; align-items: flex-start; gap: 0.1em; margin: 0; color: #000;
+  font-family: var(--font-druk); font-weight: 800; line-height: 0.8; letter-spacing: -0.03em;
+  font-size: clamp(2.9rem, 0.6rem + 6.4vw, 7rem); }
+.st-num-pre { font-family: var(--font-display); font-weight: 500; text-transform: lowercase;
+  font-size: 0.22em; line-height: 1; margin-top: 0.2em; letter-spacing: 0; will-change: transform, opacity; }
+.st-num-val { display: inline-flex; align-items: flex-start; }
+.st-num-col { display: inline-block; width: 0.56em; overflow: hidden; text-align: center; }
+.st-num-d { display: inline-block; will-change: transform; }
+.st-num-sp { display: inline-block; width: 0.2em; }               /* разряд-пробел */
+.st-num-cur { font-size: 0.36em; line-height: 1; margin-top: 0.16em; margin-left: 0.04em;
+  letter-spacing: 0; will-change: transform, opacity; }           /* ₽ мельче, поднят к верху */
+/* вторая строка — читаемая, не «мелкий шрифт извинений» */
+.st-sub { margin: clamp(1.1rem, 2.6vh, 1.9rem) 0 0; font-family: var(--font-body); font-weight: 500;
+  font-size: clamp(1rem, 0.9rem + 0.55vw, 1.35rem); line-height: 1.32; color: #000; max-width: 15ch; }
+
+/* «что двигает цену» — ровный ритм, волосяные линии */
+.st-drivers { list-style: none; margin: clamp(2.2rem, 5.5vh, 3.6rem) 0 0; padding: 0; }
+.st-drv { position: relative; padding: clamp(0.72rem, 1.7vh, 1.05rem) 0 clamp(0.72rem, 1.7vh, 1.05rem) 1.5em;
+  border-top: 1px solid rgba(0, 0, 0, 0.14); font-family: var(--font-body); font-weight: 450;
+  font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.12rem); line-height: 1.4; color: #000; will-change: transform, opacity; }
+.st-drv:last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.14); }
+.st-drv::before { content: ""; position: absolute; left: 0; top: 1.5em; width: 0.7em; height: 1px; background: #000; }
+
+/* ── замыкающая строка ── */
+.st-foot { max-width: var(--maxw); margin: clamp(3rem, 8vh, 6rem) auto 0; padding: clamp(1.5rem, 4vh, 2.6rem) var(--gutter) 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.14); display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 1.2rem 2rem; }
+.st-foot-t { margin: 0; font-family: var(--font-body); font-weight: 450; max-width: 44ch;
+  font-size: clamp(1rem, 0.94rem + 0.4vw, 1.25rem); line-height: 1.42; color: #000; }
+.st-foot-link { position: relative; white-space: nowrap; text-decoration: none; color: #000;
+  font-family: var(--font-body); font-weight: 600; font-size: clamp(1rem, 0.94rem + 0.4vw, 1.2rem); }
+.st-foot-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.18em; height: 1px; background: #000; }
+.st-foot-link span { display: inline-block; transition: transform 0.4s var(--ease); }
+.st-foot-link:hover span { transform: translateX(6px); }
+
+/* ── появление: .js прячет до JS (без вспышки), ScrollTrigger включает .st-in-*,
+   а хореографию (маска, stagger, easing) ведут transition'ы ── */
+.js .st-fmt-in { transform: translateY(118%); transition: transform 0.9s var(--ease);
+  transition-delay: calc(var(--i, 0) * 0.08s); }
+.st-in-fmt .st-fmt-in { transform: translateY(0); }
+/* разряды — выезд снизу, сдвиг слева направо (после «от») */
+.js .st-num-d { transform: translateY(115%); transition: transform 0.9s var(--ease);
+  transition-delay: calc(0.14s + var(--i, 0) * 0.055s); }
+.st-in-num .st-num-d { transform: translateY(0); }
+.js .st-num-pre { opacity: 0; transform: translateY(45%);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
+.st-in-num .st-num-pre { opacity: 1; transform: none; }
+.js .st-num-cur { opacity: 0; transform: translateY(45%);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); transition-delay: 0.52s; }
+.st-in-num .st-num-cur { opacity: 1; transform: none; }
+.js .st-drv { opacity: 0; transform: translateY(22px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i, 0) * 0.06s); }
+.st-in-drv .st-drv { opacity: 1; transform: none; }
+
+/* ── мобильная: одна колонка, blend off, слом последней строки убран ── */
+@media (max-width: 860px) {
+  .st-head { display: block; min-height: 0; padding-top: clamp(2.6rem, 9vh, 4rem); }
+  .st-word { position: static; transform: none; mix-blend-mode: normal; color: #000;
+    display: block; margin-bottom: clamp(1rem, 3vh, 1.6rem); }
+  .st-claim { text-align: left; max-width: 22ch; margin-top: 0; }
+  .st-body { grid-template-columns: 1fr; padding-top: clamp(2.4rem, 7vh, 3.4rem); }
+  .st-body::before { display: none; }
+  .st-fmt-h { white-space: normal; }
+  .st-fmt--wide { z-index: auto; }
+  .st-price { grid-column: 1; margin-top: clamp(2.4rem, 8vh, 3.6rem); }
+  .st-sub { max-width: 26ch; }
+  .st-foot { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .st-fmt-in, .js .st-num-d { transform: none; transition: none; }
+  .js .st-num-pre, .js .st-num-cur, .js .st-drv { opacity: 1; transform: none; transition: none; }
+}
+
+
 /* ═══════════════ БЛОК 4.3 — КЕЙСЫ НА ГЛАВНОЙ (Akoya, парение) ═══════════════ */
 .wk { position: relative; padding: var(--sp-section) 0; overflow: clip; }
 .wk-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: clamp(2rem,6vh,5rem); }
