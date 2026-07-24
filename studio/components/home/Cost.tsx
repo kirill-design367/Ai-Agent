@@ -307,20 +307,7 @@ export default function Cost() {
           {/* ── поле услуг (фаза 4) ── */}
           <div className="st-field">
             <div className="st-panelwrap">
-              <nav className="st-formats" aria-label="Форматы сайтов">
-                {FORMATS.map((f, i) =>
-                  f.href ? (
-                    <Link key={i} href={f.href} className="st-fmt" data-set={i + 1}>
-                      <h3 className="st-fmt-h">{f.label}</h3>
-                    </Link>
-                  ) : (
-                    <span key={i} className="st-fmt st-fmt--flat" data-set={i + 1}>
-                      <h3 className="st-fmt-h">{f.label}</h3>
-                    </span>
-                  )
-                )}
-              </nav>
-
+              {/* ПАНЕЛЬ сверху — на месте бывшего списка «что двигает цену» */}
               <div className="st-panel">
                 {/* волосяные линии — статичный каркас, не мигает */}
                 <div className="st-rules" aria-hidden>
@@ -341,6 +328,21 @@ export default function Cost() {
                   </ul>
                 ))}
               </div>
+
+              {/* ФОРМАТЫ под панелью — наводишь здесь, меняется выше */}
+              <nav className="st-formats" aria-label="Форматы сайтов">
+                {FORMATS.map((f, i) =>
+                  f.href ? (
+                    <Link key={i} href={f.href} className="st-fmt" data-set={i + 1}>
+                      <h3 className="st-fmt-h">{f.label}</h3>
+                    </Link>
+                  ) : (
+                    <span key={i} className="st-fmt st-fmt--flat" data-set={i + 1}>
+                      <h3 className="st-fmt-h">{f.label}</h3>
+                    </span>
+                  )
+                )}
+              </nav>
             </div>
 
             <div className="st-foot">

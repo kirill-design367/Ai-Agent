@@ -48,7 +48,7 @@ export default function HomeLite() {
       {/* ══ НИШИ ══ */}
       <section className="pg-hub">
         <div className="pg-wrap">
-          <p className="pg-hero-kicker">03 — Ниши</p>
+          <p className="pg-hero-kicker">Ниши</p>
           <h2 className="pg-h2">Сайты под задачу бизнеса</h2>
           <HubGrid cards={niches} />
         </div>

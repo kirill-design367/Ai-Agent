@@ -571,9 +571,10 @@ textarea.field { resize: vertical; min-height: 4em; }
 /* ── поле услуг ── */
 .st-formats { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.7em 1.6em; }
 .st-fmt { text-decoration: none; color: inherit; display: inline-block; }
-.st-fmt-h { margin: 0; font-family: var(--font-body); font-weight: 600;
+/* форматы — ANTIQVA капитель, широкий трекинг, средний кегль (не заголовочный) */
+.st-fmt-h { margin: 0; font-family: var(--font-display); font-weight: 500;
   text-transform: uppercase; letter-spacing: 0.26em; line-height: 1;
-  font-size: clamp(0.72rem, 0.62rem + 0.42vw, 0.92rem); }
+  font-size: clamp(0.86rem, 0.74rem + 0.46vw, 1.08rem); }
 
 .st-panel { position: relative; }
 .st-rules { position: absolute; inset: 0; z-index: 0; display: flex; flex-direction: column;
@@ -605,14 +606,15 @@ textarea.field { resize: vertical; min-height: 4em; }
 .st-scene .st-col { width: 0.62em; }
 .st-scene .st-gap { width: 0.14em; }
 
-.st-scene .st-sub { position: absolute; left: calc(var(--gutter) + 26px);
-  top: calc(0.382 * 100vh + 0.6rem); z-index: 3; max-width: 30ch;
-  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.3rem); color: #000; will-change: transform, opacity; }
+/* строка-контекст «Проекты…» примыкает к панели сверху (панель на 0.618) */
+.st-scene .st-sub { position: absolute; left: var(--gutter); top: calc(61.8vh - 2.6rem);
+  z-index: 3; max-width: 46ch; font-size: clamp(1rem, 0.9rem + 0.5vw, 1.3rem);
+  color: #000; will-change: transform, opacity; }
 
 .st-scene .st-field { position: absolute; left: var(--gutter); right: calc(var(--gutter) + 4vw);
   top: 61.8vh; z-index: 3; color: #000; will-change: transform, opacity; }
-.st-scene .st-formats { margin: 0 0 clamp(1rem, 2.4vh, 1.7rem); max-width: 85%; }
-.st-scene .st-panel { min-height: clamp(150px, 24vh, 220px); }
+.st-scene .st-formats { margin: clamp(1.3rem, 3vh, 2.2rem) 0 0; max-width: 85%; }
+.st-scene .st-panel { min-height: clamp(140px, 22vh, 200px); }
 .st-scene .st-set { position: absolute; inset: 0; z-index: 1; display: flex;
   flex-direction: column; }
 .st-scene .st-set li { flex: 1 1 0; display: flex; align-items: center;
@@ -645,7 +647,10 @@ textarea.field { resize: vertical; min-height: 4em; }
 .st-flow .st-cur { align-self: baseline; margin-left: 0.3em; }
 .st-flow .st-sub { max-width: 32ch; white-space: normal; margin-bottom: clamp(2rem, 7vh, 3.6rem);
   font-size: clamp(1rem, 0.9rem + 1vw, 1.3rem); }
-.st-flow .st-formats { flex-direction: column; align-items: flex-start; gap: 0; }
+/* мобильная: форматы над панелью-аккордеоном (порядок в DOM обратный — flex order) */
+.st-flow .st-panelwrap { display: flex; flex-direction: column; }
+.st-flow .st-formats { order: 0; flex-direction: column; align-items: flex-start; gap: 0; }
+.st-flow .st-panel { order: 1; }
 .st-flow .st-fmt { padding: 0.85em 0; border-top: 1px solid currentColor; width: 100%; }
 .st-flow .st-fmt:last-of-type { border-bottom: 1px solid currentColor; }
 .st-flow .st-fmt-h { letter-spacing: 0.16em; font-size: clamp(0.85rem, 3.6vw, 1rem); }
